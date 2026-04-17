@@ -5,9 +5,37 @@ package p4project;
 }
 
 expr
-    : expr ('*' | '/') expr
-    | expr ('+' | '-') expr
-    | INT
+    : equal ('&&' | '||') expr
+    | equal
+    ;
+
+equal
+    : comp ('==' | '!=') equal
+    | comp
+    ;
+
+comp
+    : additive ('<' | '>') comp
+    | additive
+    ;
+
+additive
+    : mult ('+' | '-') additive
+    | mult
+    ;
+
+mult
+    : power ('*' | '/' | '%') mult
+    | power
+    ;
+
+power
+    : factor '^' power
+    | factor
+    ;
+
+factor
+    : INT
     | '(' expr ')'
     ;
 

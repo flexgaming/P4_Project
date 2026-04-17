@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug ANTLR4 Grammar",
+      "type": "antlr-debug",
+      "request": "launch",
+      "input": "${workspaceFolder}/sample-input.txt",
+      "grammar": "${file}",
+      "startRule": "expr",
+      "printParseTree": true,
+      "visualParseTree": true
+    },
+    {
+      "name": "Run Parser Driver",
+      "type": "java",
+      "request": "launch",
+      "mainClass": "p4project.ParserDriver",
+      "projectName": "p4-project"
+    }
+  ]
+}
