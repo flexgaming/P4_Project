@@ -1,4 +1,10 @@
 {
   "java.project.sourcePaths": ["src/main/java", "src/main/antlr4/.antlr"],
-  "java.project.referencedLibraries": ["lib/antlr4-runtime-4.13.1.jar"]
+  "java.project.referencedLibraries": ["lib/antlr4-runtime-4.13.1.jar"],
+  "antlr4.generation": {
+    "mode": "external",
+    "outputDir": ".antlr/p4project",
+    "listeners": false,
+    "visitors": false
+  }
 }
