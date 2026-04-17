@@ -1,4 +1,4 @@
-// Generated from d:/Program Files (x86)/Git Projects/P4_Project/src/main/antlr4/OurGrammar.g4 by ANTLR 4.13.1
+// Generated from OurGrammar.g4 by ANTLR 4.13.1
 
 package p4project;
 
@@ -118,6 +118,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_program; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterProgram(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitProgram(this);
+		}
 	}
 
 	public final ProgramContext program() throws RecognitionException {
@@ -180,6 +188,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_statement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitStatement(this);
+		}
 	}
 
 	public final StatementContext statement() throws RecognitionException {
@@ -278,6 +294,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_assignment; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterAssignment(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitAssignment(this);
+		}
 	}
 
 	public final AssignmentContext assignment() throws RecognitionException {
@@ -381,6 +405,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeRef; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterTypeRef(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitTypeRef(this);
+		}
 	}
 
 	public final TypeRefContext typeRef() throws RecognitionException {
@@ -436,6 +468,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_ifStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterIfStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitIfStatement(this);
+		}
 	}
 
 	public final IfStatementContext ifStatement() throws RecognitionException {
@@ -516,6 +556,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_forStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterForStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitForStatement(this);
+		}
 	}
 
 	public final ForStatementContext forStatement() throws RecognitionException {
@@ -567,6 +615,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_block; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterBlock(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitBlock(this);
+		}
 	}
 
 	public final BlockContext block() throws RecognitionException {
@@ -619,6 +675,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterExpr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitExpr(this);
+		}
 	}
 
 	public final ExprContext expr() throws RecognitionException {
@@ -680,6 +744,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_equal; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterEqual(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitEqual(this);
+		}
 	}
 
 	public final EqualContext equal() throws RecognitionException {
@@ -741,6 +813,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_comp; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterComp(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitComp(this);
+		}
 	}
 
 	public final CompContext comp() throws RecognitionException {
@@ -802,6 +882,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_additive; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterAdditive(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitAdditive(this);
+		}
 	}
 
 	public final AdditiveContext additive() throws RecognitionException {
@@ -863,6 +951,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_mult; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterMult(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitMult(this);
+		}
 	}
 
 	public final MultContext mult() throws RecognitionException {
@@ -924,6 +1020,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_power; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterPower(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitPower(this);
+		}
 	}
 
 	public final PowerContext power() throws RecognitionException {
@@ -976,6 +1080,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arrayLiteral; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterArrayLiteral(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitArrayLiteral(this);
+		}
 	}
 
 	public final ArrayLiteralContext arrayLiteral() throws RecognitionException {
@@ -1030,6 +1142,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arrayIndex; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterArrayIndex(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitArrayIndex(this);
+		}
 	}
 
 	public final ArrayIndexContext arrayIndex() throws RecognitionException {
@@ -1083,6 +1203,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_factor; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterFactor(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitFactor(this);
+		}
 	}
 
 	public final FactorContext factor() throws RecognitionException {
@@ -1204,6 +1332,14 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_functionCall; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterFunctionCall(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitFunctionCall(this);
+		}
 	}
 
 	public final FunctionCallContext functionCall() throws RecognitionException {

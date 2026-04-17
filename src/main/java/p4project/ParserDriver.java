@@ -14,7 +14,7 @@ public class ParserDriver {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         OurGrammarParser parser = new OurGrammarParser(tokens);
 
-        ParseTree tree = parser.expr();
+        ParseTree tree = parser.program();
         System.out.println(tree.toStringTree(parser));
     }
 }

@@ -1,1 +1,29 @@
-(20 == 1*2^(2-1)) || 10/2 == 5
+void seq_merge_sort(int[] arr, int low, int high){
+	// standard sequential merge sort
+}
+
+void merge(int[] arr, int low, int mid, int high){
+	// standard merge algorithm
+}
+
+void parallel_merge_sort(int[] arr, int low, int high){
+	if(high - low <= threshhold){
+		seq_merge_sort(arr, low, high);
+		return; // Terminates the current thread
+	}
+	
+	int mid = (low + high) / 2;
+	
+	// new_thread is either 0 or 1 depending on if it's running or not
+	thread t1 = new_thread(){
+		parallel_merge_sort(arr, low, mid);
+	} 
+	thread t2 = new_thread(){
+		parallel_merge_sort(arr, mid+1, high);
+	}
+	// wait until both b1 and b2 is true -> finished sorting
+	await(t1 && t2);
+	
+	merge(arr, low, mid, high);
+	return; // Terminates the current thread
+}

@@ -6,8 +6,8 @@
       "type": "antlr-debug",
       "request": "launch",
       "input": "${workspaceFolder}/sample-input.txt",
-      "grammar": "${file}",
-      "startRule": "expr",
+      "grammar": "${workspaceFolder}/src/main/antlr4/OurGrammar.g4",
+      "startRule": "program",
       "printParseTree": true,
       "visualParseTree": true
     },
