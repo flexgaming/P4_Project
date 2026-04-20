@@ -1,4 +1,4 @@
-// Generated from OurGrammar.g4 by ANTLR 4.13.1
+// Generated from d:/Projecktor/P4_Project/P4_Project/src/main/antlr4/OurGrammar.g4 by ANTLR 4.13.1
 
 package p4project;
 
@@ -98,18 +98,6 @@ public class OurGrammarBaseListener implements OurGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAwaitStatement(OurGrammarParser.AwaitStatementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterCastExpression(OurGrammarParser.CastExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCastExpression(OurGrammarParser.CastExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

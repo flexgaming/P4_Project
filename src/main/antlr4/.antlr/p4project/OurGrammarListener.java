@@ -1,4 +1,4 @@
-// Generated from OurGrammar.g4 by ANTLR 4.13.1
+// Generated from d:/Projecktor/P4_Project/P4_Project/src/main/antlr4/OurGrammar.g4 by ANTLR 4.13.1
 
 package p4project;
 
@@ -79,16 +79,6 @@ public interface OurGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAwaitStatement(OurGrammarParser.AwaitStatementContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link OurGrammarParser#castExpression}.
-	 * @param ctx the parse tree
-	 */
-	void enterCastExpression(OurGrammarParser.CastExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link OurGrammarParser#castExpression}.
-	 * @param ctx the parse tree
-	 */
-	void exitCastExpression(OurGrammarParser.CastExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link OurGrammarParser#typeRef}.
 	 * @param ctx the parse tree

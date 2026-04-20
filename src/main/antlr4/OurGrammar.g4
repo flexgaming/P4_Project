@@ -50,6 +50,10 @@ awaitStatement
     | 'awaitAny' '(' expr (',' expr)* ')'
     ;
 
+castExpression
+    : 'cast' '(' TYPE ')' expr
+    ;
+
 typeRef
     : TYPE ('[' (ID | INT)? ']')*
     ;
@@ -144,6 +148,7 @@ factor
     | STRING
     | THREAD
     | '(' expr ')'
+    | castExpression
     ;
 
 functionCall

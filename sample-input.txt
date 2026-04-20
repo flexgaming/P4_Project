@@ -5,7 +5,8 @@ float randfloat(float low, float high, int decimal) {
 }
 
 float seq_sum(float[] arr, int low, int high){
-    float result = 0;
+	int castTest = 2513;
+    float result = cast(float) castTest;
     for (int i = low; i <= high; i = i + 1) {
         result = result + arr[i];
     }
