@@ -40,6 +40,46 @@ public interface OurGrammarListener extends ParseTreeListener {
 	 */
 	void exitAssignment(OurGrammarParser.AssignmentContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link OurGrammarParser#reassignment}.
+	 * @param ctx the parse tree
+	 */
+	void enterReassignment(OurGrammarParser.ReassignmentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OurGrammarParser#reassignment}.
+	 * @param ctx the parse tree
+	 */
+	void exitReassignment(OurGrammarParser.ReassignmentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OurGrammarParser#declaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterDeclaration(OurGrammarParser.DeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OurGrammarParser#declaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitDeclaration(OurGrammarParser.DeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OurGrammarParser#threadAssignment}.
+	 * @param ctx the parse tree
+	 */
+	void enterThreadAssignment(OurGrammarParser.ThreadAssignmentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OurGrammarParser#threadAssignment}.
+	 * @param ctx the parse tree
+	 */
+	void exitThreadAssignment(OurGrammarParser.ThreadAssignmentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OurGrammarParser#awaitStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterAwaitStatement(OurGrammarParser.AwaitStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OurGrammarParser#awaitStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitAwaitStatement(OurGrammarParser.AwaitStatementContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link OurGrammarParser#typeRef}.
 	 * @param ctx the parse tree
 	 */
@@ -70,6 +110,36 @@ public interface OurGrammarListener extends ParseTreeListener {
 	 */
 	void exitForStatement(OurGrammarParser.ForStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link OurGrammarParser#whileStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhileStatement(OurGrammarParser.WhileStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OurGrammarParser#whileStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhileStatement(OurGrammarParser.WhileStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OurGrammarParser#continueStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterContinueStatement(OurGrammarParser.ContinueStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OurGrammarParser#continueStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitContinueStatement(OurGrammarParser.ContinueStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OurGrammarParser#breakStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterBreakStatement(OurGrammarParser.BreakStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OurGrammarParser#breakStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitBreakStatement(OurGrammarParser.BreakStatementContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link OurGrammarParser#block}.
 	 * @param ctx the parse tree
 	 */
@@ -79,6 +149,46 @@ public interface OurGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBlock(OurGrammarParser.BlockContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OurGrammarParser#returnStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterReturnStatement(OurGrammarParser.ReturnStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OurGrammarParser#returnStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitReturnStatement(OurGrammarParser.ReturnStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OurGrammarParser#criticalSection}.
+	 * @param ctx the parse tree
+	 */
+	void enterCriticalSection(OurGrammarParser.CriticalSectionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OurGrammarParser#criticalSection}.
+	 * @param ctx the parse tree
+	 */
+	void exitCriticalSection(OurGrammarParser.CriticalSectionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OurGrammarParser#printStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterPrintStatement(OurGrammarParser.PrintStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OurGrammarParser#printStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitPrintStatement(OurGrammarParser.PrintStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OurGrammarParser#readStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterReadStatement(OurGrammarParser.ReadStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OurGrammarParser#readStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitReadStatement(OurGrammarParser.ReadStatementContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link OurGrammarParser#expr}.
 	 * @param ctx the parse tree

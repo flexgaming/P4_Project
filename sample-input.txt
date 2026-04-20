@@ -1,29 +1,85 @@
-void seq_merge_sort(int[] arr, int low, int high){
-	// standard sequential merge sort
+// First code example
+{
+float randfloat(float low, float high, int decimal) {
+	// generate a random number between low and high with 2 decimal numbers
 }
 
-void merge(int[] arr, int low, int mid, int high){
-	// standard merge algorithm
+float seq_sum(float[] arr, int low, int high){
+    float result = 0;
+    for (int i = low; i <= high; i = i + 1) {
+        result = result + arr[i];
+    }
+    return result;
 }
 
-void parallel_merge_sort(int[] arr, int low, int high){
+void parallel_sum(float[] arr, int low, int high, shared float result){
 	if(high - low <= threshhold){
-		seq_merge_sort(arr, low, high);
-		return; // Terminates the current thread
+		critical(result){
+			result = result + seq_sum(arr, low, high);
+			return; // terminates the thread
+		}
 	}
 	
 	int mid = (low + high) / 2;
 	
-	// new_thread is either 0 or 1 depending on if it's running or not
-	thread t1 = new_thread(){
-		parallel_merge_sort(arr, low, mid);
-	} 
-	thread t2 = new_thread(){
-		parallel_merge_sort(arr, mid+1, high);
+	thread t1 => {
+		parallel_sum(arr, low, mid, result);
 	}
-	// wait until both b1 and b2 is true -> finished sorting
-	await(t1 && t2);
+	thread t2 => {
+		parallel_sum(arr, mid+1, high, result);
+	}
 	
-	merge(arr, low, mid, high);
-	return; // Terminates the current thread
+	await(t1, t2);
+	
+	return;
+}
+
+void main(){
+	int arrLength = 10000;
+	int threshhold = 256;
+	float[arrLength] arr;
+	for (int i = 0; i < arrLength; i = i + 1){
+		arr[i] = randfloat(0.0,500.0,2);
+	}
+	shared float totalsum = 0.0;
+	parallel_sum(arr, 0, arrLength-1, totalsum);
+	print(totalsum);
+}
+
+
+
+
+// Second code example
+}
+{
+void seq_merge_sort(int[] arr, int low, int high){
+    // standard sequential merge sort
+}
+
+void merge(int[] arr, int low, int mid, int high){
+    // standard merge algorithm
+}
+
+void parallel_merge_sort(int[] arr, int low, int high){
+    if((high - low) <= threshhold)
+    {
+        seq_merge_sort(arr, low, high);
+        return; // Terminates the current thread
+    }
+    
+    int mid = (low + high) / 2;
+    
+    // new_thread is either 0 or 1 depending on if it's running or not
+    thread t1 => {
+        parallel_merge_sort(arr, low, mid);
+    } 
+    thread t2 => {
+        parallel_merge_sort(arr, mid+1, high);
+    }
+    // wait until both b1 and b2 is true -> finished sorting
+    await(t1, t2);
+    
+    merge(arr, low, mid, high);
+    return; // Terminates the current thread
+}
 }
