@@ -133,7 +133,7 @@ arrayLiteral
     ;
 
 arrayIndex
-    : ID '[' expr ']'
+    : ID '[' expr ']' ('[' expr ']')*
     ;
 
 factor
