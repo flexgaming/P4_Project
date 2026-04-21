@@ -5,6 +5,6 @@
     "mode": "external",
     "outputDir": ".antlr/p4project",
     "listeners": false,
-    "visitors": false
+    "visitors": true
   }
 }

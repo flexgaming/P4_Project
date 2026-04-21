@@ -1,4 +1,4 @@
-// Generated from d:/Projecktor/P4_Project/P4_Project/src/main/antlr4/OurGrammar.g4 by ANTLR 4.13.1
+// Generated from d:/Projecter/P4_Project/src/main/antlr4/OurGrammar.g4 by ANTLR 4.13.1
 
 package p4project;
 
@@ -130,6 +130,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_program; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitProgram(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ProgramContext program() throws RecognitionException {
@@ -225,6 +230,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_statement; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final StatementContext statement() throws RecognitionException {
@@ -416,6 +426,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_assignment; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitAssignment(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final AssignmentContext assignment() throws RecognitionException {
@@ -542,6 +557,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_reassignment; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitReassignment(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ReassignmentContext reassignment() throws RecognitionException {
@@ -583,6 +603,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_declaration; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitDeclaration(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final DeclarationContext declaration() throws RecognitionException {
@@ -636,6 +661,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_threadAssignment; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitThreadAssignment(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ThreadAssignmentContext threadAssignment() throws RecognitionException {
@@ -677,6 +707,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_awaitStatement; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitAwaitStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final AwaitStatementContext awaitStatement() throws RecognitionException {
@@ -770,6 +805,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_castExpression; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitCastExpression(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final CastExpressionContext castExpression() throws RecognitionException {
@@ -816,6 +856,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeRef; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitTypeRef(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TypeRefContext typeRef() throws RecognitionException {
@@ -889,6 +934,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_ifStatement; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitIfStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final IfStatementContext ifStatement() throws RecognitionException {
@@ -970,6 +1020,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_forStatement; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitForStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ForStatementContext forStatement() throws RecognitionException {
@@ -1038,6 +1093,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_whileStatement; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitWhileStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final WhileStatementContext whileStatement() throws RecognitionException {
@@ -1075,6 +1135,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_continueStatement; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitContinueStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ContinueStatementContext continueStatement() throws RecognitionException {
@@ -1104,6 +1169,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_breakStatement; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitBreakStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final BreakStatementContext breakStatement() throws RecognitionException {
@@ -1139,6 +1209,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_block; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitBlock(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final BlockContext block() throws RecognitionException {
@@ -1188,6 +1263,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_returnStatement; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitReturnStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ReturnStatementContext returnStatement() throws RecognitionException {
@@ -1235,6 +1315,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_criticalSection; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitCriticalSection(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final CriticalSectionContext criticalSection() throws RecognitionException {
@@ -1295,6 +1380,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_printStatement; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitPrintStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final PrintStatementContext printStatement() throws RecognitionException {
@@ -1348,6 +1438,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_readStatement; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitReadStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ReadStatementContext readStatement() throws RecognitionException {
@@ -1389,6 +1484,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expr; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitExpr(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ExprContext expr() throws RecognitionException {
@@ -1450,6 +1550,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_equal; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitEqual(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final EqualContext equal() throws RecognitionException {
@@ -1511,6 +1616,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_comp; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitComp(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final CompContext comp() throws RecognitionException {
@@ -1572,6 +1682,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_additive; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitAdditive(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final AdditiveContext additive() throws RecognitionException {
@@ -1633,6 +1748,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_mult; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitMult(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final MultContext mult() throws RecognitionException {
@@ -1694,6 +1814,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_power; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitPower(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final PowerContext power() throws RecognitionException {
@@ -1746,6 +1871,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arrayLiteral; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitArrayLiteral(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ArrayLiteralContext arrayLiteral() throws RecognitionException {
@@ -1800,6 +1930,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arrayIndex; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitArrayIndex(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ArrayIndexContext arrayIndex() throws RecognitionException {
@@ -1860,6 +1995,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_factor; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitFactor(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final FactorContext factor() throws RecognitionException {
@@ -2004,6 +2144,11 @@ public class OurGrammarParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_functionCall; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitFunctionCall(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final FunctionCallContext functionCall() throws RecognitionException {
