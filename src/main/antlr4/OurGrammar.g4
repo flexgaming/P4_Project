@@ -29,7 +29,7 @@ statement
     ;
 
 assignment
-    : PREFIX* typeRef ID ('=' expr ';' | '(' (PREFIX? typeRef ID (',' PREFIX? typeRef ID)*)? ')' block)
+    : PREFIX? typeRef ID ('=' expr ';' | '(' (PREFIX? typeRef ID (',' PREFIX? typeRef ID)*)? ')' block)
     // | ID ('+=' | '-=') expr ';' // Maybe add this after MVP "| '*=' | '/=' | '%='"
     ;
 
@@ -161,7 +161,7 @@ BOOL : 'true' | 'false' ;
 CHAR : '\'' . '\'' ;
 STRING : '"' .*? '"' ;
 THREAD : BOOL ; // starts with false and is true when task is done.
-PREFIX : 'shared' | 'const' | 'static' ;
+PREFIX : 'shared' 'const'? 'static'? | 'shared'? 'const' 'static'? | 'shared'? 'const'? 'static' ;
 TYPE : 'int' | 'float' | 'bool' | 'char' | 'string' | 'void' | 'thread' ;
 ID : [a-zA-Z_][a-zA-Z0-9_]* ;
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;

@@ -16,7 +16,7 @@
       "type": "java",
       "request": "launch",
       "mainClass": "p4project.ParserDriver",
-      "projectName": "p4-project"
+      "projectName": "p4_project"
     }
   ]
 }
