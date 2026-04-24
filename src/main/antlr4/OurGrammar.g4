@@ -87,7 +87,7 @@ returnStatement
     ;
 
 criticalSection
-    : 'critical''(' ID (',' ID)* ')' block
+    : 'critical' '(' ID (',' ID)* ')' block
     ;
 
 printStatement
