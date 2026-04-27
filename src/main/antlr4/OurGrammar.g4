@@ -29,8 +29,12 @@ statement
     ;
 
 assignment
-    : PREFIX? typeRef ID ('=' expr ';' | '(' (PREFIX? typeRef ID (',' PREFIX? typeRef ID)*)? ')' block)
-    // | ID ('+=' | '-=') expr ';' // Maybe add this after MVP "| '*=' | '/=' | '%='"
+    : PREFIX? typeRef ID ass1
+    ;
+
+ass1
+    : '=' expr ';'
+    | '(' (PREFIX? typeRef ID (',' PREFIX? typeRef ID)*)? ')' block
     ;
 
 reassignment

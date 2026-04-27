@@ -31,6 +31,12 @@ public interface OurGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAssignment(OurGrammarParser.AssignmentContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link OurGrammarParser#ass1}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAss1(OurGrammarParser.Ass1Context ctx);
+	/**
 	 * Visit a parse tree produced by {@link OurGrammarParser#reassignment}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
