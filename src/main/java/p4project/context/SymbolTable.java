@@ -4,7 +4,12 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 
+/**
+ * A class for handling all declared symbols and their scope.
+ * Each symbol is linked to an ID and a scope.
+ */
 public class SymbolTable {
+    //
     private final Deque<LinkedHashMap<String, Symbol>> scopes = new ArrayDeque<>();
     private int depth = 0;
 
@@ -12,5 +17,24 @@ public class SymbolTable {
     public void popScope()  { scopes.pop(); depth--; }
     public int  depth()     { return depth; }
 
-    
+    /**
+     * Define in the current (innermost) scope.
+     * Reports duplicate if already defined at this level.
+     */
+    public boolean define(Symbol s) {
+        var current = scopes.peek();
+        if (current.containsKey(s.ID)) return false;
+        current.put(s.ID, s);
+        return true;
+    }
+
+    //Goes through every scope, deepest first, to match the ID to a Symbol.
+    public Symbol resolve(String ID) {
+        for (var scope : scopes) {
+            if (scope.containsKey(ID)) return scope.get(ID);
+        }
+        return null;
+    }
+
+
 }
