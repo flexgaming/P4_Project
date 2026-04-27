@@ -31,11 +31,17 @@ public interface OurGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAssignment(OurGrammarParser.AssignmentContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link OurGrammarParser#ass1}.
+	 * Visit a parse tree produced by {@link OurGrammarParser#assVar}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAss1(OurGrammarParser.Ass1Context ctx);
+	T visitAssVar(OurGrammarParser.AssVarContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link OurGrammarParser#assFunc}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAssFunc(OurGrammarParser.AssFuncContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link OurGrammarParser#reassignment}.
 	 * @param ctx the parse tree
@@ -84,6 +90,12 @@ public interface OurGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitForStatement(OurGrammarParser.ForStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link OurGrammarParser#forVar}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitForVar(OurGrammarParser.ForVarContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link OurGrammarParser#whileStatement}.
 	 * @param ctx the parse tree

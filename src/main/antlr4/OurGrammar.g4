@@ -29,12 +29,15 @@ statement
     ;
 
 assignment
-    : PREFIX? typeRef ID ass1
+    : PREFIX? typeRef ID ( assVar ';' | assFunc )
     ;
 
-ass1
-    : '=' expr ';'
-    | '(' (PREFIX? typeRef ID (',' PREFIX? typeRef ID)*)? ')' block
+assVar
+    : '=' expr
+    ;
+
+assFunc
+    : '(' (PREFIX? typeRef ID (',' PREFIX? typeRef ID)*)? ')' block
     ;
 
 reassignment
@@ -67,7 +70,13 @@ ifStatement
     ;
 
 forStatement
-    : 'for' '(' (assignment | ID ';') expr ';' reassignment ')' statement
+    : 'for' '(' forVar ';' expr ';' reassignment ')' statement
+    ;
+
+forVar
+    : PREFIX? typeRef ID (assVar | assFunc)
+    | reassignment
+    | ID
     ;
 
 whileStatement
