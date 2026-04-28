@@ -1,6 +1,8 @@
 package p4project.visitors;
 
 import p4project.OurGrammarBaseVisitor;
+import p4project.OurGrammarParser;
+import p4project.context.CompilationContext;
 
 /*
     Phase 1: Symbol assignments and declerations
@@ -10,6 +12,20 @@ import p4project.OurGrammarBaseVisitor;
     Phase 5: Java Code Gen
 */
 
-public class TypeResolverVisitor<T> extends OurGrammarBaseVisitor<T> {
-    
+public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
+    private final CompilationContext ctx;
+
+    public RefLinkingVisitor(CompilationContext ctx) {
+        this.ctx = ctx;
+    }
+
+    @Override
+    public Void visitAssign(OurGrammarParser.AssignContext tree) {
+        String id = tree.ID().getText();
+        // Check if variable 'x' was declared in Phase 1
+        if (ctx.symbolTable.resolve(id) == null) {
+            throw new RuntimeException("Reference Error: Variable '" + id + "' is not declared.");
+        }
+        return visitChildren(tree);
+    }
 }

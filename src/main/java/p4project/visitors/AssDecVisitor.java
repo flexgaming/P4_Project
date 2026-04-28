@@ -42,5 +42,15 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
         return result;
     }
 
-
+    @Override
+    public Void visitVarDec(OurGrammarParser.VarDecContext ctx) {
+        // Example AST mapping: TYPE ID ';' (e.g., int x;)
+        String id = ctx.ID().getText();
+        String type = ctx.TYPE().getText();
+        
+        // Define symbol in current scope
+        ctx.symbolTable.define(new Symbol(id, type));
+        
+        return visitChildren(ctx);
+    }
 }

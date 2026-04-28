@@ -10,6 +10,19 @@ import p4project.OurGrammarBaseVisitor;
     Phase 5: Java Code Gen
 */
 
-public class VtableFtableGenVisitor<T> extends OurGrammarBaseVisitor<T> {
-    
+public class VtableFtableGenVisitor extends OurGrammarBaseVisitor<Void> {
+    private final CompilationContext ctx;
+
+    public VtableFtableGenVisitor(CompilationContext ctx) {
+        this.ctx = ctx;
+    }
+
+    // In a simple script, no functions or classes exist.
+    // When they do, intercept them here to populate your vt/ftables:
+    // 
+    // @Override
+    // public Void visitFuncDec(OurGrammarParser.FuncDecContext tree) {
+    //     ctx.ftable.addFunction(tree.ID().getText());
+    //     return visitChildren(tree);
+    // }
 }
