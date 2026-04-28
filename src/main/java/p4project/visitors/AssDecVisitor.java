@@ -5,6 +5,15 @@ import java.util.Map;
 
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
+
+import p4project.OurGrammarBaseVisitor;
+import p4project.context.CompilationContext;
+import p4project.context.Symbol;
 
 /*
     -> Phase 1: Symbol assignments and declerations
@@ -14,29 +23,24 @@ import p4project.OurGrammarParser;
     Phase 5: Java Code Gen
 */
 
-public class AssDecVisitor extends OurGrammarBaseVisitor<Integer> {
+public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
+    private final CompilationContext ctx;
 
-    Map<String, Integer> memory = new HashMap<>();
-
-    /**
-     * assignment
-     *     : PREFIX? typeRef ID ( assVar ';' | assFunc )
-     *     ;
-     */
-    @Override
-    public Integer visitAssignment(OurGrammarParser.AssignmentContext ctx) {
-        // You can check if PREFIX exists:
-        // boolean hasPrefix = ctx.PREFIX() != null;
-        // String typeRef = ctx.typeRef().getText();
-        // String id = ctx.ID().getText();
-        if (ctx.assVar() != null) {
-            // It's a variable assignment
-            // return visit(ctx.assVar());
-        } else if (ctx.assFunc() != null) {
-            // It's a function assignment
-            // return visit(ctx.assFunc());
-        }
-        // Default behavior: visit children
-        return visitChildren(ctx);
+    public AssDecVisitor(CompilationContext ctx) {
+        this.ctx = ctx;
+        ctx.symbolTable.pushScope(); // global scope
     }
+
+    private Set<Symbol.Prefix> parsePrefixes(List<TerminalNode> prefixTokens) {
+        Set<Symbol.Prefix> result = EnumSet.noneOf(Symbol.Prefix.class);
+        for (var t : prefixTokens) {
+            String text = t.getText();
+            if (text.contains("shared")) result.add(Symbol.Prefix.SHARED);
+            if (text.contains("const"))  result.add(Symbol.Prefix.CONST);
+            if (text.contains("static")) result.add(Symbol.Prefix.STATIC);
+        }
+        return result;
+    }
+
+
 }

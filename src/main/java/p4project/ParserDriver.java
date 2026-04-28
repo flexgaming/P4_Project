@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import p4project.visitors.AssDecVisitor;
+import p4project.context.CompilationContext;
 
 public class ParserDriver {
     public static void main(String[] args) {
@@ -22,5 +23,6 @@ public class ParserDriver {
         AssDecVisitor assDecVisitor = new AssDecVisitor();
         assDecVisitor.visit(tree);
         System.out.println(assDecVisitor.visit(tree));
+        CompilationContext ctx = new CompilationContext();
     }
 }

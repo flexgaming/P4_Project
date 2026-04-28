@@ -2,18 +2,18 @@ package p4project.context;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 
 /**
  * A class for handling all declared symbols and their scope.
  * Each symbol is linked to an ID and a scope.
  */
 public class SymbolTable {
-    //
-    private final Deque<LinkedHashMap<String, Symbol>> scopes = new ArrayDeque<>();
+    //By putting the hashmaps in a deque, stacking multiple scopes becomes possible
+    private final Deque<HashMap<String, Symbol>> scopes = new ArrayDeque<>();
     private int depth = 0;
 
-    public void pushScope() { scopes.push(new LinkedHashMap<>()); depth++; }
+    public void pushScope() { scopes.push(new HashMap<>()); depth++; }
     public void popScope()  { scopes.pop(); depth--; }
     public int  depth()     { return depth; }
 
@@ -34,6 +34,11 @@ public class SymbolTable {
             if (scope.containsKey(ID)) return scope.get(ID);
         }
         return null;
+    }
+
+    //Look to see if a function exists in the local scope, for duplicate detection
+    public Symbol resolveLocal(String name){
+        return scopes.peek().get(name);
     }
 
 
