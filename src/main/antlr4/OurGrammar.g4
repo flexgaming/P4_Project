@@ -45,7 +45,7 @@ reassignment
     ;
 
 declaration
-    : PREFIX* typeRef ID
+    : PREFIX? typeRef ID
     ;
 
 threadAssignment
