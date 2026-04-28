@@ -178,6 +178,7 @@ public class ParallelExample {
         });
 
         // Wait for both tasks
+        // await(sumTask, mergeSortTask)
         sumTask.get();
         mergeSortTask.get();
 
