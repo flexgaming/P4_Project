@@ -1,4 +1,4 @@
-// Generated from c:/Users/sanoj/OneDrive/Dokumenter/GitHub/P4_Project/src/main/antlr4/OurGrammar.g4 by ANTLR 4.13.1
+// Generated from c:/Users/Mikke/Documents/GitHub/P4_Project/src/main/antlr4/OurGrammar.g4 by ANTLR 4.13.1
 
 package p4project;
 

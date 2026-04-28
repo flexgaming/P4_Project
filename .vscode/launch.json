@@ -2,6 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "java",
+      "name": "ParserDriver",
+      "request": "launch",
+      "mainClass": "p4project.ParserDriver",
+      "projectName": "p4-project"
+    },
+    {
       "name": "Debug ANTLR4 Grammar",
       "type": "antlr-debug",
       "request": "launch",
