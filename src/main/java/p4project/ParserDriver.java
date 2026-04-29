@@ -5,12 +5,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import p4project.visitors.AssDecVisitor;
-import p4project.visitors.CodeGenVisitor;
-import p4project.visitors.TypeResolverVisitor;
-import p4project.visitors.TypeCheckingVisitor;
-import p4project.visitors.VtableFtableGenVisitor;
 import p4project.context.CompilationContext;
+import p4project.visitors.CodeGenVisitor;
 
 public class ParserDriver {
     public static void main(String[] args) {
@@ -25,7 +21,7 @@ public class ParserDriver {
         System.out.println("--- Parse Tree ---");
         System.out.println(tree.toStringTree(parser));
         System.out.println("------------------\n");
-
+ 
         // 1. Initialize Shared Context
         CompilationContext ctx = new CompilationContext();
         

@@ -16,9 +16,7 @@
       "type": "java",
       "request": "launch",
       "mainClass": "p4project.ParserDriver",
-      "classPaths": [
-        "target/classes"
-      ]
+      "cwd": "${workspaceFolder}"
     }
   ]
 }
