@@ -32,11 +32,16 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitAdditive(OurGrammarParser.AdditiveContext ctx) {
         String leftType = visit(ctx.mult());
-        String rightType = visit(ctx.mult());
-        if (!"int".equals(leftType) || !"int".equals(rightType)) {
-            throw new RuntimeException("Type Error: '+' requires integer operands.");
+        String rightType = visit(ctx.additive());
+        // checks if both sides are int or float, otherwise throws an error in an if else if statement
+        if (leftType.equals("int") && rightType.equals("int")) {
+            return "int";
+        } else if (leftType.equals("float") && rightType.equals("float")) {
+            return "float";
+        } else {
+            throw new RuntimeException("Type Error: Cannot apply operator '" + ctx.getChild(1).getText() + "' to types " + leftType + " and " + rightType);
         }
-        return "int";
+
     }
 
     @Override

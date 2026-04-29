@@ -6,11 +6,15 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import p4project.context.CompilationContext;
+import p4project.visitors.AssDecVisitor;
 import p4project.visitors.CodeGenVisitor;
+import p4project.visitors.RefLinkingVisitor;
+import p4project.visitors.TypeCheckingVisitor;
+import p4project.visitors.VtableFtableGenVisitor;
 
 public class ParserDriver {
     public static void main(String[] args) {
-        String input = args.length > 0 ? String.join(" ", args) : "int x; int y = 1 + 2; x = y * -x;";
+        String input = args.length > 0 ? String.join(" ", args) : "const shared int x; int y = 1 + 2; x = y * -x;";
 
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);
@@ -21,13 +25,31 @@ public class ParserDriver {
         System.out.println("--- Parse Tree ---");
         System.out.println(tree.toStringTree(parser));
         System.out.println("------------------\n");
- 
-        // 1. Initialize Shared Context
         CompilationContext ctx = new CompilationContext();
-        
-        // 3. Generate and Print Java Code
-        String javaCode = new CodeGenVisitor().visit(tree);
-        System.out.println("--- Generated Java Code ---");
-        System.out.println(javaCode);
+
+        // 1. Symbol assignments and declerations
+            AssDecVisitor assDecVisitor = new AssDecVisitor(ctx);
+            assDecVisitor.visit(tree);
+
+        // 2. Reference linking
+            RefLinkingVisitor refLinkingVisitor = new RefLinkingVisitor(ctx);
+            refLinkingVisitor.visit(tree);
+
+        // 3. Type checking
+            TypeCheckingVisitor typeCheckingVisitor = new TypeCheckingVisitor(ctx);
+            typeCheckingVisitor.visit(tree);
+            System.out.println("--- Type Checking Passed ---\n");
+
+        // 4. vtable and ftable generation
+            VtableFtableGenVisitor vtableFtableGenVisitor = new VtableFtableGenVisitor(ctx);
+            vtableFtableGenVisitor.visit(tree);
+            System.out.println("--- VTable and FTable Generated ---\n");
+
+        // 5. Java Code Gen
+            CodeGenVisitor codeGenVisitor = new CodeGenVisitor();
+            String javaCode = codeGenVisitor.visit(tree);
+            System.out.println("--- Generated Java Code ---");
+            System.out.println(javaCode);
+
     }
 }
