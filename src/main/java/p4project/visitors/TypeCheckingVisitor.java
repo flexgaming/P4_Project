@@ -3,6 +3,7 @@ package p4project.visitors;
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
+import p4project.context.Symbol;
 
 /*
     Phase 1: Symbol assignments and declerations
@@ -11,8 +12,8 @@ import p4project.context.CompilationContext;
     Phase 4: vtable and ftable generation
     Phase 5: Java Code Gen
 */
-
 public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
+
     private final CompilationContext ctx;
 
     public TypeCheckingVisitor(CompilationContext ctx) {
@@ -20,27 +21,37 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitIntLiteral(OurGrammarParser.IntLiteralContext tree) {
-        return "int"; // 1 is always an integer
+    public String visitFactor(OurGrammarParser.FactorContext ctx) {
+        if (ctx.INT() != null) {
+            return "int";
+        }
+        return visitChildren(ctx);
     }
 
     @Override
-    public String visitAddExpr(OurGrammarParser.AddExprContext tree) {
-        String leftType = visit(tree.expr(0));
-        String rightType = visit(tree.expr(1));
-        
+    public String visitAdditive(OurGrammarParser.AdditiveContext ctx) {
+        String leftType = visit(ctx.mult());
+        String rightType = visit(ctx.mult());
         if (!"int".equals(leftType) || !"int".equals(rightType)) {
             throw new RuntimeException("Type Error: '+' requires integer operands.");
         }
-        return "int"; // The result of int + int is an int
+        return "int";
     }
 
     @Override
-    public String visitAssign(OurGrammarParser.AssignContext tree) {
-        String id = tree.ID().getText();
-        String declaredType = ctx.symbolTable.resolve(id).getType();
-        String exprType = visit(tree.expr());
-        
+    public String visitAssignment(OurGrammarParser.AssignmentContext ctx) {
+        String id = ctx.ID().getText();
+        Symbol symbol = this.ctx.symbolTable.resolve(id);
+
+        if (symbol == null) {
+            throw new RuntimeException("Variable '" + id + "' not declared.");
+        }
+
+        // FIXED: Use direct field access (TypeSymbol has public 'name' or 'type' field)
+        String declaredType = symbol.type.name.toLowerCase();   // <<< CHANGED
+
+        String exprType = visit(ctx.assVar().expr());
+
         if (!declaredType.equals(exprType)) {
             throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
         }

@@ -11,19 +11,23 @@ public class TypeSymbol {
     //This instance of TypeSymbols' type
     public final Type type;
 
+    // Name of the type
+    public final String name;
+
     //Creating the final singular instance of every TypeSymbol
-    public static final TypeSymbol INT    = new TypeSymbol(Type.INT);
-    public static final TypeSymbol FLOAT  = new TypeSymbol(Type.FLOAT);
-    public static final TypeSymbol BOOL   = new TypeSymbol(Type.BOOL);
-    public static final TypeSymbol CHAR   = new TypeSymbol(Type.CHAR);
-    public static final TypeSymbol STRING = new TypeSymbol(Type.STRING);
-    public static final TypeSymbol VOID   = new TypeSymbol(Type.VOID);
-    public static final TypeSymbol THREAD = new TypeSymbol(Type.THREAD);
-    public static final TypeSymbol UNKNOWN = new TypeSymbol(null); // error recovery
+    public static final TypeSymbol INT    = new TypeSymbol(Type.INT, "int");
+    public static final TypeSymbol FLOAT  = new TypeSymbol(Type.FLOAT, "float");
+    public static final TypeSymbol BOOL   = new TypeSymbol(Type.BOOL, "bool");
+    public static final TypeSymbol CHAR   = new TypeSymbol(Type.CHAR, "char");
+    public static final TypeSymbol STRING = new TypeSymbol(Type.STRING, "string");
+    public static final TypeSymbol VOID   = new TypeSymbol(Type.VOID, "void");
+    public static final TypeSymbol THREAD = new TypeSymbol(Type.THREAD, "thread");
+    public static final TypeSymbol UNKNOWN = new TypeSymbol(null, "unknown"); // error recovery
 
     //Constructor, only meant to be used by all subclasses.
-    protected TypeSymbol(Type type) {
+    protected TypeSymbol(Type type, String name) {
         this.type = type;
+        this.name = name;
     }
 
     //Passes input in format of our Context Free Grammar "TYPE".

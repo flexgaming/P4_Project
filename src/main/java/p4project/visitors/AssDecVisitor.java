@@ -1,19 +1,15 @@
 package p4project.visitors;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import p4project.OurGrammarBaseVisitor;
-import p4project.OurGrammarParser;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import p4project.OurGrammarBaseVisitor;
+import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
 import p4project.context.Symbol;
+import p4project.context.TypeSymbol;
 
 /*
     -> Phase 1: Symbol assignments and declerations
@@ -22,8 +18,8 @@ import p4project.context.Symbol;
     Phase 4: vtable and ftable generation
     Phase 5: Java Code Gen
 */
-
 public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
+
     private final CompilationContext ctx;
 
     public AssDecVisitor(CompilationContext ctx) {
@@ -43,14 +39,13 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitVarDec(OurGrammarParser.VarDecContext ctx) {
-        // Example AST mapping: TYPE ID ';' (e.g., int x;)
+    public Void visitDeclaration(OurGrammarParser.DeclarationContext ctx) {
         String id = ctx.ID().getText();
-        String type = ctx.TYPE().getText();
-        
-        // Define symbol in current scope
-        ctx.symbolTable.define(new Symbol(id, type));
-        
+        String typeStr = ctx.typeRef().TYPE().getText();
+
+        Symbol symbol = new Symbol(id, TypeSymbol.fromString(typeStr));
+        this.ctx.symbolTable.define(symbol);   // <<< FIXED
+
         return visitChildren(ctx);
     }
 }

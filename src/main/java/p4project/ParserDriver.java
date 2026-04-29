@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import p4project.visitors.AssDecVisitor;
 import p4project.visitors.CodeGenVisitor;
-import p4project.visitors.RefLinkingVisitor;
+import p4project.visitors.TypeResolverVisitor;
 import p4project.visitors.TypeCheckingVisitor;
 import p4project.visitors.VtableFtableGenVisitor;
 import p4project.context.CompilationContext;
@@ -28,12 +28,6 @@ public class ParserDriver {
 
         // 1. Initialize Shared Context
         CompilationContext ctx = new CompilationContext();
-
-        // 2. Run Compiler Phases
-        new AssDecVisitor(ctx).visit(tree);
-        new RefLinkingVisitor(ctx).visit(tree);
-        new TypeCheckingVisitor(ctx).visit(tree);
-        new VtableFtableGenVisitor(ctx).visit(tree);
         
         // 3. Generate and Print Java Code
         String javaCode = new CodeGenVisitor().visit(tree);

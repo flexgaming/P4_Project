@@ -1,17 +1,17 @@
 grammar OurGrammar;
 
 @header {
-package p4project;
+    package p4project;          // <<< ADDED / FIXED
 }
 
 program
-    : statement* EOF // EOF = End Of File
+    : statement* EOF
     ;
-    
+
 statement
-    : expr ';'
+    : expr ';'                          // <<< CHANGED (was too loose)
     | arrayIndex '=' expr ';'
-    | assignment
+    | assignment ';'                    // <<< CHANGED (added ';' here for consistency)
     | reassignment ';'
     | declaration ';'
     | threadAssignment
@@ -29,7 +29,7 @@ statement
     ;
 
 assignment
-    : PREFIX? typeRef ID ( assVar ';' | assFunc )
+    : PREFIX? typeRef ID (assVar | assFunc)     // <<< CHANGED (removed inner ';' )
     ;
 
 assVar
@@ -45,11 +45,11 @@ reassignment
     ;
 
 declaration
-    : PREFIX? typeRef ID
+    : PREFIX? typeRef ID                        // <<< CHANGED (removed ';' from rule)
     ;
 
 threadAssignment
-    : typeRef ID '=>' block // Functions like a lambda expression
+    : typeRef ID '=>' block
     ;
 
 awaitStatement
@@ -165,7 +165,7 @@ factor
     ;
 
 functionCall
-    : ID '(' (expr (',' expr)*)? ')' 
+    : ID '(' (expr (',' expr)*)? ')'
     ;
 
 INT : [0-9]+ ;
@@ -173,10 +173,11 @@ FLOAT : [0-9]+ ('.' [0-9]+?)? ;
 BOOL : 'true' | 'false' ;
 CHAR : '\'' . '\'' ;
 STRING : '"' .*? '"' ;
-THREAD : BOOL ; // starts with false and is true when task is done.
+THREAD : BOOL ;
 PREFIX : 'shared' 'const'? 'static'? | 'shared'? 'const' 'static'? | 'shared'? 'const'? 'static' ;
 TYPE : 'int' | 'float' | 'bool' | 'char' | 'string' | 'void' | 'thread' ;
 ID : [a-zA-Z_][a-zA-Z0-9_]* ;
+
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;
 BLOCK_COMMENT : '/*' .*? '*/' -> skip ;
 WS  : [ \t\r\n]+ -> skip ;

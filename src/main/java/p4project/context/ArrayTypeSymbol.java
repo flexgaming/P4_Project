@@ -11,7 +11,7 @@ public class ArrayTypeSymbol extends TypeSymbol {
 
     //Constructor taking a TypeSymbol as input and the dimensions.
     public ArrayTypeSymbol(TypeSymbol elementType, int[] dimensions) {
-        super(elementType.type);
+        super(elementType.type, elementType.name + "[]");
         this.elementType = elementType;
         this.dimSize = dimensions;
         this.dimensions = dimensions.length;

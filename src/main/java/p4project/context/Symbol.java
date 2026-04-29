@@ -17,7 +17,7 @@ public class Symbol {
 
     public Symbol(String name, TypeSymbol type) {
         this.ID = name;
-        this.type = new TypeSymbol(type.type);
+        this.type = new TypeSymbol(type.type, type.name);
     }
 
     public Symbol(String name, TypeSymbol type, int[] dimensions) {

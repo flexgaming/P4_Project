@@ -12,20 +12,34 @@ import p4project.context.CompilationContext;
     Phase 5: Java Code Gen
 */
 
-public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
+public class TypeResolverVisitor extends OurGrammarBaseVisitor<Void> {
+
     private final CompilationContext ctx;
 
-    public RefLinkingVisitor(CompilationContext ctx) {
+    public TypeResolverVisitor(CompilationContext ctx) {
         this.ctx = ctx;
     }
 
     @Override
-    public Void visitAssign(OurGrammarParser.AssignContext tree) {
-        String id = tree.ID().getText();
-        // Check if variable 'x' was declared in Phase 1
-        if (ctx.symbolTable.resolve(id) == null) {
-            throw new RuntimeException("Reference Error: Variable '" + id + "' is not declared.");
+    public Void visitDeclaration(OurGrammarParser.DeclarationContext ctx) {
+        String id = ctx.ID().getText();
+        String typeStr = ctx.typeRef().TYPE().getText();
+
+        this.ctx.symbolTable.define(new p4project.context.Symbol(id, 
+            p4project.context.TypeSymbol.fromString(typeStr)));
+
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public Void visitAssignment(OurGrammarParser.AssignmentContext ctx) {
+        String id = ctx.ID().getText();
+        p4project.context.Symbol symbol = this.ctx.symbolTable.resolve(id);
+
+        if (symbol == null) {
+            throw new RuntimeException("Variable '" + id + "' not declared.");
         }
-        return visitChildren(tree);
+
+        return visitChildren(ctx);
     }
 }

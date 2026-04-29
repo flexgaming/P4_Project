@@ -1,6 +1,6 @@
 // Generated from c:/Users/ulrik/Documents/GitHub/P4_Project/src/main/antlr4/OurGrammar.g4 by ANTLR 4.13.1
 
-    package p4project;          // <<< ADDED / FIXED
+package p4project;
 
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -132,9 +132,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_program; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitProgram(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterProgram(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitProgram(this);
 		}
 	}
 
@@ -232,9 +235,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_statement; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitStatement(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitStatement(this);
 		}
 	}
 
@@ -242,7 +248,7 @@ public class OurGrammarParser extends Parser {
 		StatementContext _localctx = new StatementContext(_ctx, getState());
 		enterRule(_localctx, 2, RULE_statement);
 		try {
-			setState(113);
+			setState(111);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
 			case 1:
@@ -272,121 +278,119 @@ public class OurGrammarParser extends Parser {
 				{
 				setState(80);
 				assignment();
-				setState(81);
-				match(T__0);
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(83);
+				setState(81);
 				reassignment();
-				setState(84);
+				setState(82);
 				match(T__0);
 				}
 				break;
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(86);
+				setState(84);
 				declaration();
-				setState(87);
+				setState(85);
 				match(T__0);
 				}
 				break;
 			case 6:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(89);
+				setState(87);
 				threadAssignment();
 				}
 				break;
 			case 7:
 				enterOuterAlt(_localctx, 7);
 				{
-				setState(90);
+				setState(88);
 				awaitStatement();
-				setState(91);
+				setState(89);
 				match(T__0);
 				}
 				break;
 			case 8:
 				enterOuterAlt(_localctx, 8);
 				{
-				setState(93);
+				setState(91);
 				ifStatement();
 				}
 				break;
 			case 9:
 				enterOuterAlt(_localctx, 9);
 				{
-				setState(94);
+				setState(92);
 				forStatement();
 				}
 				break;
 			case 10:
 				enterOuterAlt(_localctx, 10);
 				{
-				setState(95);
+				setState(93);
 				whileStatement();
 				}
 				break;
 			case 11:
 				enterOuterAlt(_localctx, 11);
 				{
-				setState(96);
+				setState(94);
 				continueStatement();
-				setState(97);
+				setState(95);
 				match(T__0);
 				}
 				break;
 			case 12:
 				enterOuterAlt(_localctx, 12);
 				{
-				setState(99);
+				setState(97);
 				breakStatement();
-				setState(100);
+				setState(98);
 				match(T__0);
 				}
 				break;
 			case 13:
 				enterOuterAlt(_localctx, 13);
 				{
-				setState(102);
+				setState(100);
 				block();
 				}
 				break;
 			case 14:
 				enterOuterAlt(_localctx, 14);
 				{
-				setState(103);
+				setState(101);
 				returnStatement();
-				setState(104);
+				setState(102);
 				match(T__0);
 				}
 				break;
 			case 15:
 				enterOuterAlt(_localctx, 15);
 				{
-				setState(106);
+				setState(104);
 				criticalSection();
 				}
 				break;
 			case 16:
 				enterOuterAlt(_localctx, 16);
 				{
-				setState(107);
+				setState(105);
 				printStatement();
-				setState(108);
+				setState(106);
 				match(T__0);
 				}
 				break;
 			case 17:
 				enterOuterAlt(_localctx, 17);
 				{
-				setState(110);
+				setState(108);
 				readStatement();
-				setState(111);
+				setState(109);
 				match(T__0);
 				}
 				break;
@@ -421,9 +425,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_assignment; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitAssignment(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterAssignment(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitAssignment(this);
 		}
 	}
 
@@ -434,27 +441,29 @@ public class OurGrammarParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(116);
+			setState(114);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==PREFIX) {
 				{
-				setState(115);
+				setState(113);
 				match(PREFIX);
 				}
 			}
 
-			setState(118);
+			setState(116);
 			typeRef();
-			setState(119);
+			setState(117);
 			match(ID);
 			setState(122);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__1:
 				{
-				setState(120);
+				setState(118);
 				assVar();
+				setState(119);
+				match(T__0);
 				}
 				break;
 			case T__2:
@@ -489,9 +498,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_assVar; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitAssVar(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterAssVar(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitAssVar(this);
 		}
 	}
 
@@ -542,9 +554,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_assFunc; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitAssFunc(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterAssFunc(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitAssFunc(this);
 		}
 	}
 
@@ -635,9 +650,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_reassignment; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitReassignment(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterReassignment(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitReassignment(this);
 		}
 	}
 
@@ -678,9 +696,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_declaration; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitDeclaration(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterDeclaration(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitDeclaration(this);
 		}
 	}
 
@@ -732,9 +753,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_threadAssignment; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitThreadAssignment(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterThreadAssignment(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitThreadAssignment(this);
 		}
 	}
 
@@ -778,9 +802,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_awaitStatement; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitAwaitStatement(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterAwaitStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitAwaitStatement(this);
 		}
 	}
 
@@ -876,9 +903,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_castExpression; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitCastExpression(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterCastExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitCastExpression(this);
 		}
 	}
 
@@ -927,9 +957,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_typeRef; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitTypeRef(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterTypeRef(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitTypeRef(this);
 		}
 	}
 
@@ -1005,9 +1038,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_ifStatement; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitIfStatement(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterIfStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitIfStatement(this);
 		}
 	}
 
@@ -1090,9 +1126,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_forStatement; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitForStatement(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterForStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitForStatement(this);
 		}
 	}
 
@@ -1154,9 +1193,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_forVar; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitForVar(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterForVar(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitForVar(this);
 		}
 	}
 
@@ -1245,9 +1287,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_whileStatement; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitWhileStatement(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterWhileStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitWhileStatement(this);
 		}
 	}
 
@@ -1287,9 +1332,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_continueStatement; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitContinueStatement(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterContinueStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitContinueStatement(this);
 		}
 	}
 
@@ -1321,9 +1369,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_breakStatement; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitBreakStatement(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterBreakStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitBreakStatement(this);
 		}
 	}
 
@@ -1361,9 +1412,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_block; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitBlock(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterBlock(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitBlock(this);
 		}
 	}
 
@@ -1415,9 +1469,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_returnStatement; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitReturnStatement(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterReturnStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitReturnStatement(this);
 		}
 	}
 
@@ -1467,9 +1524,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_criticalSection; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitCriticalSection(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterCriticalSection(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitCriticalSection(this);
 		}
 	}
 
@@ -1532,9 +1592,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_printStatement; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitPrintStatement(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterPrintStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitPrintStatement(this);
 		}
 	}
 
@@ -1590,9 +1653,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_readStatement; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitReadStatement(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterReadStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitReadStatement(this);
 		}
 	}
 
@@ -1636,9 +1702,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_expr; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitExpr(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterExpr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitExpr(this);
 		}
 	}
 
@@ -1702,9 +1771,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_equal; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitEqual(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterEqual(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitEqual(this);
 		}
 	}
 
@@ -1768,9 +1840,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_comp; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitComp(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterComp(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitComp(this);
 		}
 	}
 
@@ -1834,9 +1909,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_additive; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitAdditive(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterAdditive(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitAdditive(this);
 		}
 	}
 
@@ -1900,9 +1978,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_mult; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitMult(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterMult(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitMult(this);
 		}
 	}
 
@@ -1966,9 +2047,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_power; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitPower(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterPower(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitPower(this);
 		}
 	}
 
@@ -2023,9 +2107,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_arrayLiteral; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitArrayLiteral(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterArrayLiteral(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitArrayLiteral(this);
 		}
 	}
 
@@ -2085,9 +2172,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_arrayIndex; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitArrayIndex(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterArrayIndex(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitArrayIndex(this);
 		}
 	}
 
@@ -2169,9 +2259,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_factor; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitFactor(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterFactor(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitFactor(this);
 		}
 	}
 
@@ -2318,9 +2411,12 @@ public class OurGrammarParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_functionCall; }
 		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof OurGrammarVisitor ) return ((OurGrammarVisitor<? extends T>)visitor).visitFunctionCall(this);
-			else return visitor.visitChildren(this);
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).enterFunctionCall(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof OurGrammarListener ) ((OurGrammarListener)listener).exitFunctionCall(this);
 		}
 	}
 
@@ -2395,17 +2491,17 @@ public class OurGrammarParser extends Parser {
 		"\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001"+
 		"\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001"+
 		"\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001"+
-		"\u0001\u0001\u0001\u0001\u0003\u0001r\b\u0001\u0001\u0002\u0003\u0002"+
-		"u\b\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0003\u0002"+
-		"{\b\u0002\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0004\u0001\u0004"+
-		"\u0003\u0004\u0082\b\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004"+
-		"\u0003\u0004\u0088\b\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0005\u0004"+
-		"\u008d\b\u0004\n\u0004\f\u0004\u0090\t\u0004\u0003\u0004\u0092\b\u0004"+
-		"\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0005\u0001\u0005\u0001\u0005"+
-		"\u0001\u0005\u0001\u0006\u0003\u0006\u009c\b\u0006\u0001\u0006\u0001\u0006"+
-		"\u0001\u0006\u0001\u0007\u0001\u0007\u0001\u0007\u0001\u0007\u0001\u0007"+
-		"\u0001\b\u0001\b\u0001\b\u0001\b\u0001\b\u0005\b\u00ab\b\b\n\b\f\b\u00ae"+
-		"\t\b\u0001\b\u0001\b\u0001\b\u0001\b\u0001\b\u0001\b\u0001\b\u0005\b\u00b7"+
+		"\u0003\u0001p\b\u0001\u0001\u0002\u0003\u0002s\b\u0002\u0001\u0002\u0001"+
+		"\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0003\u0002{\b"+
+		"\u0002\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0004\u0001\u0004\u0003"+
+		"\u0004\u0082\b\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0003"+
+		"\u0004\u0088\b\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0005\u0004\u008d"+
+		"\b\u0004\n\u0004\f\u0004\u0090\t\u0004\u0003\u0004\u0092\b\u0004\u0001"+
+		"\u0004\u0001\u0004\u0001\u0004\u0001\u0005\u0001\u0005\u0001\u0005\u0001"+
+		"\u0005\u0001\u0006\u0003\u0006\u009c\b\u0006\u0001\u0006\u0001\u0006\u0001"+
+		"\u0006\u0001\u0007\u0001\u0007\u0001\u0007\u0001\u0007\u0001\u0007\u0001"+
+		"\b\u0001\b\u0001\b\u0001\b\u0001\b\u0005\b\u00ab\b\b\n\b\f\b\u00ae\t\b"+
+		"\u0001\b\u0001\b\u0001\b\u0001\b\u0001\b\u0001\b\u0001\b\u0005\b\u00b7"+
 		"\b\b\n\b\f\b\u00ba\t\b\u0001\b\u0001\b\u0003\b\u00be\b\b\u0001\t\u0001"+
 		"\t\u0001\t\u0001\t\u0001\t\u0001\t\u0001\n\u0001\n\u0001\n\u0003\n\u00c9"+
 		"\b\n\u0001\n\u0005\n\u00cc\b\n\n\n\f\n\u00cf\t\n\u0001\u000b\u0001\u000b"+
@@ -2444,7 +2540,7 @@ public class OurGrammarParser extends Parser {
 		"\u0012\u0014\u0016\u0018\u001a\u001c\u001e \"$&(*,.02468:<>\u0000\u0006"+
 		"\u0002\u0000\'\'//\u0001\u0000\u0019\u001a\u0001\u0000\u001b\u001c\u0001"+
 		"\u0000\u001d \u0001\u0000!\"\u0001\u0000#%\u01b4\u0000C\u0001\u0000\u0000"+
-		"\u0000\u0002q\u0001\u0000\u0000\u0000\u0004t\u0001\u0000\u0000\u0000\u0006"+
+		"\u0000\u0002o\u0001\u0000\u0000\u0000\u0004r\u0001\u0000\u0000\u0000\u0006"+
 		"|\u0001\u0000\u0000\u0000\b\u007f\u0001\u0000\u0000\u0000\n\u0096\u0001"+
 		"\u0000\u0000\u0000\f\u009b\u0001\u0000\u0000\u0000\u000e\u00a0\u0001\u0000"+
 		"\u0000\u0000\u0010\u00bd\u0001\u0000\u0000\u0000\u0012\u00bf\u0001\u0000"+
@@ -2462,29 +2558,29 @@ public class OurGrammarParser extends Parser {
 		"\u0000\u0000CA\u0001\u0000\u0000\u0000CD\u0001\u0000\u0000\u0000DF\u0001"+
 		"\u0000\u0000\u0000EC\u0001\u0000\u0000\u0000FG\u0005\u0000\u0000\u0001"+
 		"G\u0001\u0001\u0000\u0000\u0000HI\u0003,\u0016\u0000IJ\u0005\u0001\u0000"+
-		"\u0000Jr\u0001\u0000\u0000\u0000KL\u0003:\u001d\u0000LM\u0005\u0002\u0000"+
-		"\u0000MN\u0003,\u0016\u0000NO\u0005\u0001\u0000\u0000Or\u0001\u0000\u0000"+
-		"\u0000PQ\u0003\u0004\u0002\u0000QR\u0005\u0001\u0000\u0000Rr\u0001\u0000"+
-		"\u0000\u0000ST\u0003\n\u0005\u0000TU\u0005\u0001\u0000\u0000Ur\u0001\u0000"+
-		"\u0000\u0000VW\u0003\f\u0006\u0000WX\u0005\u0001\u0000\u0000Xr\u0001\u0000"+
-		"\u0000\u0000Yr\u0003\u000e\u0007\u0000Z[\u0003\u0010\b\u0000[\\\u0005"+
-		"\u0001\u0000\u0000\\r\u0001\u0000\u0000\u0000]r\u0003\u0016\u000b\u0000"+
-		"^r\u0003\u0018\f\u0000_r\u0003\u001c\u000e\u0000`a\u0003\u001e\u000f\u0000"+
-		"ab\u0005\u0001\u0000\u0000br\u0001\u0000\u0000\u0000cd\u0003 \u0010\u0000"+
-		"de\u0005\u0001\u0000\u0000er\u0001\u0000\u0000\u0000fr\u0003\"\u0011\u0000"+
-		"gh\u0003$\u0012\u0000hi\u0005\u0001\u0000\u0000ir\u0001\u0000\u0000\u0000"+
-		"jr\u0003&\u0013\u0000kl\u0003(\u0014\u0000lm\u0005\u0001\u0000\u0000m"+
-		"r\u0001\u0000\u0000\u0000no\u0003*\u0015\u0000op\u0005\u0001\u0000\u0000"+
-		"pr\u0001\u0000\u0000\u0000qH\u0001\u0000\u0000\u0000qK\u0001\u0000\u0000"+
-		"\u0000qP\u0001\u0000\u0000\u0000qS\u0001\u0000\u0000\u0000qV\u0001\u0000"+
-		"\u0000\u0000qY\u0001\u0000\u0000\u0000qZ\u0001\u0000\u0000\u0000q]\u0001"+
-		"\u0000\u0000\u0000q^\u0001\u0000\u0000\u0000q_\u0001\u0000\u0000\u0000"+
-		"q`\u0001\u0000\u0000\u0000qc\u0001\u0000\u0000\u0000qf\u0001\u0000\u0000"+
-		"\u0000qg\u0001\u0000\u0000\u0000qj\u0001\u0000\u0000\u0000qk\u0001\u0000"+
-		"\u0000\u0000qn\u0001\u0000\u0000\u0000r\u0003\u0001\u0000\u0000\u0000"+
-		"su\u0005-\u0000\u0000ts\u0001\u0000\u0000\u0000tu\u0001\u0000\u0000\u0000"+
-		"uv\u0001\u0000\u0000\u0000vw\u0003\u0014\n\u0000wz\u0005/\u0000\u0000"+
-		"x{\u0003\u0006\u0003\u0000y{\u0003\b\u0004\u0000zx\u0001\u0000\u0000\u0000"+
+		"\u0000Jp\u0001\u0000\u0000\u0000KL\u0003:\u001d\u0000LM\u0005\u0002\u0000"+
+		"\u0000MN\u0003,\u0016\u0000NO\u0005\u0001\u0000\u0000Op\u0001\u0000\u0000"+
+		"\u0000Pp\u0003\u0004\u0002\u0000QR\u0003\n\u0005\u0000RS\u0005\u0001\u0000"+
+		"\u0000Sp\u0001\u0000\u0000\u0000TU\u0003\f\u0006\u0000UV\u0005\u0001\u0000"+
+		"\u0000Vp\u0001\u0000\u0000\u0000Wp\u0003\u000e\u0007\u0000XY\u0003\u0010"+
+		"\b\u0000YZ\u0005\u0001\u0000\u0000Zp\u0001\u0000\u0000\u0000[p\u0003\u0016"+
+		"\u000b\u0000\\p\u0003\u0018\f\u0000]p\u0003\u001c\u000e\u0000^_\u0003"+
+		"\u001e\u000f\u0000_`\u0005\u0001\u0000\u0000`p\u0001\u0000\u0000\u0000"+
+		"ab\u0003 \u0010\u0000bc\u0005\u0001\u0000\u0000cp\u0001\u0000\u0000\u0000"+
+		"dp\u0003\"\u0011\u0000ef\u0003$\u0012\u0000fg\u0005\u0001\u0000\u0000"+
+		"gp\u0001\u0000\u0000\u0000hp\u0003&\u0013\u0000ij\u0003(\u0014\u0000j"+
+		"k\u0005\u0001\u0000\u0000kp\u0001\u0000\u0000\u0000lm\u0003*\u0015\u0000"+
+		"mn\u0005\u0001\u0000\u0000np\u0001\u0000\u0000\u0000oH\u0001\u0000\u0000"+
+		"\u0000oK\u0001\u0000\u0000\u0000oP\u0001\u0000\u0000\u0000oQ\u0001\u0000"+
+		"\u0000\u0000oT\u0001\u0000\u0000\u0000oW\u0001\u0000\u0000\u0000oX\u0001"+
+		"\u0000\u0000\u0000o[\u0001\u0000\u0000\u0000o\\\u0001\u0000\u0000\u0000"+
+		"o]\u0001\u0000\u0000\u0000o^\u0001\u0000\u0000\u0000oa\u0001\u0000\u0000"+
+		"\u0000od\u0001\u0000\u0000\u0000oe\u0001\u0000\u0000\u0000oh\u0001\u0000"+
+		"\u0000\u0000oi\u0001\u0000\u0000\u0000ol\u0001\u0000\u0000\u0000p\u0003"+
+		"\u0001\u0000\u0000\u0000qs\u0005-\u0000\u0000rq\u0001\u0000\u0000\u0000"+
+		"rs\u0001\u0000\u0000\u0000st\u0001\u0000\u0000\u0000tu\u0003\u0014\n\u0000"+
+		"uz\u0005/\u0000\u0000vw\u0003\u0006\u0003\u0000wx\u0005\u0001\u0000\u0000"+
+		"x{\u0001\u0000\u0000\u0000y{\u0003\b\u0004\u0000zv\u0001\u0000\u0000\u0000"+
 		"zy\u0001\u0000\u0000\u0000{\u0005\u0001\u0000\u0000\u0000|}\u0005\u0002"+
 		"\u0000\u0000}~\u0003,\u0016\u0000~\u0007\u0001\u0000\u0000\u0000\u007f"+
 		"\u0091\u0005\u0003\u0000\u0000\u0080\u0082\u0005-\u0000\u0000\u0081\u0080"+
@@ -2640,7 +2736,7 @@ public class OurGrammarParser extends Parser {
 		"\u0000\u0192\u0190\u0001\u0000\u0000\u0000\u0193\u018b\u0001\u0000\u0000"+
 		"\u0000\u0193\u0194\u0001\u0000\u0000\u0000\u0194\u0195\u0001\u0000\u0000"+
 		"\u0000\u0195\u0196\u0005\u0005\u0000\u0000\u0196?\u0001\u0000\u0000\u0000"+
-		"#Cqtz\u0081\u0087\u008e\u0091\u009b\u00ac\u00b8\u00bd\u00c8\u00cd\u00d9"+
+		"#Corz\u0081\u0087\u008e\u0091\u009b\u00ac\u00b8\u00bd\u00c8\u00cd\u00d9"+
 		"\u00de\u00eb\u00f1\u00f5\u0105\u010c\u0115\u0122\u0131\u0138\u013f\u0146"+
 		"\u014d\u0154\u015c\u016b\u0178\u0187\u0190\u0193";
 	public static final ATN _ATN =
