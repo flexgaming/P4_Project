@@ -24,7 +24,13 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitAdditive(OurGrammarParser.AdditiveContext ctx) {
-        return visit(ctx.mult()) + " + " + visit(ctx.mult());   // <<< FIXED - no (0) or (1)
+        String left = visit(ctx.mult());
+        if (ctx.additive() != null) {
+            String op = ctx.getChild(1).getText();  // The operator
+            String right = visit(ctx.additive());
+            return left + " " + op + " " + right;
+        }
+        return left;
     }
 
     @Override
