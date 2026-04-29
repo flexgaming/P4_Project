@@ -10,6 +10,7 @@ import p4project.context.CompilationContext;   // <<< ADDED
     -> Phase 4: vtable and ftable generation
     Phase 5: Java Code Gen
 */
+
 public class VtableFtableGenVisitor extends OurGrammarBaseVisitor<Void> {
 
     private final CompilationContext ctx;

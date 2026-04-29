@@ -18,6 +18,7 @@ import p4project.context.TypeSymbol;
     Phase 4: vtable and ftable generation
     Phase 5: Java Code Gen
 */
+
 public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
 
     private final CompilationContext ctx;

@@ -1,7 +1,7 @@
 grammar OurGrammar;
 
 @header {
-    package p4project;          // <<< ADDED / FIXED
+    package p4project;
 }
 
 program
@@ -9,9 +9,9 @@ program
     ;
 
 statement
-    : expr ';'                          // <<< CHANGED (was too loose)
+    : expr ';'
     | arrayIndex '=' expr ';'
-    | assignment ';'                    // <<< CHANGED (added ';' here for consistency)
+    | assignment
     | reassignment ';'
     | declaration ';'
     | threadAssignment
@@ -29,7 +29,7 @@ statement
     ;
 
 assignment
-    : PREFIX? typeRef ID (assVar | assFunc)     // <<< CHANGED (removed inner ';' )
+    : PREFIX? typeRef ID (assVar ';' | assFunc)
     ;
 
 assVar
@@ -45,7 +45,7 @@ reassignment
     ;
 
 declaration
-    : PREFIX? typeRef ID                        // <<< CHANGED (removed ';' from rule)
+    : PREFIX? typeRef ID ';'
     ;
 
 threadAssignment
@@ -150,7 +150,7 @@ arrayIndex
     ;
 
 factor
-    : '-' factor
+    : NEGATIVE factor
     | functionCall
     | ID ('[' expr ']')*
     | arrayLiteral
@@ -168,6 +168,7 @@ functionCall
     : ID '(' (expr (',' expr)*)? ')'
     ;
 
+NEGATIVE : '-';
 INT : [0-9]+ ;
 FLOAT : [0-9]+ ('.' [0-9]+?)? ;
 BOOL : 'true' | 'false' ;

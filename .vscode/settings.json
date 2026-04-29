@@ -6,5 +6,6 @@
     "outputDir": ".antlr/p4project",
     "listeners": false,
     "visitors": true
-  }
+  },
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

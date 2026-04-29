@@ -1,6 +1,6 @@
 // Generated from c:/Users/ulrik/Documents/GitHub/P4_Project/src/main/antlr4/OurGrammar.g4 by ANTLR 4.13.1
 
-    package p4project;          // <<< ADDED / FIXED
+    package p4project;
 
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -23,7 +23,7 @@ public class OurGrammarLexer extends Lexer {
 		T__9=10, T__10=11, T__11=12, T__12=13, T__13=14, T__14=15, T__15=16, T__16=17, 
 		T__17=18, T__18=19, T__19=20, T__20=21, T__21=22, T__22=23, T__23=24, 
 		T__24=25, T__25=26, T__26=27, T__27=28, T__28=29, T__29=30, T__30=31, 
-		T__31=32, T__32=33, T__33=34, T__34=35, T__35=36, T__36=37, T__37=38, 
+		T__31=32, T__32=33, T__33=34, T__34=35, T__35=36, T__36=37, NEGATIVE=38, 
 		INT=39, FLOAT=40, BOOL=41, CHAR=42, STRING=43, THREAD=44, PREFIX=45, TYPE=46, 
 		ID=47, LINE_COMMENT=48, BLOCK_COMMENT=49, WS=50;
 	public static String[] channelNames = {
@@ -40,7 +40,7 @@ public class OurGrammarLexer extends Lexer {
 			"T__9", "T__10", "T__11", "T__12", "T__13", "T__14", "T__15", "T__16", 
 			"T__17", "T__18", "T__19", "T__20", "T__21", "T__22", "T__23", "T__24", 
 			"T__25", "T__26", "T__27", "T__28", "T__29", "T__30", "T__31", "T__32", 
-			"T__33", "T__34", "T__35", "T__36", "T__37", "INT", "FLOAT", "BOOL", 
+			"T__33", "T__34", "T__35", "T__36", "NEGATIVE", "INT", "FLOAT", "BOOL", 
 			"CHAR", "STRING", "THREAD", "PREFIX", "TYPE", "ID", "LINE_COMMENT", "BLOCK_COMMENT", 
 			"WS"
 		};
@@ -53,7 +53,7 @@ public class OurGrammarLexer extends Lexer {
 			"'cast'", "'['", "']'", "'if'", "'else if'", "'else'", "'for'", "'while'", 
 			"'continue'", "'break'", "'{'", "'}'", "'return'", "'critical'", "'print'", 
 			"'read'", "'&&'", "'||'", "'=='", "'!='", "'<'", "'>'", "'<='", "'>='", 
-			"'+'", "'-'", "'*'", "'/'", "'%'", "'^'"
+			"'+'", "'*'", "'/'", "'%'", "'^'", "'-'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -62,7 +62,7 @@ public class OurGrammarLexer extends Lexer {
 			null, null, null, null, null, null, null, null, null, null, null, null, 
 			null, null, null, null, null, null, null, null, null, null, null, null, 
 			null, null, null, null, null, null, null, null, null, null, null, null, 
-			null, null, null, "INT", "FLOAT", "BOOL", "CHAR", "STRING", "THREAD", 
+			null, null, "NEGATIVE", "INT", "FLOAT", "BOOL", "CHAR", "STRING", "THREAD", 
 			"PREFIX", "TYPE", "ID", "LINE_COMMENT", "BLOCK_COMMENT", "WS"
 		};
 	}
@@ -285,10 +285,10 @@ public class OurGrammarLexer extends Lexer {
 		"<\u0000\u0000\u00e3\u00e4\u0005=\u0000\u0000\u00e4>\u0001\u0000\u0000"+
 		"\u0000\u00e5\u00e6\u0005>\u0000\u0000\u00e6\u00e7\u0005=\u0000\u0000\u00e7"+
 		"@\u0001\u0000\u0000\u0000\u00e8\u00e9\u0005+\u0000\u0000\u00e9B\u0001"+
-		"\u0000\u0000\u0000\u00ea\u00eb\u0005-\u0000\u0000\u00ebD\u0001\u0000\u0000"+
-		"\u0000\u00ec\u00ed\u0005*\u0000\u0000\u00edF\u0001\u0000\u0000\u0000\u00ee"+
-		"\u00ef\u0005/\u0000\u0000\u00efH\u0001\u0000\u0000\u0000\u00f0\u00f1\u0005"+
-		"%\u0000\u0000\u00f1J\u0001\u0000\u0000\u0000\u00f2\u00f3\u0005^\u0000"+
+		"\u0000\u0000\u0000\u00ea\u00eb\u0005*\u0000\u0000\u00ebD\u0001\u0000\u0000"+
+		"\u0000\u00ec\u00ed\u0005/\u0000\u0000\u00edF\u0001\u0000\u0000\u0000\u00ee"+
+		"\u00ef\u0005%\u0000\u0000\u00efH\u0001\u0000\u0000\u0000\u00f0\u00f1\u0005"+
+		"^\u0000\u0000\u00f1J\u0001\u0000\u0000\u0000\u00f2\u00f3\u0005-\u0000"+
 		"\u0000\u00f3L\u0001\u0000\u0000\u0000\u00f4\u00f6\u0007\u0000\u0000\u0000"+
 		"\u00f5\u00f4\u0001\u0000\u0000\u0000\u00f6\u00f7\u0001\u0000\u0000\u0000"+
 		"\u00f7\u00f5\u0001\u0000\u0000\u0000\u00f7\u00f8\u0001\u0000\u0000\u0000"+

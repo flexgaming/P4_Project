@@ -12,6 +12,7 @@ import p4project.context.Symbol;
     Phase 4: vtable and ftable generation
     Phase 5: Java Code Gen
 */
+
 public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     private final CompilationContext ctx;

@@ -11,6 +11,7 @@ import p4project.context.CompilationContext;
     Phase 4: vtable and ftable generation
     Phase 5: Java Code Gen
 */
+
 public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
 
     private final CompilationContext ctx;
@@ -20,11 +21,25 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitDeclaration(OurGrammarParser.DeclarationContext ctx) {
+        String id = ctx.ID().getText();
+        String typeStr = ctx.typeRef().TYPE().getText();
+
+        this.ctx.symbolTable.define(new p4project.context.Symbol(id, 
+            p4project.context.TypeSymbol.fromString(typeStr)));
+
+        return visitChildren(ctx);
+    }
+
+    @Override
     public Void visitAssignment(OurGrammarParser.AssignmentContext ctx) {
         String id = ctx.ID().getText();
-        if (this.ctx.symbolTable.resolve(id) == null) {
-            throw new RuntimeException("Reference Error: Variable '" + id + "' is not declared.");
+        p4project.context.Symbol symbol = this.ctx.symbolTable.resolve(id);
+
+        if (symbol == null) {
+            throw new RuntimeException("Variable '" + id + "' not declared.");
         }
+
         return visitChildren(ctx);
     }
 }

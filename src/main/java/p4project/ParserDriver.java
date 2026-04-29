@@ -10,7 +10,7 @@ import p4project.visitors.CodeGenVisitor;
 
 public class ParserDriver {
     public static void main(String[] args) {
-        String input = args.length > 0 ? String.join(" ", args) : "int x; x = 1 + 2;";
+        String input = args.length > 0 ? String.join(" ", args) : "int x; int y = 1 + 2; x = y * -x;";
 
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);
