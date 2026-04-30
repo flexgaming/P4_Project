@@ -1,5 +1,9 @@
 package p4project.visitors;
 
+import java.util.List;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
@@ -93,15 +97,33 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         return visitChildren(ctx);
     }
 
+    @Override
+    public Void visitFactor(OurGrammarParser.FactorContext ctx) {
+        if (ctx.ID() != null) {
+            String id = ctx.ID().getText();
+            Symbol symbol = this.ctx.symbolTable.resolve(id);
+
+            if (symbol == null) {
+                throw new RuntimeException("Variable '" + id + "' not declared.");
+            }
+            this.ctx.resolvedSymbols.put(ctx.ID(), symbol);
+        }
+        return visitChildren(ctx);
+    }
+
     // ======================== Critical sections ========================
 
     @Override
     public Void visitCriticalSection(OurGrammarParser.CriticalSectionContext ctx) {
-        // TODO check that all variables used inside the critical section that are declared as 'shared' are only mutated inside the critical section
+        List<TerminalNode> sharedVars = ctx.ID().stream()
+            .filter(id -> this.ctx.sharedVariables.contains(id.getText()))
+            .toList();
+        for (var id : sharedVars) {
+            this.ctx.resolvedSymbols.put(id, this.ctx.symbolTable.resolve(id.getText()));
+        }
+
         return visitChildren(ctx);
     }
-
-    // ======================== For loops statements ========================
 
 }
 

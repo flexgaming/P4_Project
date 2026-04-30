@@ -1,5 +1,7 @@
 package p4project;
 
+import java.io.Console;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -14,8 +16,10 @@ import p4project.visitors.VtableFtableGenVisitor;
 
 public class ParserDriver {
     public static void main(String[] args) {
-        String input = args.length > 0 ? String.join(" ", args) : "const shared int x; int y = 1 + 2; x = y * -x;";
-
+        String input = "shared int x; int y = 1 + 2; x = y * -x;";
+        // shared int x = (statement (declaration shared (typeRef int) x);)
+        // int y = 1 + 2 = (statement (assignment (typeRef int) y (assVar = (expr (equal (comp (additive (mult (power (factor 1))) + (additive (mult (power (factor 2))))))))) ;)
+        // x = y * -x = (statement (reassignment x = (expr (equal (comp (additive (mult (power (factor y)) * (mult (power (factor - (factor x)))))))))) ;)
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -30,10 +34,20 @@ public class ParserDriver {
         // 1. Symbol assignments and declerations
             AssDecVisitor assDecVisitor = new AssDecVisitor(ctx);
             assDecVisitor.visit(tree);
+            // print the symbol table after phase 1:
+            System.out.println("--- Symbol Table After Phase 1 ---");
+            ctx.symbolTable.printSymbolTable();
+            System.out.println("----------------------------------\n");
 
         // 2. Reference linking
             RefLinkingVisitor refLinkingVisitor = new RefLinkingVisitor(ctx);
             refLinkingVisitor.visit(tree);
+            // print the resolved symbols after phase 2:
+            System.out.println("--- Resolved Symbols After Phase 2 ---");
+            ctx.resolvedSymbols.forEach((node, sym) -> {
+                System.out.println(node.getText() + " -> " + sym);
+            });
+            System.out.println("--------------------------------------\n");
 
         // 3. Type checking
             TypeCheckingVisitor typeCheckingVisitor = new TypeCheckingVisitor(ctx);
@@ -44,6 +58,16 @@ public class ParserDriver {
             VtableFtableGenVisitor vtableFtableGenVisitor = new VtableFtableGenVisitor(ctx);
             vtableFtableGenVisitor.visit(tree);
             System.out.println("--- VTable and FTable Generated ---\n");
+            System.out.println("--- Function Table After Phase 4 ---");
+            ctx.ftable.forEach((name, func) -> {
+                System.out.println(name + " -> " + func);
+            });
+            System.out.println("--- Variable Table After Phase 4 ---");
+            ctx.vtable.forEach((name, var) -> {
+                System.out.println(name + " -> " + var);
+            });
+            System.out.println("-----------------------------------\n");
+
 
         // 5. Java Code Gen
             CodeGenVisitor codeGenVisitor = new CodeGenVisitor();

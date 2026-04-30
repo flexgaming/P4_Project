@@ -41,5 +41,18 @@ public class SymbolTable {
         return scopes.peek().get(name);
     }
 
+    // For debugging purposes, to print the symbol table after phase 1
+    public Void printSymbolTable() {
+        for (var scope : scopes) {
+            System.out.println(scope);
+        }
+        return null;
+    }
+
+    // For debugging purposes, to print the symbol table after phase 1
+    public int Length() {
+        return scopes.size();
+    }
+
 
 }
