@@ -45,7 +45,7 @@ reassignment
     ;
 
 declaration
-    : PREFIX? typeRef ID ';'
+    : PREFIX? typeRef ID 
     ;
 
 threadAssignment
@@ -58,7 +58,7 @@ awaitStatement
     ;
 
 castExpression
-    : 'cast' '(' TYPE ')' expr
+    : 'cast' '(' TYPE ')' expr 
     ;
 
 typeRef
@@ -152,8 +152,9 @@ arrayIndex
 factor
     : NEGATIVE factor
     | functionCall
-    | ID ('[' expr ']')*
+    | arrayIndex
     | arrayLiteral
+    | ID
     | INT
     | FLOAT
     | BOOL

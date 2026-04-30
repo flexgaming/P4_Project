@@ -9,6 +9,7 @@ import java.util.Set;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 public class CompilationContext {
+    // Phase 1: the symbol table, which supports scopes (stack of hashmaps)
     public final SymbolTable symbolTable = new SymbolTable();
 
     // Phase 2: every identifier-use node → the Symbol it refers to

@@ -96,15 +96,16 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
         int bracketCount = 0;
         for (int i = 0; i < typeRefText.length(); i++) if (typeRefText.charAt(i) == '[') bracketCount++;
 
-        if (bracketCount == 0) {
+        if (bracketCount == 0) { 
+            // simple variable, no array
             VariableSymbol v = new VariableSymbol(id, TypeSymbol.fromString(typeStr));
             v.prefixes.addAll(prefixes);
-            if (!this.ctx.symbolTable.define(v)) {
+            if (!this.ctx.symbolTable.define(v)) { // checks for duplicate variable declaration
                 throw new RuntimeException("Duplicate declaration: '" + id + "'");
             }
             if (v.isShared()) this.ctx.sharedVariables.add(id);
         } else {
-            // parse dimensions (numbers or leave -1 for unspecified)
+            // array variable, parse dimensions (numbers or leave -1 for unspecified)
             Matcher m = Pattern.compile("\\[(.*?)\\]").matcher(typeRefText);
             java.util.List<Integer> dims = new java.util.ArrayList<>();
             while (m.find()) {
