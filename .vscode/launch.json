@@ -16,6 +16,10 @@
       "type": "java",
       "request": "launch",
       "mainClass": "p4project.ParserDriver",
+      "classPaths": [
+        "${workspaceFolder}/target/classes",
+        "${workspaceFolder}/lib/antlr4-runtime-4.13.1.jar"
+      ],
       "cwd": "${workspaceFolder}"
     }
   ]
