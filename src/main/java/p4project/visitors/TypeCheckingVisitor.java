@@ -30,8 +30,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             throw new RuntimeException("Variable '" + id + "' not declared.");
         }
 
-        // FIXED: Use direct field access (TypeSymbol has public 'name' or 'type' field)
-        String declaredType = symbol.type.name.toLowerCase();   // <<< CHANGED
+        String declaredType = symbol.type.name.toLowerCase();
 
         String exprType = visit(ctx.assVar().expr());
 
