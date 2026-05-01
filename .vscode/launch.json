@@ -6,7 +6,7 @@
       "type": "antlr-debug",
       "request": "launch",
       "input": "${workspaceFolder}/sample-input.txt",
-      "grammar": "${workspaceFolder}/src/main/antlr4/OurGrammar.g4",
+      "grammar": "${workspaceFolder}/src/main/antlr4/p4project/OurGrammar.g4",
       "startRule": "program",
       "printParseTree": true,
       "visualParseTree": true

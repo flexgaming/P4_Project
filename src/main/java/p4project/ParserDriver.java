@@ -12,7 +12,7 @@ import p4project.visitors.AssDecVisitor;
 import p4project.visitors.CodeGenVisitor;
 import p4project.visitors.RefLinkingVisitor;
 import p4project.visitors.TypeCheckingVisitor;
-import p4project.visitors.VtableFtableGenVisitor;
+import p4project.visitors.FtableGenVisitor;
 
 public class ParserDriver {
     public static void main(String[] args) {
@@ -54,17 +54,13 @@ public class ParserDriver {
             typeCheckingVisitor.visit(tree);
             System.out.println("--- Type Checking Passed ---\n");
 
-        // 4. vtable and ftable generation
-            VtableFtableGenVisitor vtableFtableGenVisitor = new VtableFtableGenVisitor(ctx);
-            vtableFtableGenVisitor.visit(tree);
-            System.out.println("--- VTable and FTable Generated ---\n");
+        // 4. ftable generation
+            FtableGenVisitor ftableGenVisitor = new FtableGenVisitor(ctx);
+            ftableGenVisitor.visit(tree);
+            System.out.println("--- Function Table Generated ---\n");
             System.out.println("--- Function Table After Phase 4 ---");
             ctx.ftable.forEach((name, func) -> {
                 System.out.println(name + " -> " + func);
-            });
-            System.out.println("--- Variable Table After Phase 4 ---");
-            ctx.vtable.forEach((name, var) -> {
-                System.out.println(name + " -> " + var);
             });
             System.out.println("-----------------------------------\n");
 

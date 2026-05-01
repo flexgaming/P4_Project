@@ -1,9 +1,5 @@
 grammar OurGrammar;
 
-@header {
-    package p4project;
-}
-
 program
     : statement* EOF
     ;

@@ -28,7 +28,6 @@
         <artifactId>antlr4-maven-plugin</artifactId>
         <version>${antlr4.version}</version>
         <configuration>
-          <outputDirectory>${project.build.directory}/generated-sources/antlr4/p4project</outputDirectory>
           <visitor>true</visitor>
         </configuration>
         <executions>
