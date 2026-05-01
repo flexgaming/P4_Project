@@ -62,7 +62,9 @@ typeRef
     ;
 
 ifStatement
-    : 'if' '(' expr ')' statement ('else if' statement)* ('else' statement)?
+    :   'if' '(' expr ')' statement 
+        ('else if' '(' expr ')' statement)* 
+        ('else' statement)?
     ;
 
 forStatement

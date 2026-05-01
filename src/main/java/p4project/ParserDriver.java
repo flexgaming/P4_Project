@@ -16,7 +16,7 @@ import p4project.visitors.FtableGenVisitor;
 
 public class ParserDriver {
     public static void main(String[] args) {
-        String input = "void main() { int x; x = 5; int y = -x; float z = cast(float) x; }";
+        String input = "float bah(float a) { return a + 1.0; } void main() { int x = 5; if (x > 0) { float lol = 2.0; lol = bah(lol); } else if (x == 0) { x = 10; } else { x = x + 1; } }";
 
 
         CharStream charStream = CharStreams.fromString(input);
@@ -64,7 +64,7 @@ public class ParserDriver {
 
 
         // 5. Java Code Gen
-            CodeGenVisitor codeGenVisitor = new CodeGenVisitor();
+            CodeGenVisitor codeGenVisitor = new CodeGenVisitor(ctx);
             String javaCode = codeGenVisitor.visit(tree);
             System.out.println("--- Generated Java Code Phase 5---");
             System.out.println(javaCode);

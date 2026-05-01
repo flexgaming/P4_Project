@@ -8,6 +8,7 @@ import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
 import p4project.context.Symbol;
+import p4project.context.FunctionSymbol;
 
 /*
     Phase 1: Symbol assignments and declerations
@@ -79,6 +80,14 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         return visitChildren(ctx);
     }
 
+    @Override
+    public Void visitBlock(OurGrammarParser.BlockContext ctx) {
+        this.ctx.symbolTable.pushScope();
+        visitChildren(ctx);
+        this.ctx.symbolTable.popScope();
+        return null;
+    }
+
     // ========================= FUNCTION CALLS =========================
 
     @Override
@@ -89,9 +98,6 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         if (symbol == null) {
             throw new RuntimeException("Function '" + id + "' not declared.");
         }
-
-        // TODO look up the function in the ftable and check if it is a function 
-        // and if the arguments match the parameters
 
         this.ctx.resolvedSymbols.put(ctx.ID(), symbol);
         return visitChildren(ctx);
@@ -115,16 +121,45 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
 
     @Override
     public Void visitCriticalSection(OurGrammarParser.CriticalSectionContext ctx) {
+        this.ctx.symbolTable.pushScope();
         List<TerminalNode> sharedVars = ctx.ID().stream()
             .filter(id -> this.ctx.sharedVariables.contains(id.getText()))
             .toList();
         for (var id : sharedVars) {
             this.ctx.resolvedSymbols.put(id, this.ctx.symbolTable.resolve(id.getText()));
         }
+        visitChildren(ctx);
+        this.ctx.symbolTable.popScope();
+        return null;
+    }
+
+    // ====================== if- & for-statements and while loops ====================
+    
+    @Override
+    public Void visitIfStatement(OurGrammarParser.IfStatementContext ctx) {
+        for (OurGrammarParser.ExprContext e : ctx.getRuleContexts(OurGrammarParser.ExprContext.class)) {
+            visit(e);
+        }
+
+        // If the statement is a block the visitBlock will create a new scope, otherwise no new scope is needed.
+        for (OurGrammarParser.StatementContext s : ctx.statement()) {
+            visit(s);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Void visitForStatement(OurGrammarParser.ForStatementContext ctx) {
 
         return visitChildren(ctx);
     }
 
+    @Override
+    public Void visitWhileStatement(OurGrammarParser.WhileStatementContext ctx) {
+
+        return visitChildren(ctx);
+    }
 }
 
 // ctx.resolvedSymbols skal skrives til. Husk det er et hashmap<String, Symbol> hvor key er navnet på symbolet og value er selve symbolet. Det skal fyldes ud i denne visitor, og så kan de andre visitors bruge det til at slå op i stedet for at skulle gøre det selv.
