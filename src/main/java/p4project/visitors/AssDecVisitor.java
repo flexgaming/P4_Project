@@ -69,7 +69,6 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
 
     @Override
     public Void visitAssignment(OurGrammarParser.AssignmentContext context) {
-        // This rule covers declarations with initializers and function definitions.
         Set<Symbol.Prefix> prefixes = EnumSet.noneOf(Symbol.Prefix.class);
         if (context.PREFIX() != null) {
             prefixes = parsePrefixes(List.of(context.PREFIX()));
@@ -81,48 +80,35 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
         String id = context.ID().getText();
         String typeStr = context.typeRef().TYPE().getText();
 
-        // Function declaration (assFunc present)
         if (context.assFunc() != null) {
             FunctionSymbol f = new FunctionSymbol(id, TypeSymbol.fromString(typeStr));
             f.prefixes.addAll(prefixes);
+
+            this.ctx.symbolTable.pushScope();
+
+            if (context.assFunc().typeRef() != null) {
+                var paramTypes = context.assFunc().typeRef();
+                var paramNames = context.assFunc().ID();
+
+                for (int i = 0; i < paramNames.size(); i++) {
+                    // Skip the function name itself if it's included
+                    if (i == 0 && paramNames.get(i).getText().equals(id)) continue;
+
+                    String paramName = paramNames.get(i).getText();
+                    String paramTypeStr = paramTypes.get(i).TYPE().getText();
+
+                    VariableSymbol param = new VariableSymbol(paramName, TypeSymbol.fromString(paramTypeStr));
+                    if (!this.ctx.symbolTable.define(param)) {
+                        throw new RuntimeException("Duplicate parameter name: '" + paramName + "'");
+                    }
+                }
+            }
+
             if (!this.ctx.symbolTable.define(f)) {
                 throw new RuntimeException("Duplicate function declaration: '" + id + "'");
             }
+
             return visitChildren(context);
-        }
-
-        // Variable declaration with initializer
-        String typeRefText = context.typeRef().getText();
-        int bracketCount = 0;
-        for (int i = 0; i < typeRefText.length(); i++) if (typeRefText.charAt(i) == '[') bracketCount++;
-
-        if (bracketCount == 0) { 
-            // simple variable, no array
-            VariableSymbol v = new VariableSymbol(id, TypeSymbol.fromString(typeStr));
-            v.prefixes.addAll(prefixes);
-            if (!this.ctx.symbolTable.define(v)) { // checks for duplicate variable declaration
-                throw new RuntimeException("Duplicate declaration: '" + id + "'");
-            }
-            if (v.isShared()) this.ctx.sharedVariables.add(id);
-        } else {
-            // array variable, parse dimensions (numbers or leave -1 for unspecified)
-            Matcher m = Pattern.compile("\\[(.*?)\\]").matcher(typeRefText);
-            java.util.List<Integer> dims = new java.util.ArrayList<>();
-            while (m.find()) {
-                String inside = m.group(1);
-                if (inside == null || inside.isEmpty()) dims.add(-1);
-                else {
-                    try { dims.add(Integer.parseInt(inside)); }
-                    catch (NumberFormatException ex) { dims.add(-1); }
-                }
-            }
-            int[] dimArr = dims.stream().mapToInt(Integer::intValue).toArray();
-            Symbol arr = new Symbol(id, TypeSymbol.fromString(typeStr), dimArr);
-            arr.prefixes.addAll(prefixes);
-            if (!this.ctx.symbolTable.define(arr)) {
-                throw new RuntimeException("Duplicate declaration: '" + id + "'");
-            }
-            if (arr.isShared()) this.ctx.sharedVariables.add(id);
         }
 
         return visitChildren(context);

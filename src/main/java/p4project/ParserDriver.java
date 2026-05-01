@@ -16,10 +16,9 @@ import p4project.visitors.FtableGenVisitor;
 
 public class ParserDriver {
     public static void main(String[] args) {
-        String input = "shared int x; int y = 1 + 2; x = y * -x;";
-        // shared int x = (statement (declaration shared (typeRef int) x);)
-        // int y = 1 + 2 = (statement (assignment (typeRef int) y (assVar = (expr (equal (comp (additive (mult (power (factor 1))) + (additive (mult (power (factor 2))))))))) ;)
-        // x = y * -x = (statement (reassignment x = (expr (equal (comp (additive (mult (power (factor y)) * (mult (power (factor - (factor x)))))))))) ;)
+        String input = "void main() { int x; x = 5; int y = -x; }";
+
+
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -52,12 +51,11 @@ public class ParserDriver {
         // 3. Type checking
             TypeCheckingVisitor typeCheckingVisitor = new TypeCheckingVisitor(ctx);
             typeCheckingVisitor.visit(tree);
-            System.out.println("--- Type Checking Passed ---\n");
+            System.out.println("--- Type Checking Passed Phase 3 ---\n");
 
         // 4. ftable generation
             FtableGenVisitor ftableGenVisitor = new FtableGenVisitor(ctx);
             ftableGenVisitor.visit(tree);
-            System.out.println("--- Function Table Generated ---\n");
             System.out.println("--- Function Table After Phase 4 ---");
             ctx.ftable.forEach((name, func) -> {
                 System.out.println(name + " -> " + func);
@@ -68,7 +66,7 @@ public class ParserDriver {
         // 5. Java Code Gen
             CodeGenVisitor codeGenVisitor = new CodeGenVisitor();
             String javaCode = codeGenVisitor.visit(tree);
-            System.out.println("--- Generated Java Code ---");
+            System.out.println("--- Generated Java Code Phase 5---");
             System.out.println(javaCode);
 
     }

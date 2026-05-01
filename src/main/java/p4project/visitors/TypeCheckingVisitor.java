@@ -32,12 +32,17 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
         String declaredType = symbol.type.name.toLowerCase();
 
-        String exprType = visit(ctx.assVar().expr());
-
-        if (!declaredType.equals(exprType)) {
-            throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
+        if (ctx.assVar() != null) {
+            String exprType = visit(ctx.assVar().expr());
+            if (!declaredType.equals(exprType)) {
+                throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
+            }
+            return declaredType;
+        } else if (ctx.assFunc() != null) {
+            // Function declarations are handled in the FtableGenVisitor, so we can skip type checking here.
+            return declaredType;
         }
-        return declaredType;
+        throw new RuntimeException("Type Error: Invalid assignment");
     }
 
     @Override

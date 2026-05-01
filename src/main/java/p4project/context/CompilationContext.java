@@ -20,7 +20,6 @@ public class CompilationContext {
 
     // Phase 4: function name → FunctionSymbol (the ftable)
     public final Map<String, FunctionSymbol> ftable = new HashMap<>();
-    public final Map<String, VariableSymbol> vtable = new HashMap<>();
 
     // Concurrency: track which variables are declared 'shared' — Phase 3 uses this
     // to enforce that shared vars are only mutated inside critical sections

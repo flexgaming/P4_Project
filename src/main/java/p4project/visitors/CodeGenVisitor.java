@@ -16,12 +16,14 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitProgram(OurGrammarParser.ProgramContext ctx) {
         StringBuilder result = new StringBuilder();
+        
         for (OurGrammarParser.StatementContext stmt : ctx.statement()) {
             String stmtCode = visit(stmt);
             if (stmtCode != null && !stmtCode.isEmpty()) {
                 result.append(stmtCode);
             }
         }
+        
         return result.toString();
     }
 
@@ -37,7 +39,61 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitAssignment(OurGrammarParser.AssignmentContext ctx) {
-        return ctx.typeRef().TYPE().getText() + " " + ctx.ID().getText() + " = " + visit(ctx.assVar().expr()) + ";\n";
+        String type = ctx.typeRef().TYPE().getText();
+        String id = ctx.ID().getText();
+
+        if (ctx.assFunc() != null) {
+            // Function definition
+            String params = visit(ctx.assFunc());     // Let assFunc generate the parameter list
+            String blockCode = visit(ctx.assFunc().block());
+
+            return type + " " + id + params + " " + blockCode;
+        } 
+        else if (ctx.assVar() != null) {
+            String exprCode = visit(ctx.assVar().expr());
+            return type + " " + id + " = " + exprCode + ";\n";
+        } 
+        else {
+            return "";
+        }
+    }
+
+    @Override
+    public String visitAssFunc(OurGrammarParser.AssFuncContext ctx) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+
+        if (ctx.typeRef() != null && !ctx.typeRef().isEmpty()) {
+            for (int i = 0; i < ctx.typeRef().size(); i++) {
+                String paramType = ctx.typeRef(i).TYPE().getText();
+                String paramName = ctx.ID(i).getText();     // Note: adjust index if needed
+
+                sb.append(paramType).append(" ").append(paramName);
+
+                if (i < ctx.typeRef().size() - 1) {
+                    sb.append(", ");
+                }
+            }
+        }
+
+        sb.append(")");
+        return sb.toString();
+    }
+
+    @Override
+    public String visitBlock(OurGrammarParser.BlockContext ctx) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\n");
+
+        for (OurGrammarParser.StatementContext stmt : ctx.statement()) {
+            String stmtCode = visit(stmt);
+            if (stmtCode != null && !stmtCode.isEmpty()) {
+                sb.append("    ").append(stmtCode);
+            }
+        }
+
+        sb.append("}\n");
+        return sb.toString();
     }
     
     @Override
