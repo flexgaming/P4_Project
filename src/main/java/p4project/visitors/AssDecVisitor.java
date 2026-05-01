@@ -109,6 +109,18 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
             }
 
             return visitChildren(context);
+        } 
+        // Variable declaration with initialization
+        else if (context.assVar() != null) { 
+            VariableSymbol symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr));
+            symbol.prefixes.addAll(prefixes);
+            if (!this.ctx.symbolTable.define(symbol)) {
+                throw new RuntimeException("Duplicate declaration: '" + id + "'");
+            }
+
+            if (symbol.isShared()) this.ctx.sharedVariables.add(id);
+
+            return visitChildren(context);
         }
 
         return visitChildren(context);

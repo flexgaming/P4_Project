@@ -1,6 +1,7 @@
 package p4project.visitors;
 
 import p4project.OurGrammarBaseVisitor;
+import p4project.OurGrammarLexer;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
 import p4project.context.Symbol;
@@ -175,6 +176,19 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
                     throw new RuntimeException("Variable '" + ctx.ID().getText() + "' not declared.");
                 }
                 return symbol.type.name.toLowerCase();
+            // case for cast expressions (starts with the 'cast' literal token)
+            case OurGrammarParser.T__8: // 'cast'
+                OurGrammarParser.CastExpressionContext castCtx = ctx.castExpression();
+                if (castCtx == null) {
+                    throw new RuntimeException("Type Error: Malformed cast expression");
+                }
+                String targetType = castCtx.TYPE().getText().toLowerCase();
+                String exprType = visit(castCtx.expr());
+                if (!targetType.matches("int|float|bool|char|string") || !exprType.matches("int|float|bool|char|string")) {
+                    throw new RuntimeException("Type Error: Invalid cast from " + exprType + " to " + targetType);
+                }
+                return targetType;
+
             default:
                 throw new RuntimeException("Type Error: Invalid factor");
         }
