@@ -14,6 +14,7 @@ public class SymbolTable {
     private final Map<ParseTree, Scope> nodeScopes = new HashMap<>();
     private int depth = 0;
 
+    // Phase 1: Symbol assignments and declarations
     // Create a new scope and link it to the current (Block) node in the parse tree.
     public void pushScope(ParseTree node) { 
         currentScope = new Scope(currentScope);
@@ -21,9 +22,7 @@ public class SymbolTable {
         depth++;
     }
 
-    // Exit the current scope and return to the parent scope.
-    public void popScope() { currentScope = currentScope.parent; depth--; }
-
+    // Phases 2-5: Restore the scope associated with the given parse tree node.
     // Restore the scope associated with the given parse tree node.
     public void restoreScope(ParseTree node) {
         Scope stored = nodeScopes.get(node);
@@ -32,14 +31,9 @@ public class SymbolTable {
             depth++;
         }
     }
-
-    // Restore the parent scope of the current scope.
-    public void restoreParent() {
-        if (currentScope != null) {
-            currentScope = currentScope.parent;
-            depth--;
-        }
-    }
+    
+    // Exit the current scope and return to the parent scope.
+    public void popScope() { currentScope = currentScope.parent; depth--; }
 
     // Get the current depth of the scope stack.
     public int getDepth() { return depth; }
@@ -52,7 +46,6 @@ public class SymbolTable {
         return currentScope.define(s);
     }
     
-
     //Goes through every scope, deepest first, to match the ID to a Symbol.
     public Symbol resolve(String ID) {
         return currentScope.resolve(ID);
