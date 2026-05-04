@@ -16,7 +16,7 @@ import p4project.visitors.FtableGenVisitor;
 
 public class ParserDriver {
     public static void main(String[] args) {
-        String input = "void main() { int x = 5; if (x > 3) { int x = 10; } }";
+        String input = "float bah(float a) { return a + 1.0; } void main() { int x = 5; int y = 10; if (x > y) { float lol = 2.0; lol = bah(lol); } else if (x == 0) { x = 10; } else { x = x + 1; } }";
 
 
         CharStream charStream = CharStreams.fromString(input);

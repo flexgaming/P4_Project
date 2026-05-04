@@ -67,13 +67,13 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
         return visitChildren(context);
     }
 
-    @Override
+    /* @Override
     public Void visitBlock(OurGrammarParser.BlockContext context) {
         this.ctx.symbolTable.pushScope();
         Void result = visitChildren(context);
         this.ctx.symbolTable.popScope();
         return result;
-    }
+    } */
 
     @Override
     public Void visitAssignment(OurGrammarParser.AssignmentContext context) {
@@ -84,6 +84,8 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
                 throw new RuntimeException("Variable cannot be both 'const' and 'shared'.");
             }
         }
+
+        
 
         String id = context.ID().getText();
         String typeStr = context.typeRef().TYPE().getText();
