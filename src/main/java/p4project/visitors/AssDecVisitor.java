@@ -66,13 +66,13 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
         return visitChildren(context);
     }
 
-    /* @Override
+    @Override
     public Void visitBlock(OurGrammarParser.BlockContext context) {
         this.ctx.symbolTable.pushScope(context);
         Void result = visitChildren(context);
         this.ctx.symbolTable.popScope();
         return result;
-    } */
+    }
 
     @Override
     public Void visitAssignment(OurGrammarParser.AssignmentContext context) {

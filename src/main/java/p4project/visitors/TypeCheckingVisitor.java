@@ -25,6 +25,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     public String visitAssignment(OurGrammarParser.AssignmentContext ctx) {
         String id = ctx.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
+        System.out.println("Visiting assignment to '" + id + "' with declared type " + (symbol != null ? symbol.type.name : "null"));
 
         if (symbol == null) {
             throw new RuntimeException("Variable '" + id + "' not declared.");
