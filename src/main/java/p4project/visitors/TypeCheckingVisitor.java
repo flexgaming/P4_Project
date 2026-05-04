@@ -24,6 +24,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitAssignment(OurGrammarParser.AssignmentContext ctx) {
+        System.out.println("We got to Assignment!");
         String id = ctx.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
 
@@ -48,6 +49,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitExpr(OurGrammarParser.ExprContext ctx) {
+        System.out.println("We got to Expression!");
         if (ctx.expr() == null) {
             return visit(ctx.equal());
         }
@@ -67,6 +69,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitEqual(OurGrammarParser.EqualContext ctx) {
+        System.out.println("We got to Equality!");
         if (ctx.equal() == null) {
             return visit(ctx.comp());
         }
@@ -87,13 +90,17 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitComp(OurGrammarParser.CompContext ctx) {
+        System.out.println("We got to Comparison!");
         if (ctx.comp() == null) {
             return visit(ctx.additive());
         }
         if (ctx.getChild(1).getText().matches("<|>|<=|>=")) {
             // Check data types of both sides, they must be the same and either int or float
+            // TODO : Test for actual data types and throw error if they are not both int or float
             String leftType = visit(ctx.additive());
+            System.out.println("Left type: " + leftType);
             String rightType = visit(ctx.comp());
+            System.out.println("Right type: " + rightType);
             if (!leftType.equals(rightType)) {
                 throw new RuntimeException("Type Error: Cannot compare " + leftType + " and " + rightType);
             }
@@ -101,11 +108,12 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         }
         throw new RuntimeException("Type Error: Invalid comparison operator '" + ctx.getChild(1).getText() + "'");
         // int 4 < float 4                  -> error (cannot compare int and float)
-        // int 4 >= cast(int) float 4.5     -> true (Must be same data type, but can be casted)
+        // int 4 >= cast(int) 4.5           -> true (Must be same data type, but can be casted)
     }
     
     @Override
     public String visitAdditive(OurGrammarParser.AdditiveContext ctx) {
+        System.out.println("We got to Additive!");
         if (ctx.additive() == null) {
             return visit(ctx.mult());
         }
@@ -124,6 +132,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitMult(OurGrammarParser.MultContext ctx) {
+        System.out.println("We got to Multiplication!");
         if (ctx.mult() == null) {
             return visit(ctx.power());
         }
@@ -141,6 +150,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitPower(OurGrammarParser.PowerContext ctx) {
+        System.out.println("We got to Power!");
         if (ctx.power() == null) {
             return visit(ctx.factor());
         }
@@ -157,6 +167,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitFactor(OurGrammarParser.FactorContext ctx) {
+        System.out.println("We got to Factor!");
         switch (ctx.getStart().getType()) {
             case OurGrammarParser.NEGATIVE:
                 String factorType = visit(ctx.factor());

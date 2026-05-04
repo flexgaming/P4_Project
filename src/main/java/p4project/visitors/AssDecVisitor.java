@@ -68,6 +68,14 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitBlock(OurGrammarParser.BlockContext context) {
+        this.ctx.symbolTable.pushScope();
+        Void result = visitChildren(context);
+        this.ctx.symbolTable.popScope();
+        return result;
+    }
+
+    @Override
     public Void visitAssignment(OurGrammarParser.AssignmentContext context) {
         Set<Symbol.Prefix> prefixes = EnumSet.noneOf(Symbol.Prefix.class);
         if (context.PREFIX() != null) {
@@ -83,8 +91,6 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
         if (context.assFunc() != null) {
             FunctionSymbol f = new FunctionSymbol(id, TypeSymbol.fromString(typeStr));
             f.prefixes.addAll(prefixes);
-
-            this.ctx.symbolTable.pushScope();
 
             if (context.assFunc().typeRef() != null) {
                 var paramTypes = context.assFunc().typeRef();
