@@ -85,8 +85,6 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
             }
         }
 
-        
-
         String id = context.ID().getText();
         String typeStr = context.typeRef().TYPE().getText();
 

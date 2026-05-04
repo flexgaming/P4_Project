@@ -173,11 +173,11 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
                     visit(e);
                 }
             }
-            Symbol fSym = this.ctx.resolvedSymbols.get(fc.ID());
-            if (fSym == null) {
+            Symbol functionSymbol = this.ctx.resolvedSymbols.get(fc.ID());
+            if (functionSymbol == null) {
                 throw new RuntimeException("Function '" + fc.ID().getText() + "' not declared.");
             }
-            return fSym.type.name.toLowerCase();
+            return functionSymbol.type.name.toLowerCase();
         }
 
         // array indexing
