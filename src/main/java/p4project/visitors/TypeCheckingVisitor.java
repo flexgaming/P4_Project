@@ -50,6 +50,14 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
+    public String visitBlock(OurGrammarParser.BlockContext ctx) {
+        this.ctx.symbolTable.restoreScope(ctx);
+        visitChildren(ctx);
+        this.ctx.symbolTable.popScope();
+        return null;
+    }
+
+    @Override
     public String visitExpr(OurGrammarParser.ExprContext ctx) {
         if (ctx.expr() == null) {
             return visit(ctx.equal());

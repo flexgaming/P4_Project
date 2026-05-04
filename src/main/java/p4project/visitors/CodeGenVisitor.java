@@ -3,6 +3,9 @@ package p4project.visitors;
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
+import p4project.context.FunctionSymbol;
+
+
 
 /*
     Phase 1: Symbol assignments and declerations
@@ -19,11 +22,10 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         this.ctx = ctx;
     }
 
-    private int indentLevel = 0; // Track current indentation level for pretty-printing
     private static final String INDENT = "    ";
 
     private String indent() {
-        return INDENT.repeat(Math.max(0, indentLevel)); // Ensure non-negative repeat count
+        return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth())); // Ensure non-negative repeat count
     }
 
     @Override
@@ -85,20 +87,20 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitIfStatement(OurGrammarParser.IfStatementContext ctx) {
         StringBuilder sb = new StringBuilder();
-        sb.append(indent()).append("if (").append(visit(ctx.expr(0))).append(") ");
+        sb.append(indent()).append("if (").append(visit(ctx.expr(0))).append(")");
         String thenCode = visit(ctx.statement(0));
         if (thenCode.startsWith(indent())) thenCode = thenCode.substring(indent().length());
         sb.append(thenCode);
 
         for (int i = 1; i < ctx.expr().size(); i++) {
-            sb.append(indent()).append("else if (").append(visit(ctx.expr(i))).append(") ");
+            sb.append(indent()).append("else if (").append(visit(ctx.expr(i))).append(")");
             String elifCode = visit(ctx.statement(i));
             if (elifCode.startsWith(indent())) elifCode = elifCode.substring(indent().length());
             sb.append(elifCode);
         }
 
         if (ctx.statement().size() > ctx.expr().size()) {
-            sb.append(indent()).append("else ");
+            sb.append(indent()).append("else");
             String elseCode = visit(ctx.statement(ctx.statement().size() - 1));
             if (elseCode.startsWith(indent())) elseCode = elseCode.substring(indent().length());
             sb.append(elseCode);
@@ -138,17 +140,17 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitBlock(OurGrammarParser.BlockContext ctx) {
+    public String visitBlock(OurGrammarParser.BlockContext context) {
         StringBuilder sb = new StringBuilder();
-        sb.append(indent()).append("{\n");
+        sb.append(indent()).append(" {\n");
 
-        indentLevel++;
-        for (OurGrammarParser.StatementContext stmt : ctx.statement()) {
+        ctx.symbolTable.restoreScope(context);
+        for (OurGrammarParser.StatementContext stmt : context.statement()) {
             String stmtCode = visit(stmt);
             if (stmtCode == null || stmtCode.isEmpty()) continue;
             sb.append(stmtCode);
         }
-        indentLevel--;
+        ctx.symbolTable.popScope();
 
         sb.append(indent()).append("}\n");
         return sb.toString();

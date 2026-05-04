@@ -12,7 +12,7 @@ public class SymbolTable {
     //By putting the hashmaps in a deque, stacking multiple scopes becomes possible
     private Scope currentScope = null;
     private final Map<ParseTree, Scope> nodeScopes = new HashMap<>();
-    private int depth = 0;
+    private int depth = -1; // global scope starts at 0, so -1 means no scopes yet
 
     // Phase 1: Symbol assignments and declarations
     // Create a new scope and link it to the current (Block) node in the parse tree.

@@ -32,6 +32,7 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
     public Void visitAssignment(OurGrammarParser.AssignmentContext ctx) {
         String id = ctx.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id); // looks up the symbol in the symbol table using the variable name (id)
+        
 
         if (symbol == null) {
             throw new RuntimeException("Variable '" + id + "' not declared.");

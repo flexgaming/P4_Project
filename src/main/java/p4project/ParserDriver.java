@@ -51,7 +51,7 @@ public class ParserDriver {
             // print the resolved symbols after phase 2:
             System.out.println("--- Resolved Symbols After Phase 2 ---");
             ctx.resolvedSymbols.forEach((node, sym) -> {
-                System.out.println(node.getText() + " -> " + sym);
+                System.out.println(node.getText() + " -> " + sym + " (type: " + sym.type.name + ")");
             });
             System.out.println("--------------------------------------\n");
 
