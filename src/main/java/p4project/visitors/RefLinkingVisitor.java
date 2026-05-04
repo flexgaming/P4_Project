@@ -152,8 +152,10 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
 
     @Override
     public Void visitForStatement(OurGrammarParser.ForStatementContext ctx) {
-
-        return visitChildren(ctx);
+        this.ctx.symbolTable.restoreScope(ctx);
+        visitChildren(ctx);
+        this.ctx.symbolTable.popScope();
+        return null;
     }
 
     @Override

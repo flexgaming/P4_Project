@@ -132,11 +132,30 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitReturnStatement(OurGrammarParser.ReturnStatementContext ctx) {
+    public String visitForStatement(OurGrammarParser.ForStatementContext ctx) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(indent()).append("for (");
+
+        // Initialization
+        if (ctx.forVar() != null) {
+            sb.append(visit(ctx.forVar()) + ";");
+        } 
+
+        // Condition
         if (ctx.expr() != null) {
-            return indent() + "return " + visit(ctx.expr()) + ";\n";
+            sb.append(" ").append(visit(ctx.expr())).append(";");
+        } 
+
+        // Update
+        if (ctx.reassignment() != null) {
+            sb.append(" ").append(visit(ctx.reassignment()));
         }
-        return indent() + "return;\n";
+
+        sb.append(")");
+        String blockCode = visit(ctx.statement());
+        if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
+        sb.append(blockCode);
+        return sb.toString();
     }
 
     @Override
@@ -154,6 +173,14 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
         sb.append(indent()).append("}\n");
         return sb.toString();
+    }
+
+    @Override
+    public String visitReturnStatement(OurGrammarParser.ReturnStatementContext ctx) {
+        if (ctx.expr() != null) {
+            return indent() + "return " + visit(ctx.expr()) + ";\n";
+        }
+        return indent() + "return;\n";
     }
 
     @Override

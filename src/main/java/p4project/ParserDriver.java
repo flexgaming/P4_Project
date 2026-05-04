@@ -16,14 +16,8 @@ import p4project.visitors.FtableGenVisitor;
 
 public class ParserDriver {
     public static void main(String[] args) {
-        String input = "float bah(float a) { return a + 1.0; } " + 
-        "void main() { int x = 5; " + 
-        " int y = 10; " + 
-        " if (x > y) { float lol = 2.0; " + 
-        " lol = bah(lol); " + 
-        " } else if (x == 0) { x = 10; " + 
-        " } else { x = x + 1; } }";
-
+        // For loop example:
+        String input = "void main() { int x = 45; for (int i = 0; i < 10; i = i + 1) { x = x + i; } }";
 
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);
