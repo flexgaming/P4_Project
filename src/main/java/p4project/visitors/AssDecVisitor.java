@@ -29,7 +29,6 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
 
     public AssDecVisitor(CompilationContext ctx) {
         this.ctx = ctx;
-        ctx.symbolTable.pushScope(); // global scope
     }
 
     private Set<Symbol.Prefix> parsePrefixes(List<TerminalNode> prefixTokens) {
@@ -69,7 +68,7 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
 
     /* @Override
     public Void visitBlock(OurGrammarParser.BlockContext context) {
-        this.ctx.symbolTable.pushScope();
+        this.ctx.symbolTable.pushScope(context);
         Void result = visitChildren(context);
         this.ctx.symbolTable.popScope();
         return result;

@@ -82,7 +82,7 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
 
     @Override
     public Void visitBlock(OurGrammarParser.BlockContext ctx) {
-        this.ctx.symbolTable.pushScope();
+        this.ctx.symbolTable.restoreScope(ctx);
         visitChildren(ctx);
         this.ctx.symbolTable.popScope();
         return null;
@@ -121,7 +121,7 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
 
     @Override
     public Void visitCriticalSection(OurGrammarParser.CriticalSectionContext ctx) {
-        this.ctx.symbolTable.pushScope();
+        this.ctx.symbolTable.restoreScope(ctx);
         List<TerminalNode> sharedVars = ctx.ID().stream()
             .filter(id -> this.ctx.sharedVariables.contains(id.getText()))
             .toList();

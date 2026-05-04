@@ -1,7 +1,7 @@
 package p4project.context;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import org.antlr.v4.runtime.tree.ParseTree;
+import java.util.Map;
 import java.util.HashMap;
 
 /**
@@ -10,49 +10,49 @@ import java.util.HashMap;
  */
 public class SymbolTable {
     //By putting the hashmaps in a deque, stacking multiple scopes becomes possible
-    private final Deque<HashMap<String, Symbol>> scopes = new ArrayDeque<>();
+    private Scope currentScope = null;
+    private final Map<ParseTree, Scope> nodeScopes = new HashMap<>();
     private int depth = 0;
 
-    public void pushScope() { scopes.push(new HashMap<>()); depth++; }
-    public void popScope()  { scopes.pop(); depth--; }
-    public int  depth()     { return depth; }
+    // Phase 1: Symbol assignments and declarations
+    // Create a new scope and link it to the current (Block) node in the parse tree.
+    public void pushScope(ParseTree node) { 
+        currentScope = new Scope(currentScope);
+        nodeScopes.put(node, currentScope);
+        depth++;
+    }
+
+    // Phases 2-5: Restore the scope associated with the given parse tree node.
+    // Restore the scope associated with the given parse tree node.
+    public void restoreScope(ParseTree node) {
+        Scope stored = nodeScopes.get(node);
+        if (stored != null) {
+            currentScope = stored;
+            depth++;
+        }
+    }
+    
+    // Exit the current scope and return to the parent scope.
+    public void popScope() { currentScope = currentScope.parent; depth--; }
+
+    // Get the current depth of the scope stack.
+    public int getDepth() { return depth; }
 
     /**
      * Define in the current (innermost) scope.
      * Reports duplicate if already defined at this level.
      */
     public boolean define(Symbol s) {
-        var current = scopes.peek();
-        if (current.containsKey(s.ID)) return false;
-        current.put(s.ID, s);
-        return true;
+        return currentScope.define(s);
     }
-
+    
     //Goes through every scope, deepest first, to match the ID to a Symbol.
     public Symbol resolve(String ID) {
-        for (var scope : scopes) {
-            if (scope.containsKey(ID)) return scope.get(ID);
-        }
-        return null;
+        return currentScope.resolve(ID);
     }
 
     //Look to see if a function exists in the local scope, for duplicate detection
     public Symbol resolveLocal(String name){
-        return scopes.peek().get(name);
+        return currentScope.resolveLocal(name);
     }
-
-    // For debugging purposes, to print the symbol table after phase 1
-    public Void printSymbolTable() {
-        for (var scope : scopes) {
-            System.out.println(scope);
-        }
-        return null;
-    }
-
-    // For debugging purposes, to print the symbol table after phase 1
-    public int Length() {
-        return scopes.size();
-    }
-
-
 }

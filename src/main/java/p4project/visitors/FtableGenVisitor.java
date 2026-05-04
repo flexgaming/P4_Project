@@ -33,7 +33,7 @@ public class FtableGenVisitor extends OurGrammarBaseVisitor<Void> {
                 throw new RuntimeException("'" + id + "' is not a function declaration.");
             }
 
-            functionSymbol.declaredAtDepth = this.ctx.symbolTable.depth();
+            functionSymbol.declaredAtDepth = this.ctx.symbolTable.getDepth();
             functionSymbol.parameters.clear();
 
             var parameterTypes = ctx.assFunc().typeRef();

@@ -29,13 +29,14 @@ public class ParserDriver {
         System.out.println(tree.toStringTree(parser));
         System.out.println("------------------\n");
         CompilationContext ctx = new CompilationContext();
+        ctx.symbolTable.pushScope(tree); // global scope
 
         // 1. Symbol assignments and declerations
             AssDecVisitor assDecVisitor = new AssDecVisitor(ctx);
             assDecVisitor.visit(tree);
             // print the symbol table after phase 1:
             System.out.println("--- Symbol Table After Phase 1 ---");
-            ctx.symbolTable.printSymbolTable();
+            // ctx.symbolTable.printSymbolTable(); //No longer exists lol
             System.out.println("----------------------------------\n");
 
         // 2. Reference linking
