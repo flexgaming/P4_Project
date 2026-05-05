@@ -16,6 +16,7 @@ import p4project.context.Symbol;
 public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     private final CompilationContext ctx;
+    private int loopDepth = 0;
 
     public TypeCheckingVisitor(CompilationContext ctx) {
         this.ctx = ctx;
@@ -82,6 +83,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         // Restore the for-statement scope created during declaration phase,
         // then type-check the for-loop body and related expressions.
         this.ctx.symbolTable.restoreScope(ctx);
+        loopDepth++;
 
         if (ctx.forVar() != null) {
             visit(ctx.forVar());
@@ -98,6 +100,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         }
         visitChildren(ctx);
         this.ctx.symbolTable.popScope();
+        loopDepth--;
         return null;
 
     }
@@ -127,12 +130,30 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitWhileStatement(OurGrammarParser.WhileStatementContext ctx) {
         this.ctx.symbolTable.restoreScope(ctx);
+        loopDepth++;
         String conditionType = visit(ctx.expr());
         if (!conditionType.equals("bool")) {
             throw new RuntimeException("Type Error: While loop condition must be of type bool, but got " + conditionType);
         }
         visitChildren(ctx);
         this.ctx.symbolTable.popScope();
+        loopDepth--;
+        return null;
+    }
+
+    @Override
+    public String visitBreakStatement(OurGrammarParser.BreakStatementContext ctx) {
+        if (loopDepth == 0) {
+            throw new RuntimeException("Syntax Error: 'break' statement not within a loop");
+        }
+        return null;
+    }
+
+    @Override
+    public String visitContinueStatement(OurGrammarParser.ContinueStatementContext ctx) {
+        if (loopDepth == 0) {
+            throw new RuntimeException("Syntax Error: 'continue' statement not within a loop");
+        }
         return null;
     }
 
@@ -251,7 +272,6 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitFactor(OurGrammarParser.FactorContext ctx) {
-
         // Unary negation
         if (ctx.NEGATIVE() != null) {
             String factorType = visit(ctx.factor());

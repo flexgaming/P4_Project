@@ -165,6 +165,16 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         this.ctx.symbolTable.popScope();
         return null;
     }
+
+    @Override
+    public Void visitBreakStatement(OurGrammarParser.BreakStatementContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public Void visitContinueStatement(OurGrammarParser.ContinueStatementContext ctx) {
+        return visitChildren(ctx);
+    }
 }
 
 // ctx.resolvedSymbols skal skrives til. Husk det er et hashmap<String, Symbol> hvor key er navnet på symbolet og value er selve symbolet. Det skal fyldes ud i denne visitor, og så kan de andre visitors bruge det til at slå op i stedet for at skulle gøre det selv.

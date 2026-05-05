@@ -206,6 +206,16 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
+    public String visitBreakStatement(OurGrammarParser.BreakStatementContext ctx) {
+        return indent() + "break;\n";
+    }
+
+    @Override
+    public String visitContinueStatement(OurGrammarParser.ContinueStatementContext ctx) {
+        return indent() + "continue;\n";
+    }
+
+    @Override
     public String visitBlock(OurGrammarParser.BlockContext context) {
         StringBuilder sb = new StringBuilder();
         sb.append(indent()).append("{\n");
