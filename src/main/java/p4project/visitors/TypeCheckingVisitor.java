@@ -331,10 +331,35 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             }
             String targetType = castCtx.TYPE().getText().toLowerCase();
             String exprType = visit(castCtx.expr());
-            if (!targetType.matches("int|float|bool|char|string") || !exprType.matches("int|float|bool|char|string")) {
+            // Cannot cast to char as they could be the source to a lot of casting problems.
+            if (!targetType.matches("int|float|bool|string") || !exprType.matches("int|float|bool|string")) {
                 throw new RuntimeException("Type Error: Invalid cast from " + exprType + " to " + targetType);
             }
-            return targetType;
+            switch (targetType) {
+                case "int":
+                    if (!exprType.matches("float|bool")) {
+                        throw new RuntimeException("Type Error: Cannot cast " + exprType + " to int");
+                    }
+                    return "int";
+                case "bool":
+                    if (!exprType.matches("int|float")) {
+                        throw new RuntimeException("Type Error: Cannot cast " + exprType + " to bool");
+                    }
+                    return "bool";
+                case "float":
+                    if (!exprType.matches("int|bool")) {
+                        throw new RuntimeException("Type Error: Cannot cast " + exprType + " to float");
+                    }
+                    return "float"; 
+                case "string":
+                    if (!exprType.matches("char|int|float|bool")) {
+                        throw new RuntimeException("Type Error: Cannot cast " + exprType + " to string");
+                    }
+                    return "string";
+                default:
+                    throw new RuntimeException("Type Error: Unsupported cast from " + exprType + " to " + targetType);
+            }
+            
         }
 
         throw new RuntimeException("Type Error: Invalid factor");
