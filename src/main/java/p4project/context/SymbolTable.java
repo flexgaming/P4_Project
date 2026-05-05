@@ -14,6 +14,17 @@ public class SymbolTable {
     private final Map<ParseTree, Scope> nodeScopes = new HashMap<>();
     private int depth = -1; // global scope starts at 0, so -1 means no scopes yet
 
+    // Get the current scope's associated parse tree node.
+    public ParseTree getNodeScope() {
+        // get parsetree node key in the hashmap corresponding to current scope
+        for (Map.Entry<ParseTree, Scope> entry : nodeScopes.entrySet()) {
+            if (entry.getValue() == currentScope) {
+                return entry.getKey();
+            }
+        }
+        return null; // should never happen if scopes are managed correctly
+    }
+
     // Phase 1: Symbol assignments and declarations
     // Create a new scope and link it to the current (Block) node in the parse tree.
     public void pushScope(ParseTree node) { 

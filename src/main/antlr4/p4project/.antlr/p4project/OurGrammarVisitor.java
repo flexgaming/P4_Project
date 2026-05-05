@@ -22,6 +22,12 @@ public interface OurGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStatement(OurGrammarParser.StatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link OurGrammarParser#statementPrime}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStatementPrime(OurGrammarParser.StatementPrimeContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link OurGrammarParser#assignment}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

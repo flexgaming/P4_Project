@@ -44,6 +44,14 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitStatement(OurGrammarParser.StatementContext ctx) {
+        if (ctx.statementPrime() != null) {
+            return visit(ctx.statementPrime());
+        }
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public String visitStatementPrime(OurGrammarParser.StatementPrimeContext ctx) {
         if (ctx.expr() != null) {
             return indent() + visit(ctx.expr()) + ";\n";
         }
@@ -75,8 +83,13 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitReassignment(OurGrammarParser.ReassignmentContext ctx) {
-        return indent() + ctx.ID().getText() + " = " + visit(ctx.expr()) + ";\n";
+    public String visitReassignment(OurGrammarParser.ReassignmentContext context) {
+        // check if it is called in a for header
+        if (this.ctx.symbolTable.getNodeScope().getText().contains("for")) {
+            return context.ID().getText() + " = " + visit(context.expr());
+        }
+
+        return indent() + context.ID().getText() + " = " + visit(context.expr()) + ";\n";
     }
 
     @Override
@@ -87,20 +100,20 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitIfStatement(OurGrammarParser.IfStatementContext ctx) {
         StringBuilder sb = new StringBuilder();
-        sb.append(indent()).append("if (").append(visit(ctx.expr(0))).append(")");
+        sb.append(indent()).append("if (").append(visit(ctx.expr(0))).append(") ");
         String thenCode = visit(ctx.statement(0));
         if (thenCode.startsWith(indent())) thenCode = thenCode.substring(indent().length());
         sb.append(thenCode);
 
         for (int i = 1; i < ctx.expr().size(); i++) {
-            sb.append(indent()).append("else if (").append(visit(ctx.expr(i))).append(")");
+            sb.append(indent()).append("else if (").append(visit(ctx.expr(i))).append(") ");
             String elifCode = visit(ctx.statement(i));
             if (elifCode.startsWith(indent())) elifCode = elifCode.substring(indent().length());
             sb.append(elifCode);
         }
 
         if (ctx.statement().size() > ctx.expr().size()) {
-            sb.append(indent()).append("else");
+            sb.append(indent()).append("else ");
             String elseCode = visit(ctx.statement(ctx.statement().size() - 1));
             if (elseCode.startsWith(indent())) elseCode = elseCode.substring(indent().length());
             sb.append(elseCode);
@@ -127,7 +140,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             }
         }
 
-        sb.append(")");
+        sb.append(") ");
         return sb.toString();
     }
 
@@ -151,7 +164,41 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             sb.append(" ").append(visit(ctx.reassignment()));
         }
 
-        sb.append(")");
+        sb.append(") ");
+        String blockCode = visit(ctx.statement());
+        if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
+        sb.append(blockCode);
+        return sb.toString();
+    }
+
+    @Override
+    public String visitForVar(OurGrammarParser.ForVarContext ctx) {
+        String type = ctx.typeRef().TYPE().getText();
+        String id = ctx.ID().getText();
+
+        if (ctx.assFunc() != null) {
+            // Function definition
+            String params = visit(ctx.assFunc());     // Let assFunc generate the parameter list
+            String blockCode = visit(ctx.assFunc().block());
+            // If blockCode starts with the current indent, strip it so the '{' lands
+            // directly after the function header (`void main() {`).
+            if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
+
+            return type + " " + id + params + blockCode;
+        } 
+        else if (ctx.assVar() != null) {
+            String exprCode = visit(ctx.assVar().expr());
+            return type + " " + id + " = " + exprCode;
+        } 
+        else {
+            return "";
+        }
+    }
+
+    @Override
+    public String visitWhileStatement(OurGrammarParser.WhileStatementContext ctx) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(indent()).append("while (").append(visit(ctx.expr())).append(") ");
         String blockCode = visit(ctx.statement());
         if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
         sb.append(blockCode);
@@ -161,7 +208,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitBlock(OurGrammarParser.BlockContext context) {
         StringBuilder sb = new StringBuilder();
-        sb.append(indent()).append(" {\n");
+        sb.append(indent()).append("{\n");
 
         ctx.symbolTable.restoreScope(context);
         for (OurGrammarParser.StatementContext stmt : context.statement()) {

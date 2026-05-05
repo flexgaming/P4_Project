@@ -25,8 +25,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     public String visitAssignment(OurGrammarParser.AssignmentContext ctx) {
         String id = ctx.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
-        System.out.println("Visiting assignment to '" + id + "' with declared type " + (symbol != null ? symbol.type.name : "null"));
-
+        
         if (symbol == null) {
             throw new RuntimeException("Variable '" + id + "' not declared.");
         }
@@ -80,51 +79,61 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitForStatement(OurGrammarParser.ForStatementContext ctx) {
-        // The reference linking phase should have already resolved the loop variable declaration and put it in the symbol table
-        // Just need to type check the loop variable initialization, condition, and update expressions here
+        // Restore the for-statement scope created during declaration phase,
+        // then type-check the for-loop body and related expressions.
+        this.ctx.symbolTable.restoreScope(ctx);
 
-        // Loop variable initialization
         if (ctx.forVar() != null) {
             visit(ctx.forVar());
         }
-
-        // Loop condition
+        // Loop variable initialization, condition and update are handled by visitChildren
         if (ctx.expr() != null) {
             String conditionType = visit(ctx.expr());
             if (!conditionType.equals("bool")) {
                 throw new RuntimeException("Type Error: For loop condition must be of type bool, but got " + conditionType);
             }
         }
-
-        // Loop update expression
         if (ctx.reassignment() != null) {
             visit(ctx.reassignment());
         }
+        visitChildren(ctx);
+        this.ctx.symbolTable.popScope();
+        return null;
 
-        return visitChildren(ctx);
     }
 
     @Override
-    public String visitForVar(OurGrammarParser.ForVarContext ctx) {
+    public String visitForVar(OurGrammarParser.ForVarContext context) {
         // This should have been resolved in the reference linking phase, just need to type check the initialization expression
-        String id = ctx.ID().getText();
+        String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
-        System.out.println("Visiting for-loop variable '" + id + "' with declared type " + (symbol != null ? symbol.type.name : "null"));
-
+        
         if (symbol == null) {
             throw new RuntimeException("Variable '" + id + "' not declared.");
         }
 
         String declaredType = symbol.type.name.toLowerCase();
 
-        if (ctx.assVar() != null) {
-            String exprType = visit(ctx.assVar().expr());
+        if (context.assVar() != null) {
+            String exprType = visit(context.assVar().expr());
             if (!declaredType.equals(exprType)) {
                 throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
             }
             return declaredType;
         }
         throw new RuntimeException("Type Error: Invalid for-loop variable declaration");
+    }
+
+    @Override
+    public String visitWhileStatement(OurGrammarParser.WhileStatementContext ctx) {
+        this.ctx.symbolTable.restoreScope(ctx);
+        String conditionType = visit(ctx.expr());
+        if (!conditionType.equals("bool")) {
+            throw new RuntimeException("Type Error: While loop condition must be of type bool, but got " + conditionType);
+        }
+        visitChildren(ctx);
+        this.ctx.symbolTable.popScope();
+        return null;
     }
 
     @Override

@@ -197,4 +197,12 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
 
         return visitChildren(context);
     }
+
+    @Override
+    public Void visitWhileStatement(OurGrammarParser.WhileStatementContext ctx) {
+        this.ctx.symbolTable.pushScope(ctx);
+        visitChildren(ctx);
+        this.ctx.symbolTable.popScope();
+        return null;
+    }
 }

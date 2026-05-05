@@ -5,23 +5,27 @@ program
     ;
 
 statement
-    : expr ';'
-    | arrayIndex '=' expr ';'
+    : statementPrime ';'
     | assignment
-    | reassignment ';'
-    | declaration ';'
     | threadAssignment
-    | awaitStatement ';'
     | ifStatement
     | forStatement
     | whileStatement
-    | continueStatement ';'
-    | breakStatement ';'
-    | block
-    | returnStatement ';'
     | criticalSection
-    | printStatement ';'
-    | readStatement ';'
+    | block
+    ;
+
+statementPrime
+    : expr
+    | arrayIndex '=' expr
+    | reassignment
+    | declaration 
+    | awaitStatement 
+    | continueStatement 
+    | breakStatement 
+    | returnStatement 
+    | printStatement 
+    | readStatement 
     ;
 
 assignment
