@@ -29,8 +29,8 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
     // ==================== Variable / Identifier References ====================
 
     @Override
-    public Void visitAssignment(OurGrammarParser.AssignmentContext ctx) {
-        String id = ctx.ID().getText();
+    public Void visitAssignment(OurGrammarParser.AssignmentContext context) {
+        String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id); // looks up the symbol in the symbol table using the variable name (id)
         
 
@@ -38,53 +38,60 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
             throw new RuntimeException("Variable '" + id + "' not declared.");
         }
 
-        this.ctx.resolvedSymbols.put(ctx.ID(), symbol);
-        return visitChildren(ctx);
+        this.ctx.resolvedSymbols.put(context.ID(), symbol);
+        return visitChildren(context);
     }
 
     @Override
-    public Void visitReassignment(OurGrammarParser.ReassignmentContext ctx) {
-        String id = ctx.ID().getText();
+    public Void visitReassignment(OurGrammarParser.ReassignmentContext context) {
+        String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id); // looks up the symbol in the symbol table using the variable name (id)
 
         if (symbol == null) {
             throw new RuntimeException("Variable '" + id + "' not declared.");
         }
 
-        this.ctx.resolvedSymbols.put(ctx.ID(), symbol);
-        return visitChildren(ctx);
+        this.ctx.resolvedSymbols.put(context.ID(), symbol);
+        return visitChildren(context);
     }
 
     @Override
-    public Void visitArrayIndex(OurGrammarParser.ArrayIndexContext ctx) {
-        String id = ctx.ID().getText();
+    public Void visitArrayIndex(OurGrammarParser.ArrayIndexContext context) {
+        String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id); // looks up the symbol in the symbol table using the variable name (id)
 
         if (symbol == null) {
             throw new RuntimeException("Variable '" + id + "' not declared.");
         }
 
-        this.ctx.resolvedSymbols.put(ctx.ID(), symbol);
-        return visitChildren(ctx);
+        this.ctx.resolvedSymbols.put(context.ID(), symbol);
+        return visitChildren(context);
     }
 
     @Override
-    public Void visitReadStatement(OurGrammarParser.ReadStatementContext ctx) {
-        String id = ctx.ID().getText();
-        Symbol symbol = this.ctx.symbolTable.resolve(id); // looks up the symbol in the symbol table using the variable name (id)
-
-        if (symbol == null) {
-            throw new RuntimeException("Variable '" + id + "' not declared.");
-        }
-
-        this.ctx.resolvedSymbols.put(ctx.ID(), symbol);
-        return visitChildren(ctx);
+    public Void visitReadIntStatement(OurGrammarParser.ReadIntStatementContext context) {
+        return visitChildren(context);
     }
 
     @Override
-    public Void visitBlock(OurGrammarParser.BlockContext ctx) {
-        this.ctx.symbolTable.restoreScope(ctx);
-        visitChildren(ctx);
+    public Void visitReadFloatStatement(OurGrammarParser.ReadFloatStatementContext context) {
+        return visitChildren(context);
+    }
+
+    @Override
+    public Void visitReadBoolStatement(OurGrammarParser.ReadBoolStatementContext context) {
+        return visitChildren(context);
+    }
+
+    @Override
+    public Void visitReadStringStatement(OurGrammarParser.ReadStringStatementContext context) {
+        return visitChildren(context);
+    }
+
+    @Override
+    public Void visitBlock(OurGrammarParser.BlockContext context) {
+        this.ctx.symbolTable.restoreScope(context);
+        visitChildren(context);
         this.ctx.symbolTable.popScope();
         return null;
     }
@@ -92,44 +99,44 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
     // ========================= FUNCTION CALLS =========================
 
     @Override
-    public Void visitFunctionCall(OurGrammarParser.FunctionCallContext ctx) {
-        String id = ctx.ID().getText();
+    public Void visitFunctionCall(OurGrammarParser.FunctionCallContext context) {
+        String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id); // looks up the symbol in the symbol table using the variable name (id)
 
         if (symbol == null) {
             throw new RuntimeException("Function '" + id + "' not declared.");
         }
 
-        this.ctx.resolvedSymbols.put(ctx.ID(), symbol);
-        return visitChildren(ctx);
+        this.ctx.resolvedSymbols.put(context.ID(), symbol);
+        return visitChildren(context);
     }
 
     @Override
-    public Void visitFactor(OurGrammarParser.FactorContext ctx) {
-        if (ctx.ID() != null) {
-            String id = ctx.ID().getText();
+    public Void visitFactor(OurGrammarParser.FactorContext context) {
+        if (context.ID() != null) {
+            String id = context.ID().getText();
             Symbol symbol = this.ctx.symbolTable.resolve(id);
 
             if (symbol == null) {
                 throw new RuntimeException("Variable '" + id + "' not declared.");
             }
-            this.ctx.resolvedSymbols.put(ctx.ID(), symbol);
+            this.ctx.resolvedSymbols.put(context.ID(), symbol);
         }
-        return visitChildren(ctx);
+        return visitChildren(context);
     }
 
     // ======================== Critical sections ========================
 
     @Override
-    public Void visitCriticalSection(OurGrammarParser.CriticalSectionContext ctx) {
-        this.ctx.symbolTable.restoreScope(ctx);
-        List<TerminalNode> sharedVars = ctx.ID().stream()
+    public Void visitCriticalSection(OurGrammarParser.CriticalSectionContext context) {
+        this.ctx.symbolTable.restoreScope(context);
+        List<TerminalNode> sharedVars = context.ID().stream()
             .filter(id -> this.ctx.sharedVariables.contains(id.getText()))
             .toList();
         for (var id : sharedVars) {
             this.ctx.resolvedSymbols.put(id, this.ctx.symbolTable.resolve(id.getText()));
         }
-        visitChildren(ctx);
+        visitChildren(context);
         this.ctx.symbolTable.popScope();
         return null;
     }
@@ -137,13 +144,13 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
     // ====================== if- & for-statements and while loops ====================
     
     @Override
-    public Void visitIfStatement(OurGrammarParser.IfStatementContext ctx) {
-        for (OurGrammarParser.ExprContext e : ctx.getRuleContexts(OurGrammarParser.ExprContext.class)) {
+    public Void visitIfStatement(OurGrammarParser.IfStatementContext context) {
+        for (OurGrammarParser.ExprContext e : context.getRuleContexts(OurGrammarParser.ExprContext.class)) {
             visit(e);
         }
 
         // If the statement is a block the visitBlock will create a new scope, otherwise no new scope is needed.
-        for (OurGrammarParser.StatementContext s : ctx.statement()) {
+        for (OurGrammarParser.StatementContext s : context.statement()) {
             visit(s);
         }
 
@@ -151,29 +158,29 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitForStatement(OurGrammarParser.ForStatementContext ctx) {
-        this.ctx.symbolTable.restoreScope(ctx);
-        visitChildren(ctx);
+    public Void visitForStatement(OurGrammarParser.ForStatementContext context) {
+        this.ctx.symbolTable.restoreScope(context);
+        visitChildren(context);
         this.ctx.symbolTable.popScope();
         return null;
     }
 
     @Override
-    public Void visitWhileStatement(OurGrammarParser.WhileStatementContext ctx) {
-        this.ctx.symbolTable.restoreScope(ctx);
-        visitChildren(ctx);
+    public Void visitWhileStatement(OurGrammarParser.WhileStatementContext context) {
+        this.ctx.symbolTable.restoreScope(context);
+        visitChildren(context);
         this.ctx.symbolTable.popScope();
         return null;
     }
 
     @Override
-    public Void visitBreakStatement(OurGrammarParser.BreakStatementContext ctx) {
-        return visitChildren(ctx);
+    public Void visitBreakStatement(OurGrammarParser.BreakStatementContext context) {
+        return visitChildren(context);
     }
 
     @Override
-    public Void visitContinueStatement(OurGrammarParser.ContinueStatementContext ctx) {
-        return visitChildren(ctx);
+    public Void visitContinueStatement(OurGrammarParser.ContinueStatementContext context) {
+        return visitChildren(context);
     }
 }
 

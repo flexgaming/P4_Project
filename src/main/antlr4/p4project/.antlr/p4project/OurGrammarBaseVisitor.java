@@ -171,7 +171,7 @@ public class OurGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitReadStatement(OurGrammarParser.ReadStatementContext ctx) { return visitChildren(ctx); }
+	@Override public T visitRead(OurGrammarParser.ReadContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

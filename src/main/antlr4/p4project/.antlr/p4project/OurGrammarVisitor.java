@@ -142,11 +142,11 @@ public interface OurGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPrintStatement(OurGrammarParser.PrintStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link OurGrammarParser#readStatement}.
+	 * Visit a parse tree produced by {@link OurGrammarParser#read}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitReadStatement(OurGrammarParser.ReadStatementContext ctx);
+	T visitRead(OurGrammarParser.ReadContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link OurGrammarParser#expr}.
 	 * @param ctx the parse tree

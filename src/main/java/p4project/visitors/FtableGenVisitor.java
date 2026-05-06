@@ -24,11 +24,11 @@ public class FtableGenVisitor extends OurGrammarBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitAssignment(OurGrammarParser.AssignmentContext ctx) {
-        String id = ctx.ID().getText();
+    public Void visitAssignment(OurGrammarParser.AssignmentContext context) {
+        String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
 
-        if (ctx.assFunc() != null) {
+        if (context.assFunc() != null) {
             if (!(symbol instanceof FunctionSymbol functionSymbol)) {
                 throw new RuntimeException("'" + id + "' is not a function declaration.");
             }
@@ -36,8 +36,8 @@ public class FtableGenVisitor extends OurGrammarBaseVisitor<Void> {
             functionSymbol.declaredAtDepth = this.ctx.symbolTable.getDepth();
             functionSymbol.parameters.clear();
 
-            var parameterTypes = ctx.assFunc().typeRef();
-            var parameterNames = ctx.assFunc().ID();
+            var parameterTypes = context.assFunc().typeRef();
+            var parameterNames = context.assFunc().ID();
             for (int i = 0; i < parameterNames.size(); i++) {
                 String parameterName = parameterNames.get(i).getText();
                 String parameterType = parameterTypes.get(i).TYPE().getText();
@@ -45,9 +45,9 @@ public class FtableGenVisitor extends OurGrammarBaseVisitor<Void> {
             }
 
             this.ctx.ftable.putIfAbsent(id, functionSymbol);
-            return visitChildren(ctx);
+            return visitChildren(context);
         }
-        return visitChildren(ctx);
+        return visitChildren(context);
     }
 
     // In a simple script, no functions or classes exist.

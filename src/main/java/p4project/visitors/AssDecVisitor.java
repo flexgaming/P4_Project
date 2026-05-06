@@ -3,8 +3,6 @@ package p4project.visitors;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import p4project.OurGrammarBaseVisitor;
@@ -75,9 +73,9 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitForStatement(OurGrammarParser.ForStatementContext ctx) {
-        this.ctx.symbolTable.pushScope(ctx);
-        visitChildren(ctx);
+    public Void visitForStatement(OurGrammarParser.ForStatementContext context) {
+        this.ctx.symbolTable.pushScope(context);
+        visitChildren(context);
         this.ctx.symbolTable.popScope();
         return null;
     }
@@ -199,9 +197,9 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitWhileStatement(OurGrammarParser.WhileStatementContext ctx) {
-        this.ctx.symbolTable.pushScope(ctx);
-        visitChildren(ctx);
+    public Void visitWhileStatement(OurGrammarParser.WhileStatementContext context) {
+        this.ctx.symbolTable.pushScope(context);
+        visitChildren(context);
         this.ctx.symbolTable.popScope();
         return null;
     }

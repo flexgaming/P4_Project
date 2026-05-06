@@ -25,7 +25,6 @@ statementPrime
     | breakStatement 
     | returnStatement 
     | printStatement 
-    | readStatement 
     ;
 
 assignment
@@ -109,8 +108,8 @@ printStatement
     : 'print' '(' expr (',' expr)* ')'
     ;
 
-readStatement
-    : 'read' '(' ID ')'
+read
+    : 'read' '(' ('int' | 'float' | 'bool' | 'string') ')'
     ;
 
 expr
@@ -165,6 +164,7 @@ factor
     | THREAD
     | '(' expr ')'
     | castExpression
+    | read
     ;
 
 functionCall

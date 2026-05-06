@@ -23,8 +23,8 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitAssignment(OurGrammarParser.AssignmentContext ctx) {
-        String id = ctx.ID().getText();
+    public String visitAssignment(OurGrammarParser.AssignmentContext context) {
+        String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
         
         if (symbol == null) {
@@ -33,16 +33,16 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
         String declaredType = symbol.type.name.toLowerCase();
 
-        if (ctx.assVar() != null) {
-            String exprType = visit(ctx.assVar().expr());
+        if (context.assVar() != null) {
+            String exprType = visit(context.assVar().expr());
             if (!declaredType.equals(exprType)) {
                 throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
             }
             return declaredType;
-        } else if (ctx.assFunc() != null) {
+        } else if (context.assFunc() != null) {
             // Visit function body to type-check its statements
-            if (ctx.assFunc().block() != null) {
-                visit(ctx.assFunc().block());
+            if (context.assFunc().block() != null) {
+                visit(context.assFunc().block());
             }
             return declaredType;
         }
@@ -50,8 +50,8 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitReassignment(OurGrammarParser.ReassignmentContext ctx) {
-        String id = ctx.ID().getText();
+    public String visitReassignment(OurGrammarParser.ReassignmentContext context) {
+        String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
         
         if (symbol == null) {
@@ -59,7 +59,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         }
 
         String declaredType = symbol.type.name.toLowerCase();
-        String exprType = visit(ctx.expr());
+        String exprType = visit(context.expr());
 
         if (!declaredType.equals(exprType)) {
             throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
@@ -68,37 +68,37 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitIfStatement(OurGrammarParser.IfStatementContext ctx) {
-        for (OurGrammarParser.ExprContext expr : ctx.expr()) {
+    public String visitIfStatement(OurGrammarParser.IfStatementContext context) {
+        for (OurGrammarParser.ExprContext expr : context.expr()) {
             String conditionType = visit(expr);
             if (!conditionType.equals("bool")) {
                 throw new RuntimeException("Type Error: Condition expression must be of type bool, but got " + conditionType);
             }
         }
-        return visitChildren(ctx);
+        return visitChildren(context);
     }
 
     @Override
-    public String visitForStatement(OurGrammarParser.ForStatementContext ctx) {
+    public String visitForStatement(OurGrammarParser.ForStatementContext context) {
         // Restore the for-statement scope created during declaration phase,
         // then type-check the for-loop body and related expressions.
-        this.ctx.symbolTable.restoreScope(ctx);
+        this.ctx.symbolTable.restoreScope(context);
         loopDepth++;
 
-        if (ctx.forVar() != null) {
-            visit(ctx.forVar());
+        if (context.forVar() != null) {
+            visit(context.forVar());
         }
         // Loop variable initialization, condition and update are handled by visitChildren
-        if (ctx.expr() != null) {
-            String conditionType = visit(ctx.expr());
+        if (context.expr() != null) {
+            String conditionType = visit(context.expr());
             if (!conditionType.equals("bool")) {
                 throw new RuntimeException("Type Error: For loop condition must be of type bool, but got " + conditionType);
             }
         }
-        if (ctx.reassignment() != null) {
-            visit(ctx.reassignment());
+        if (context.reassignment() != null) {
+            visit(context.reassignment());
         }
-        visitChildren(ctx);
+        visitChildren(context);
         this.ctx.symbolTable.popScope();
         loopDepth--;
         return null;
@@ -128,21 +128,21 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitWhileStatement(OurGrammarParser.WhileStatementContext ctx) {
-        this.ctx.symbolTable.restoreScope(ctx);
+    public String visitWhileStatement(OurGrammarParser.WhileStatementContext context) {
+        this.ctx.symbolTable.restoreScope(context);
         loopDepth++;
-        String conditionType = visit(ctx.expr());
+        String conditionType = visit(context.expr());
         if (!conditionType.equals("bool")) {
             throw new RuntimeException("Type Error: While loop condition must be of type bool, but got " + conditionType);
         }
-        visitChildren(ctx);
+        visitChildren(context);
         this.ctx.symbolTable.popScope();
         loopDepth--;
         return null;
     }
 
     @Override
-    public String visitBreakStatement(OurGrammarParser.BreakStatementContext ctx) {
+    public String visitBreakStatement(OurGrammarParser.BreakStatementContext context) {
         if (loopDepth == 0) {
             throw new RuntimeException("Syntax Error: 'break' statement not within a loop");
         }
@@ -150,7 +150,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitContinueStatement(OurGrammarParser.ContinueStatementContext ctx) {
+    public String visitContinueStatement(OurGrammarParser.ContinueStatementContext context) {
         if (loopDepth == 0) {
             throw new RuntimeException("Syntax Error: 'continue' statement not within a loop");
         }
@@ -158,74 +158,87 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitBlock(OurGrammarParser.BlockContext ctx) {
-        this.ctx.symbolTable.restoreScope(ctx);
-        visitChildren(ctx);
+    public String visitBlock(OurGrammarParser.BlockContext context) {
+        this.ctx.symbolTable.restoreScope(context);
+        visitChildren(context);
         this.ctx.symbolTable.popScope();
         return null;
     }
 
     @Override
-    public String visitExpr(OurGrammarParser.ExprContext ctx) {
-        if (ctx.expr() == null) {
-            return visit(ctx.equal());
+    public String visitRead(OurGrammarParser.ReadContext context) {
+        visitChildren(context);
+        return context.READTYPE().getText().toLowerCase();
+    }
+
+    @Override
+    public String visitPrintStatement(OurGrammarParser.PrintStatementContext context) {
+        // TODO finish this plz
+        visitChildren(context);
+        return null;
+    }
+
+    @Override
+    public String visitExpr(OurGrammarParser.ExprContext context) {
+        if (context.expr() == null) {
+            return visit(context.equal());
         }
         // Check if operator is '&&' or '||', if so, both sides must be bool
-        if (ctx.getChild(1).getText().equals("&&") || ctx.getChild(1).getText().equals("||")) {
-            String leftType = visit(ctx.equal());
-            String rightType = visit(ctx.expr());
+        if (context.getChild(1).getText().equals("&&") || context.getChild(1).getText().equals("||")) {
+            String leftType = visit(context.equal());
+            String rightType = visit(context.expr());
 
             if (!leftType.equals("bool") || !rightType.equals("bool")) {
-                throw new RuntimeException("Type Error: Operator '" + ctx.getChild(1).getText() + "' requires boolean operands, but got " + leftType + " and " + rightType);
+                throw new RuntimeException("Type Error: Operator '" + context.getChild(1).getText() + "' requires boolean operands, but got " + leftType + " and " + rightType);
             }
             return "bool";
         }
 
-        throw new RuntimeException("Type Error: Invalid operator '" + ctx.getChild(1).getText() + "' in expression");
+        throw new RuntimeException("Type Error: Invalid operator '" + context.getChild(1).getText() + "' in expression");
     }
 
     @Override
-    public String visitEqual(OurGrammarParser.EqualContext ctx) {
-        if (ctx.equal() == null) {
-            return visit(ctx.comp());
+    public String visitEqual(OurGrammarParser.EqualContext context) {
+        if (context.equal() == null) {
+            return visit(context.comp());
         }
-        if (ctx.getChild(1).getText().matches("==|!=")) {
-            String leftType = visit(ctx.comp());
-            String rightType = visit(ctx.equal());
+        if (context.getChild(1).getText().matches("==|!=")) {
+            String leftType = visit(context.comp());
+            String rightType = visit(context.equal());
             if (!leftType.equals(rightType)) {
                 throw new RuntimeException("Type Error: Cannot compare different types " + leftType + " and " + rightType);
             }
             return "bool";
         }
-        throw new RuntimeException("Type Error: Invalid equality operator '" + ctx.getChild(1).getText() + "'");
+        throw new RuntimeException("Type Error: Invalid equality operator '" + context.getChild(1).getText() + "'");
     }
 
     @Override
-    public String visitComp(OurGrammarParser.CompContext ctx) {
-        if (ctx.comp() == null) {
-            return visit(ctx.additive());
+    public String visitComp(OurGrammarParser.CompContext context) {
+        if (context.comp() == null) {
+            return visit(context.additive());
         }
-        if (ctx.getChild(1).getText().matches("<|>|<=|>=")) {
+        if (context.getChild(1).getText().matches("<|>|<=|>=")) {
             // Check data types of both sides, they must be the same and either int or float
-            String leftType = visit(ctx.additive());
+            String leftType = visit(context.additive());
             System.out.println("Left type: " + leftType);
-            String rightType = visit(ctx.comp());
+            String rightType = visit(context.comp());
             System.out.println("Right type: " + rightType);
             if (!leftType.equals(rightType)) {
                 throw new RuntimeException("Type Error: Cannot compare " + leftType + " and " + rightType);
             }
             return "bool";
         }
-        throw new RuntimeException("Type Error: Invalid comparison operator '" + ctx.getChild(1).getText() + "'");
+        throw new RuntimeException("Type Error: Invalid comparison operator '" + context.getChild(1).getText() + "'");
     }
     
     @Override
-    public String visitAdditive(OurGrammarParser.AdditiveContext ctx) {
-        if (ctx.additive() == null) {
-            return visit(ctx.mult());
+    public String visitAdditive(OurGrammarParser.AdditiveContext context) {
+        if (context.additive() == null) {
+            return visit(context.mult());
         }
-        String leftType = visit(ctx.mult());
-        String rightType = visit(ctx.additive());
+        String leftType = visit(context.mult());
+        String rightType = visit(context.additive());
         
         // checks if both sides are int or float, otherwise throws an error in an if else if statement
         if (leftType.equals("int") && rightType.equals("int")) {
@@ -233,48 +246,48 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         } else if (leftType.equals("float") && rightType.equals("float")) {
             return "float";
         } else {
-            throw new RuntimeException("Type Error: Cannot apply operator '" + ctx.getChild(1).getText() + "' to types " + leftType + " and " + rightType);
+            throw new RuntimeException("Type Error: Cannot apply operator '" + context.getChild(1).getText() + "' to types " + leftType + " and " + rightType);
         }
     }
 
     @Override
-    public String visitMult(OurGrammarParser.MultContext ctx) {
-        if (ctx.mult() == null) {
-            return visit(ctx.power());
+    public String visitMult(OurGrammarParser.MultContext context) {
+        if (context.mult() == null) {
+            return visit(context.power());
         }
-        String leftType = visit(ctx.power());
-        String rightType = visit(ctx.mult());
+        String leftType = visit(context.power());
+        String rightType = visit(context.mult());
         // checks if both sides are int or float, otherwise throws an error in an if else if statement
         if (leftType.equals("int") && rightType.equals("int")) {
             return "int";
         } else if (leftType.equals("float") && rightType.equals("float")) {
             return "float";
         } else {
-            throw new RuntimeException("Type Error: Cannot apply operator '" + ctx.getChild(1).getText() + "' to types " + leftType + " and " + rightType);
+            throw new RuntimeException("Type Error: Cannot apply operator '" + context.getChild(1).getText() + "' to types " + leftType + " and " + rightType);
         }
     }
 
     @Override
-    public String visitPower(OurGrammarParser.PowerContext ctx) {
-        if (ctx.power() == null) {
-            return visit(ctx.factor());
+    public String visitPower(OurGrammarParser.PowerContext context) {
+        if (context.power() == null) {
+            return visit(context.factor());
         }
-        String leftType = visit(ctx.factor());
-        String rightType = visit(ctx.power());
+        String leftType = visit(context.factor());
+        String rightType = visit(context.power());
         if (!leftType.matches("int|float") || !rightType.matches("int|float")) {
-            throw new RuntimeException("Type Error: Cannot apply operator '" + ctx.getChild(1).getText() + "' to types " + leftType + " and " + rightType);
+            throw new RuntimeException("Type Error: Cannot apply operator '" + context.getChild(1).getText() + "' to types " + leftType + " and " + rightType);
         }
         if (leftType.equals(rightType)) {
             return leftType;
         } 
-        throw new RuntimeException("Type Error: Cannot apply operator '" + ctx.getChild(1).getText() + "' to different types " + leftType + " and " + rightType);
+        throw new RuntimeException("Type Error: Cannot apply operator '" + context.getChild(1).getText() + "' to different types " + leftType + " and " + rightType);
     }
 
     @Override
-    public String visitFactor(OurGrammarParser.FactorContext ctx) {
+    public String visitFactor(OurGrammarParser.FactorContext context) {
         // Unary negation
-        if (ctx.NEGATIVE() != null) {
-            String factorType = visit(ctx.factor());
+        if (context.NEGATIVE() != null) {
+            String factorType = visit(context.factor());
             if (!factorType.matches("int|float")) {
                 throw new RuntimeException("Type Error: Unary '-' operator cannot be applied to type " + factorType);
             }
@@ -282,8 +295,8 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         }
 
         // function call
-        if (ctx.functionCall() != null) {
-            OurGrammarParser.FunctionCallContext fc = ctx.functionCall();
+        if (context.functionCall() != null) {
+            OurGrammarParser.FunctionCallContext fc = context.functionCall();
             if (fc.expr() != null) {
                 for (OurGrammarParser.ExprContext e : fc.expr()) {
                     visit(e);
@@ -297,8 +310,8 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         }
 
         // array indexing
-        if (ctx.arrayIndex() != null) {
-            OurGrammarParser.ArrayIndexContext ai = ctx.arrayIndex();
+        if (context.arrayIndex() != null) {
+            OurGrammarParser.ArrayIndexContext ai = context.arrayIndex();
             Symbol symbol = this.ctx.resolvedSymbols.get(ai.ID());
             if (symbol == null) {
                 throw new RuntimeException("Variable '" + ai.ID().getText() + "' not declared.");
@@ -307,8 +320,8 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         }
 
         // array literal
-        if (ctx.arrayLiteral() != null) {
-            OurGrammarParser.ArrayLiteralContext al = ctx.arrayLiteral();
+        if (context.arrayLiteral() != null) {
+            OurGrammarParser.ArrayLiteralContext al = context.arrayLiteral();
             if (al.expr() != null && !al.expr().isEmpty()) {
                 String firstType = visit(al.expr(0));
                 for (int i = 1; i < al.expr().size(); i++) {
@@ -323,29 +336,29 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         }
 
         // simple identifier (variable)
-        if (ctx.ID() != null) {
-            Symbol symbol = this.ctx.resolvedSymbols.get(ctx.ID());
+        if (context.ID() != null) {
+            Symbol symbol = this.ctx.resolvedSymbols.get(context.ID());
             if (symbol == null) {
-                throw new RuntimeException("Variable '" + ctx.ID().getText() + "' not declared.");
+                throw new RuntimeException("Variable '" + context.ID().getText() + "' not declared.");
             }
             return symbol.type.name.toLowerCase();
         }
 
-        if (ctx.INT() != null) return "int";
-        if (ctx.FLOAT() != null) return "float";
-        if (ctx.BOOL() != null) return "bool";
-        if (ctx.CHAR() != null) return "char";
-        if (ctx.STRING() != null) return "string";
-        if (ctx.THREAD() != null) return "thread";
+        if (context.INT() != null) return "int";
+        if (context.FLOAT() != null) return "float";
+        if (context.BOOL() != null) return "bool";
+        if (context.CHAR() != null) return "char";
+        if (context.STRING() != null) return "string";
+        if (context.THREAD() != null) return "thread";
 
         // parenthesized expression
-        if (ctx.expr() != null) {
-            return visit(ctx.expr());
+        if (context.expr() != null) {
+            return visit(context.expr());
         }
 
         // cast expression
-        if (ctx.castExpression() != null) {
-            OurGrammarParser.CastExpressionContext castCtx = ctx.castExpression();
+        if (context.castExpression() != null) {
+            OurGrammarParser.CastExpressionContext castCtx = context.castExpression();
             if (castCtx == null) {
                 throw new RuntimeException("Type Error: Malformed cast expression");
             }

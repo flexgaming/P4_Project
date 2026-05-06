@@ -1,7 +1,5 @@
 package p4project;
 
-import java.io.Console;
-
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;

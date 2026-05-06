@@ -3,9 +3,6 @@ package p4project.visitors;
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
-import p4project.context.FunctionSymbol;
-
-
 
 /*
     Phase 1: Symbol assignments and declerations
@@ -29,10 +26,10 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitProgram(OurGrammarParser.ProgramContext ctx) {
+    public String visitProgram(OurGrammarParser.ProgramContext context) {
         StringBuilder result = new StringBuilder();
 
-        for (OurGrammarParser.StatementContext stmt : ctx.statement()) {
+        for (OurGrammarParser.StatementContext stmt : context.statement()) {
             String stmtCode = visit(stmt);
             if (stmtCode != null && !stmtCode.isEmpty()) {
                 result.append(stmtCode);
@@ -43,38 +40,38 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitStatement(OurGrammarParser.StatementContext ctx) {
-        if (ctx.statementPrime() != null) {
-            return visit(ctx.statementPrime());
+    public String visitStatement(OurGrammarParser.StatementContext context) {
+        if (context.statementPrime() != null) {
+            return visit(context.statementPrime());
         }
-        return visitChildren(ctx);
+        return visitChildren(context);
     }
 
     @Override
-    public String visitStatementPrime(OurGrammarParser.StatementPrimeContext ctx) {
-        if (ctx.expr() != null) {
-            return indent() + visit(ctx.expr()) + ";\n";
+    public String visitStatementPrime(OurGrammarParser.StatementPrimeContext context) {
+        if (context.expr() != null) {
+            return indent() + visit(context.expr()) + ";\n";
         }
-        return visitChildren(ctx);
+        return visitChildren(context);
     }
 
     @Override
-    public String visitAssignment(OurGrammarParser.AssignmentContext ctx) {
-        String type = ctx.typeRef().TYPE().getText();
-        String id = ctx.ID().getText();
+    public String visitAssignment(OurGrammarParser.AssignmentContext context) {
+        String type = context.typeRef().TYPE().getText();
+        String id = context.ID().getText();
 
-        if (ctx.assFunc() != null) {
+        if (context.assFunc() != null) {
             // Function definition
-            String params = visit(ctx.assFunc());     // Let assFunc generate the parameter list
-            String blockCode = visit(ctx.assFunc().block());
+            String params = visit(context.assFunc());     // Let assFunc generate the parameter list
+            String blockCode = visit(context.assFunc().block());
             // If blockCode starts with the current indent, strip it so the '{' lands
             // directly after the function header (`void main() {`).
             if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
 
             return indent() + type + " " + id + params + blockCode;
         } 
-        else if (ctx.assVar() != null) {
-            String exprCode = visit(ctx.assVar().expr());
+        else if (context.assVar() != null) {
+            String exprCode = visit(context.assVar().expr());
             return indent() + type + " " + id + " = " + exprCode + ";\n";
         } 
         else {
@@ -93,28 +90,28 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitDeclaration(OurGrammarParser.DeclarationContext ctx) {
-        return indent() + ctx.typeRef().TYPE().getText() + " " + ctx.ID().getText() + ";\n";
+    public String visitDeclaration(OurGrammarParser.DeclarationContext context) {
+        return indent() + context.typeRef().TYPE().getText() + " " + context.ID().getText() + ";\n";
     }
 
     @Override
-    public String visitIfStatement(OurGrammarParser.IfStatementContext ctx) {
+    public String visitIfStatement(OurGrammarParser.IfStatementContext context) {
         StringBuilder sb = new StringBuilder();
-        sb.append(indent()).append("if (").append(visit(ctx.expr(0))).append(") ");
-        String thenCode = visit(ctx.statement(0));
+        sb.append(indent()).append("if (").append(visit(context.expr(0))).append(") ");
+        String thenCode = visit(context.statement(0));
         if (thenCode.startsWith(indent())) thenCode = thenCode.substring(indent().length());
         sb.append(thenCode);
 
-        for (int i = 1; i < ctx.expr().size(); i++) {
-            sb.append(indent()).append("else if (").append(visit(ctx.expr(i))).append(") ");
-            String elifCode = visit(ctx.statement(i));
+        for (int i = 1; i < context.expr().size(); i++) {
+            sb.append(indent()).append("else if (").append(visit(context.expr(i))).append(") ");
+            String elifCode = visit(context.statement(i));
             if (elifCode.startsWith(indent())) elifCode = elifCode.substring(indent().length());
             sb.append(elifCode);
         }
 
-        if (ctx.statement().size() > ctx.expr().size()) {
+        if (context.statement().size() > context.expr().size()) {
             sb.append(indent()).append("else ");
-            String elseCode = visit(ctx.statement(ctx.statement().size() - 1));
+            String elseCode = visit(context.statement(context.statement().size() - 1));
             if (elseCode.startsWith(indent())) elseCode = elseCode.substring(indent().length());
             sb.append(elseCode);
         }
@@ -123,18 +120,18 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitAssFunc(OurGrammarParser.AssFuncContext ctx) {
+    public String visitAssFunc(OurGrammarParser.AssFuncContext context) {
         StringBuilder sb = new StringBuilder();
         sb.append("(");
 
-        if (ctx.typeRef() != null && !ctx.typeRef().isEmpty()) {
-            for (int i = 0; i < ctx.typeRef().size(); i++) {
-                String paramType = ctx.typeRef(i).TYPE().getText();
-                String paramName = ctx.ID(i).getText();     // Note: adjust index if needed
+        if (context.typeRef() != null && !context.typeRef().isEmpty()) {
+            for (int i = 0; i < context.typeRef().size(); i++) {
+                String paramType = context.typeRef(i).TYPE().getText();
+                String paramName = context.ID(i).getText();     // Note: adjust index if needed
 
                 sb.append(paramType).append(" ").append(paramName);
 
-                if (i < ctx.typeRef().size() - 1) {
+                if (i < context.typeRef().size() - 1) {
                     sb.append(", ");
                 }
             }
@@ -145,49 +142,49 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitForStatement(OurGrammarParser.ForStatementContext ctx) {
+    public String visitForStatement(OurGrammarParser.ForStatementContext context) {
         StringBuilder sb = new StringBuilder();
         sb.append(indent()).append("for (");
 
         // Initialization
-        if (ctx.forVar() != null) {
-            sb.append(visit(ctx.forVar()) + ";");
+        if (context.forVar() != null) {
+            sb.append(visit(context.forVar()) + ";");
         } 
 
         // Condition
-        if (ctx.expr() != null) {
-            sb.append(" ").append(visit(ctx.expr())).append(";");
+        if (context.expr() != null) {
+            sb.append(" ").append(visit(context.expr())).append(";");
         } 
 
         // Update
-        if (ctx.reassignment() != null) {
-            sb.append(" ").append(visit(ctx.reassignment()));
+        if (context.reassignment() != null) {
+            sb.append(" ").append(visit(context.reassignment()));
         }
 
         sb.append(") ");
-        String blockCode = visit(ctx.statement());
+        String blockCode = visit(context.statement());
         if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
         sb.append(blockCode);
         return sb.toString();
     }
 
     @Override
-    public String visitForVar(OurGrammarParser.ForVarContext ctx) {
-        String type = ctx.typeRef().TYPE().getText();
-        String id = ctx.ID().getText();
+    public String visitForVar(OurGrammarParser.ForVarContext context) {
+        String type = context.typeRef().TYPE().getText();
+        String id = context.ID().getText();
 
-        if (ctx.assFunc() != null) {
+        if (context.assFunc() != null) {
             // Function definition
-            String params = visit(ctx.assFunc());     // Let assFunc generate the parameter list
-            String blockCode = visit(ctx.assFunc().block());
+            String params = visit(context.assFunc());     // Let assFunc generate the parameter list
+            String blockCode = visit(context.assFunc().block());
             // If blockCode starts with the current indent, strip it so the '{' lands
             // directly after the function header (`void main() {`).
             if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
 
             return type + " " + id + params + blockCode;
         } 
-        else if (ctx.assVar() != null) {
-            String exprCode = visit(ctx.assVar().expr());
+        else if (context.assVar() != null) {
+            String exprCode = visit(context.assVar().expr());
             return type + " " + id + " = " + exprCode;
         } 
         else {
@@ -196,22 +193,22 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitWhileStatement(OurGrammarParser.WhileStatementContext ctx) {
+    public String visitWhileStatement(OurGrammarParser.WhileStatementContext context) {
         StringBuilder sb = new StringBuilder();
-        sb.append(indent()).append("while (").append(visit(ctx.expr())).append(") ");
-        String blockCode = visit(ctx.statement());
+        sb.append(indent()).append("while (").append(visit(context.expr())).append(") ");
+        String blockCode = visit(context.statement());
         if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
         sb.append(blockCode);
         return sb.toString();
     }
 
     @Override
-    public String visitBreakStatement(OurGrammarParser.BreakStatementContext ctx) {
+    public String visitBreakStatement(OurGrammarParser.BreakStatementContext context) {
         return indent() + "break;\n";
     }
 
     @Override
-    public String visitContinueStatement(OurGrammarParser.ContinueStatementContext ctx) {
+    public String visitContinueStatement(OurGrammarParser.ContinueStatementContext context) {
         return indent() + "continue;\n";
     }
 
@@ -233,86 +230,98 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitReturnStatement(OurGrammarParser.ReturnStatementContext ctx) {
-        if (ctx.expr() != null) {
-            return indent() + "return " + visit(ctx.expr()) + ";\n";
+    public String visitReturnStatement(OurGrammarParser.ReturnStatementContext context) {
+        if (context.expr() != null) {
+            return indent() + "return " + visit(context.expr()) + ";\n";
         }
         return indent() + "return;\n";
     }
 
     @Override
-    public String visitExpr(OurGrammarParser.ExprContext ctx) {
-        String left = visit(ctx.equal());
-        if (ctx.expr() != null) {
-            String op = ctx.getChild(1).getText();
-            String right = visit(ctx.expr());
+    public String visitPrintStatement(OurGrammarParser.PrintStatementContext context) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(indent()).append("System.out.print(");
+        for (int i = 0; i < context.expr().size(); i++) {
+            sb.append(visit(context.expr(i)));
+            if (i < context.expr().size() - 1) sb.append(" + ");
+        }
+        sb.append(");\n");
+        return sb.toString();
+    }
+
+    @Override
+    public String visitExpr(OurGrammarParser.ExprContext context) {
+        String left = visit(context.equal());
+        if (context.expr() != null) {
+            String op = context.getChild(1).getText();
+            String right = visit(context.expr());
             return left + " " + op + " " + right;
         }
         return left;
     }
 
     @Override
-    public String visitEqual(OurGrammarParser.EqualContext ctx) {
-        String left = visit(ctx.comp());
-        if (ctx.equal() != null) {
-            String op = ctx.getChild(1).getText();
-            String right = visit(ctx.equal());
+    public String visitEqual(OurGrammarParser.EqualContext context) {
+        String left = visit(context.comp());
+        if (context.equal() != null) {
+            String op = context.getChild(1).getText();
+            String right = visit(context.equal());
             return left + " " + op + " " + right;
         }
         return left;
     }
 
     @Override
-    public String visitComp(OurGrammarParser.CompContext ctx) {
-        String left = visit(ctx.additive());
-        if (ctx.comp() != null) {
-            String op = ctx.getChild(1).getText();
-            String right = visit(ctx.comp());
+    public String visitComp(OurGrammarParser.CompContext context) {
+        String left = visit(context.additive());
+        if (context.comp() != null) {
+            String op = context.getChild(1).getText();
+            String right = visit(context.comp());
             return left + " " + op + " " + right;
         }
         return left;
     }
 
     @Override
-    public String visitAdditive(OurGrammarParser.AdditiveContext ctx) {
-        String left = visit(ctx.mult());
-        if (ctx.additive() != null) {
-            String op = ctx.getChild(1).getText();
-            String right = visit(ctx.additive());
+    public String visitAdditive(OurGrammarParser.AdditiveContext context) {
+        String left = visit(context.mult());
+        if (context.additive() != null) {
+            String op = context.getChild(1).getText();
+            String right = visit(context.additive());
             return left + " " + op + " " + right;
         }
         return left;
     }
 
     @Override
-    public String visitMult(OurGrammarParser.MultContext ctx) {
-        String left = visit(ctx.power());
-        if (ctx.mult() != null) {
-            String op = ctx.getChild(1).getText();
-            String right = visit(ctx.mult());
+    public String visitMult(OurGrammarParser.MultContext context) {
+        String left = visit(context.power());
+        if (context.mult() != null) {
+            String op = context.getChild(1).getText();
+            String right = visit(context.mult());
             return left + " " + op + " " + right;
         }
         return left;
     }
 
     @Override
-    public String visitPower(OurGrammarParser.PowerContext ctx) {
-        String left = visit(ctx.factor());
-        if (ctx.power() != null) {
-            String op = ctx.getChild(1).getText();
-            String right = visit(ctx.power());
+    public String visitPower(OurGrammarParser.PowerContext context) {
+        String left = visit(context.factor());
+        if (context.power() != null) {
+            String op = context.getChild(1).getText();
+            String right = visit(context.power());
             return left + " " + op + " " + right;
         }
         return left;
     }
 
     @Override
-    public String visitArrayLiteral(OurGrammarParser.ArrayLiteralContext ctx) {
+    public String visitArrayLiteral(OurGrammarParser.ArrayLiteralContext context) {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        for (int i = 0; i < ctx.expr().size(); i++) {
-            sb.append(visit(ctx.expr(i)));
-            if (i < ctx.expr().size() - 1) {
+        for (int i = 0; i < context.expr().size(); i++) {
+            sb.append(visit(context.expr(i)));
+            if (i < context.expr().size() - 1) {
                 sb.append(", ");
             }
         }
@@ -321,73 +330,73 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitArrayIndex(OurGrammarParser.ArrayIndexContext ctx) {
-        String base = visit(ctx.expr(0));
-        String index = visit(ctx.expr(1));
+    public String visitArrayIndex(OurGrammarParser.ArrayIndexContext context) {
+        String base = visit(context.expr(0));
+        String index = visit(context.expr(1));
         return base + "[" + index + "]";
     }
 
     @Override
-    public String visitFactor(OurGrammarParser.FactorContext ctx) {
+    public String visitFactor(OurGrammarParser.FactorContext context) {
         // Prefer checking specific child contexts instead of relying on the
         // start token: several alternatives (functionCall, arrayIndex) start
         // with an ID token and would otherwise be mis-dispatched.
-        if (ctx.NEGATIVE() != null) {
-            return "-" + visit(ctx.factor());
+        if (context.NEGATIVE() != null) {
+            return "-" + visit(context.factor());
         }
-        if (ctx.functionCall() != null) {
-            return visitFunctionCall(ctx.functionCall());
+        if (context.functionCall() != null) {
+            return visitFunctionCall(context.functionCall());
         }
-        if (ctx.arrayIndex() != null) {
-            return visitArrayIndex(ctx.arrayIndex());
+        if (context.arrayIndex() != null) {
+            return visitArrayIndex(context.arrayIndex());
         }
-        if (ctx.arrayLiteral() != null) {
-            return visitArrayLiteral(ctx.arrayLiteral());
+        if (context.arrayLiteral() != null) {
+            return visitArrayLiteral(context.arrayLiteral());
         }
-        if (ctx.ID() != null) {
-            return ctx.ID().getText();
+        if (context.ID() != null) {
+            return context.ID().getText();
         }
-        if (ctx.INT() != null) {
-            return ctx.INT().getText();
+        if (context.INT() != null) {
+            return context.INT().getText();
         }
-        if (ctx.FLOAT() != null) {
-            return ctx.FLOAT().getText();
+        if (context.FLOAT() != null) {
+            return context.FLOAT().getText();
         }
-        if (ctx.BOOL() != null) {
-            return ctx.BOOL().getText();
+        if (context.BOOL() != null) {
+            return context.BOOL().getText();
         }
-        if (ctx.CHAR() != null) {
-            return ctx.CHAR().getText();
+        if (context.CHAR() != null) {
+            return context.CHAR().getText();
         }
-        if (ctx.STRING() != null) {
-            return ctx.STRING().getText();
+        if (context.STRING() != null) {
+            return context.STRING().getText();
         }
-        if (ctx.THREAD() != null) {
-            return ctx.THREAD().getText();
+        if (context.THREAD() != null) {
+            return context.THREAD().getText();
         }
-        if (ctx.castExpression() != null) {
-            OurGrammarParser.CastExpressionContext castCtx = ctx.castExpression();
+        if (context.castExpression() != null) {
+            OurGrammarParser.CastExpressionContext castCtx = context.castExpression();
             String targetType = castCtx.TYPE().getText().toLowerCase();
             String expr = visit(castCtx.expr());
             return "(" + targetType + ") " + expr;
         }
-        if (ctx.expr() != null) {
+        if (context.expr() != null) {
             // parenthesised expression
-            return "(" + visit(ctx.expr()) + ")";
+            return "(" + visit(context.expr()) + ")";
         }
 
-        return visitChildren(ctx);
+        return visitChildren(context);
     }
 
     @Override
-    public String visitFunctionCall(OurGrammarParser.FunctionCallContext ctx) {
+    public String visitFunctionCall(OurGrammarParser.FunctionCallContext context) {
         StringBuilder sb = new StringBuilder();
-        sb.append(ctx.ID().getText());
+        sb.append(context.ID().getText());
         sb.append("(");
-        if (ctx.expr() != null && !ctx.expr().isEmpty()) {
-            for (int i = 0; i < ctx.expr().size(); i++) {
-                sb.append(visit(ctx.expr(i)));
-                if (i < ctx.expr().size() - 1) sb.append(", ");
+        if (context.expr() != null && !context.expr().isEmpty()) {
+            for (int i = 0; i < context.expr().size(); i++) {
+                sb.append(visit(context.expr(i)));
+                if (i < context.expr().size() - 1) sb.append(", ");
             }
         }
         sb.append(")");
