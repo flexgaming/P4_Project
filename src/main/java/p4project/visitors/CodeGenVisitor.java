@@ -28,7 +28,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
     private String indent() {
         if (!ctx.ftable.containsKey("main")) {
-            return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth()+2));
+            return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth()+2)); // compensate for the extra indent level of the generated main method
         }
         return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth())); // Ensure non-negative repeat count
         
@@ -85,7 +85,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             String params = visit(context.assFunc());
             String blockCode = visit(context.assFunc().block());
             if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
-            return indent() + type + " " + id + params + blockCode;
+            return indent() + type + " " + id + params + blockCode + "\n";
         } 
         else if (context.assVar() != null) {
             String exprCode = visit(context.assVar().expr());
@@ -117,20 +117,20 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         sb.append(indent()).append("if (").append(visit(context.expr(0))).append(") ");
         String thenCode = visit(context.statement(0));
         if (thenCode.startsWith(indent())) thenCode = thenCode.substring(indent().length());
-        sb.append(thenCode);
+        sb.append(thenCode + "\n");
 
-        for (int i = 1; i < context.expr().size(); i++) {
+        for (int i = 1; i < context.expr().size(); i++) { // else-if statements
             sb.append(indent()).append("else if (").append(visit(context.expr(i))).append(") ");
-            String elifCode = visit(context.statement(i));
-            if (elifCode.startsWith(indent())) elifCode = elifCode.substring(indent().length());
-            sb.append(elifCode);
+            String elseIfCode = visit(context.statement(i));
+            if (elseIfCode.startsWith(indent())) elseIfCode = elseIfCode.substring(indent().length());
+            sb.append(elseIfCode + "\n");
         }
 
-        if (context.statement().size() > context.expr().size()) {
+        if (context.statement().size() > context.expr().size()) { // else statement
             sb.append(indent()).append("else ");
             String elseCode = visit(context.statement(context.statement().size() - 1));
             if (elseCode.startsWith(indent())) elseCode = elseCode.substring(indent().length());
-            sb.append(elseCode);
+            sb.append(elseCode + "\n");
         }
 
         return sb.toString();
@@ -223,7 +223,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         sb.append(") ");
         String blockCode = visit(context.statement());
         if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
-        sb.append(blockCode);
+        sb.append(blockCode + "\n");
         return sb.toString();
     }
 
@@ -257,7 +257,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         sb.append(indent()).append("while (").append(visit(context.expr())).append(") ");
         String blockCode = visit(context.statement());
         if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
-        sb.append(blockCode);
+        sb.append(blockCode + "\n");
         return sb.toString();
     }
 
@@ -301,7 +301,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         }
         ctx.symbolTable.popScope();
 
-        sb.append(indent()).append("}\n");
+        sb.append(indent()).append("}");
         return sb.toString();
     }
 
