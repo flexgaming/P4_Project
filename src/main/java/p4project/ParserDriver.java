@@ -20,6 +20,9 @@ void main() {
     int x; 
     print(x, "Hello World"); 
     x = read(int); 
+    thread t1 => { 
+        print("In thread, x = ", x); 
+    }
     while (x > 0) { 
         if (x == 3) { 
             break; 
@@ -29,7 +32,7 @@ void main() {
         x = x - 1; 
     } 
 }
-                """;;
+        """;;
 
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);

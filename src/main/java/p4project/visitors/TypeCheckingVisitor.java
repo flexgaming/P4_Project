@@ -68,6 +68,18 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
+    public String visitThreadAssignment(OurGrammarParser.ThreadAssignmentContext context) {
+        String id = context.ID().getText();
+        Symbol symbol = this.ctx.symbolTable.resolve(id);
+
+        String declaredType = symbol.type.name.toLowerCase();
+        if (!declaredType.equals("thread")) {
+            throw new RuntimeException("Type Error: Cannot assign non-thread to thread variable '" + id + "'");
+        }
+        return declaredType;
+    }
+
+    @Override
     public String visitIfStatement(OurGrammarParser.IfStatementContext context) {
         for (OurGrammarParser.ExprContext expr : context.expr()) {
             String conditionType = visit(expr);

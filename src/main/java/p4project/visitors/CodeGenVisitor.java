@@ -155,6 +155,13 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
+    public String visitThreadAssignment(OurGrammarParser.ThreadAssignmentContext context) {
+        String id = context.ID().getText();
+        System.out.println("Generating code for thread assignment to " + id);
+        return indent() + "Future<?> " + id + " = executor.submit(() -> " + context.block() + ");\n";
+    }
+
+    @Override
     public String visitForStatement(OurGrammarParser.ForStatementContext context) {
         StringBuilder sb = new StringBuilder();
         sb.append(indent()).append("for (");
