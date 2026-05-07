@@ -25,8 +25,6 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         this.ctx = ctx;
     }
 
-    // ==================== Variable / Identifier References ====================
-
     @Override
     public Void visitAssignment(OurGrammarParser.AssignmentContext context) {
         String id = context.ID().getText();
@@ -67,10 +65,10 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         return visitChildren(context);
     }
 
-    /* @Override
+    @Override
     public Void visitRead(OurGrammarParser.ReadContext context) {
         return visitChildren(context);
-    } */
+    }
 
     @Override
     public Void visitBlock(OurGrammarParser.BlockContext context) {
@@ -79,8 +77,6 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         this.ctx.symbolTable.popScope();
         return null;
     }
-
-    // ========================= FUNCTION CALLS =========================
 
     @Override
     public Void visitFunctionCall(OurGrammarParser.FunctionCallContext context) {
@@ -109,8 +105,6 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         return visitChildren(context);
     }
 
-    // ======================== Critical sections ========================
-
     @Override
     public Void visitCriticalSection(OurGrammarParser.CriticalSectionContext context) {
         this.ctx.symbolTable.restoreScope(context);
@@ -124,8 +118,6 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         this.ctx.symbolTable.popScope();
         return null;
     }
-
-    // ====================== if- & for-statements and while loops ====================
     
     @Override
     public Void visitIfStatement(OurGrammarParser.IfStatementContext context) {

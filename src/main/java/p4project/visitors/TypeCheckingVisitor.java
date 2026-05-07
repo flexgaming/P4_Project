@@ -166,6 +166,15 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
+    public String visitPrintStatement(OurGrammarParser.PrintStatementContext context) {
+        for (OurGrammarParser.ExprContext expr : context.expr()) {
+            visit(expr); // Just need to type-check the expressions being printed
+        }
+        visitChildren(context);
+        return null;
+    }
+
+    @Override
     public String visitRead(OurGrammarParser.ReadContext context) {
         // find the declared type without the id
         String text = context.getText();
@@ -173,16 +182,11 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         int endIndex = text.lastIndexOf(')');
 
         String declaredType = text.substring(startIndex, endIndex);
+        if (!declaredType.matches("int|float|bool|string")) {
+            throw new RuntimeException("Type Error: Invalid type '" + declaredType + "' in read statement");
+        }
         visitChildren(context);
         return declaredType.toLowerCase();
-    }
-
-    @Override
-    public String visitPrintStatement(OurGrammarParser.PrintStatementContext context) {
-        
-
-        visitChildren(context);
-        return null;
     }
 
     @Override

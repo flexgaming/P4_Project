@@ -71,8 +71,8 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             if (id.equals("main")) {
                 inMain = true;
                 // Function definition
-                String params = visit(context.assFunc());
                 String blockCode = visit(context.assFunc().block());
+                // If blockCode starts with the current indent, strip it so the '{' lands directly after the function header.
                 if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
                 return "public class Main " + blockCode;
             }
@@ -277,6 +277,25 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         }
         sb.append(");\n");
         return sb.toString();
+    }
+
+    @Override
+    public String visitRead(OurGrammarParser.ReadContext context) {
+        if (context.TYPE() == null) {
+            throw new RuntimeException("Expected a type in read statement.");
+        }
+        switch (context.TYPE().getText()) {
+            case "int":
+                return "scanner.nextInt()";
+            case "float":
+                return "scanner.nextFloat()";
+            case "bool":
+                return "scanner.nextBoolean()";
+            case "string":
+                return "scanner.nextLine()";
+            default:
+                throw new RuntimeException("Unsupported type in read statement: " + context.TYPE().getText());
+        }
     }
 
     @Override
