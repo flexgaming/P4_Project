@@ -15,7 +15,7 @@ import p4project.visitors.FtableGenVisitor;
 public class ParserDriver {
     public static void main(String[] args) {
         // While loop example with break and continue:
-        String input = "void maint() { int x; x = 5; x = read(int); while (x > 0) { if (x == 3) { break; } else if (x == 4) { continue; } x = x - 1; } }";
+        String input = "void mainnt() { int x; x = 5; x = read(int); while (x > 0) { if (x == 3) { break; } else if (x == 4) { continue; } x = x - 1; } }";
 
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);
@@ -71,8 +71,8 @@ public class ParserDriver {
             if (!ctx.ftable.containsKey("main")) {
                 javaCode.append("public class Main {\n");
                 javaCode.append("    public static void main(String[] args) {\n");
-                javaCode.append("    Scanner scanner = new Scanner(System.in);\n");
-                javaCode.append("    ExecutorService executor = Executors.newCachedThreadPool();\n");
+                javaCode.append("        Scanner scanner = new Scanner(System.in);\n");
+                javaCode.append("        ExecutorService executor = Executors.newCachedThreadPool();\n");
                 javaCode.append(codeGenVisitor.visit(tree));
                 javaCode.append("    executor.shutdown();\n");
                 javaCode.append("    scanner.close();\n");

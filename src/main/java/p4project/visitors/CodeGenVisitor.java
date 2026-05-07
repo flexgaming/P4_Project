@@ -67,16 +67,20 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
         if (context.assFunc() != null) {
             
-            // Function definition
+            // Check if this is the main function to set the inMain flag.
             if (id.equals("main")) {
                 inMain = true;
+                // Function definition
+                String params = visit(context.assFunc());
+                String blockCode = visit(context.assFunc().block());
+                if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
+                return "public class Main " + blockCode;
             }
-            String params = visit(context.assFunc());     // Let assFunc generate the parameter list
-            String blockCode = visit(context.assFunc().block());
-            // If blockCode starts with the current indent, strip it so the '{' lands
-            // directly after the function header (`void main() {`).
-            if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
 
+            // Function definition
+            String params = visit(context.assFunc());
+            String blockCode = visit(context.assFunc().block());
+            if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
             return indent() + type + " " + id + params + blockCode;
         } 
         else if (context.assVar() != null) {
