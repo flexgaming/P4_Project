@@ -3,6 +3,9 @@ package p4project.visitors;
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
+
+import java.util.concurrent.CompletableFuture;
+
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 /*
@@ -166,16 +169,34 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitAwaitStatement(OurGrammarParser.AwaitStatementContext context) {
         StringBuilder sb = new StringBuilder();
-        // check if it is await or awaitAny
-        if (context.awaitAny() != null) {
-            sb.append(indent()).append("awaitAny(");
-        } else {
-            sb.append(indent()).append("await(");
+        // check if it is awaitAll or awaitAny
+        if (context.getChild(0).getText().equals("awaitAll")) {
+            sb.append(indent() + "CompletableFuture.allOf(");
+            for (int i = 0; i < context.ID().size(); i++) {
+                String id = context.ID(i).getText();
+                sb.append(id);
+                if (i < context.ID().size() - 1) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(").get();\n");
+        } 
+        else if (context.getChild(0).getText().equals("awaitAny")) {
+            sb.append(indent() + "CompletableFuture.anyOf(");
+            for (int i = 0; i < context.ID().size(); i++) {
+                String id = context.ID(i).getText();
+                sb.append(id);
+                if (i < context.ID().size() - 1) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(").get();\n");
+            
+        } 
+        else {
+            throw new RuntimeException("Unexpected await statement type: " + context.getChild(0).getText());
         }
-        for (TerminalNode idNode : context.ID()) {
-            String id = idNode.getText();
-            sb.append(indent() + id + ".get();\n");
-        }
+        
         return sb.toString();
     }
 

@@ -86,7 +86,6 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitAwaitStatement(OurGrammarParser.AwaitStatementContext context) {
-        // TODO check if the types are threads
         for (TerminalNode idNode : context.ID()) {
             String id = idNode.getText();
             Symbol symbol = this.ctx.symbolTable.resolve(id);

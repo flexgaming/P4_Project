@@ -26,7 +26,7 @@ void main() {
     thread t2 => { 
         print("In thread, x = ", x); 
     }
-    awaitAny(t1, t2);
+    awaitAll(t1, t2);
     while (x > 0) { 
         if (x == 3) { 
             break; 
