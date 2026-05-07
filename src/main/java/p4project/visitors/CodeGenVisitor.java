@@ -14,6 +14,7 @@ import p4project.context.CompilationContext;
 
 public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     private final CompilationContext ctx;
+    private boolean inMain = false;
 
     public CodeGenVisitor(CompilationContext ctx) {
         this.ctx = ctx;
@@ -65,7 +66,11 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         String id = context.ID().getText();
 
         if (context.assFunc() != null) {
+            
             // Function definition
+            if (id.equals("main")) {
+                inMain = true;
+            }
             String params = visit(context.assFunc());     // Let assFunc generate the parameter list
             String blockCode = visit(context.assFunc().block());
             // If blockCode starts with the current indent, strip it so the '{' lands
@@ -222,10 +227,27 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         sb.append(indent()).append("{\n");
 
         ctx.symbolTable.restoreScope(context);
-        for (OurGrammarParser.StatementContext stmt : context.statement()) {
-            String stmtCode = visit(stmt);
-            if (stmtCode == null || stmtCode.isEmpty()) continue;
-            sb.append(stmtCode);
+        if (inMain) { // Main block
+            sb.append(indent() + "public static void main(String[] args) {\n");
+            ctx.symbolTable.restoreScope(context);
+            sb.append(indent() + "Scanner scanner = new Scanner(System.in);\n");
+            sb.append(indent() + "ExecutorService executor = Executors.newCachedThreadPool();\n");
+            inMain = false;
+            for (OurGrammarParser.StatementContext stmt : context.statement()) {
+                String stmtCode = visit(stmt);
+                if (stmtCode == null || stmtCode.isEmpty()) continue;
+                sb.append(stmtCode);
+            }
+            sb.append(indent() + "executor.shutdown();\n");
+            sb.append(indent() + "scanner.close();\n");
+            ctx.symbolTable.popScope();
+            sb.append(indent()).append("}\n");
+        } else { // All other blocks
+            for (OurGrammarParser.StatementContext stmt : context.statement()) {
+                String stmtCode = visit(stmt);
+                if (stmtCode == null || stmtCode.isEmpty()) continue;
+                sb.append(stmtCode);
+            }
         }
         ctx.symbolTable.popScope();
 

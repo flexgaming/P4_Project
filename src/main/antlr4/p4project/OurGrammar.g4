@@ -52,8 +52,8 @@ threadAssignment
     ;
 
 awaitStatement
-    : 'await' '(' expr (',' expr)* ')'
-    | 'awaitAny' '(' expr (',' expr)* ')'
+    : 'await' '(' ID (',' ID)* ')'
+    | 'awaitAny' '(' ID (',' ID)* ')'
     ;
 
 castExpression
