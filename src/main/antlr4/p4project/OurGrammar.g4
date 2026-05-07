@@ -16,15 +16,15 @@ statement
     ;
 
 statementPrime
-    : expr
-    | arrayIndex '=' expr
+    : arrayIndex '=' expr
     | reassignment
     | declaration 
     | awaitStatement 
     | continueStatement 
     | breakStatement 
     | returnStatement 
-    | printStatement 
+    | printStatement
+    | functionCall
     ;
 
 assignment
@@ -109,7 +109,7 @@ printStatement
     ;
 
 read
-    : 'read' '(' ('int' | 'float' | 'bool' | 'string') ')'
+    : 'read' '(' TYPE ')' 
     ;
 
 expr
@@ -143,7 +143,7 @@ power
     ;
 
 arrayLiteral
-    : '[' expr (',' expr)* ']'
+    : ('[' expr (',' expr)* ']')+
     ;
 
 arrayIndex

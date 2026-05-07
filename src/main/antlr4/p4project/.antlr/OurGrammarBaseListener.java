@@ -40,6 +40,18 @@ public class OurGrammarBaseListener implements OurGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterStatementPrime(OurGrammarParser.StatementPrimeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStatementPrime(OurGrammarParser.StatementPrimeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAssignment(OurGrammarParser.AssignmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -268,13 +280,13 @@ public class OurGrammarBaseListener implements OurGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterReadStatement(OurGrammarParser.ReadStatementContext ctx) { }
+	@Override public void enterRead(OurGrammarParser.ReadContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitReadStatement(OurGrammarParser.ReadStatementContext ctx) { }
+	@Override public void exitRead(OurGrammarParser.ReadContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -167,13 +167,20 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitRead(OurGrammarParser.ReadContext context) {
+        // find the declared type without the id
+        String text = context.getText();
+        int startIndex = text.indexOf('(') + 1;
+        int endIndex = text.lastIndexOf(')');
+
+        String declaredType = text.substring(startIndex, endIndex);
         visitChildren(context);
-        return context.READTYPE().getText().toLowerCase();
+        return declaredType.toLowerCase();
     }
 
     @Override
     public String visitPrintStatement(OurGrammarParser.PrintStatementContext context) {
-        // TODO finish this plz
+        
+
         visitChildren(context);
         return null;
     }
@@ -221,9 +228,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         if (context.getChild(1).getText().matches("<|>|<=|>=")) {
             // Check data types of both sides, they must be the same and either int or float
             String leftType = visit(context.additive());
-            System.out.println("Left type: " + leftType);
             String rightType = visit(context.comp());
-            System.out.println("Right type: " + rightType);
             if (!leftType.equals(rightType)) {
                 throw new RuntimeException("Type Error: Cannot compare " + leftType + " and " + rightType);
             }
@@ -333,6 +338,10 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
                 return firstType;
             }
             throw new RuntimeException("Type Error: Empty array literal");
+        }
+
+        if (context.read() != null) {
+            return visit(context.read());
         }
 
         // simple identifier (variable)

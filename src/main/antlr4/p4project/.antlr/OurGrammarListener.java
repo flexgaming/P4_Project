@@ -27,6 +27,16 @@ public interface OurGrammarListener extends ParseTreeListener {
 	 */
 	void exitStatement(OurGrammarParser.StatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link OurGrammarParser#statementPrime}.
+	 * @param ctx the parse tree
+	 */
+	void enterStatementPrime(OurGrammarParser.StatementPrimeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OurGrammarParser#statementPrime}.
+	 * @param ctx the parse tree
+	 */
+	void exitStatementPrime(OurGrammarParser.StatementPrimeContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link OurGrammarParser#assignment}.
 	 * @param ctx the parse tree
 	 */
@@ -217,15 +227,15 @@ public interface OurGrammarListener extends ParseTreeListener {
 	 */
 	void exitPrintStatement(OurGrammarParser.PrintStatementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link OurGrammarParser#readStatement}.
+	 * Enter a parse tree produced by {@link OurGrammarParser#read}.
 	 * @param ctx the parse tree
 	 */
-	void enterReadStatement(OurGrammarParser.ReadStatementContext ctx);
+	void enterRead(OurGrammarParser.ReadContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link OurGrammarParser#readStatement}.
+	 * Exit a parse tree produced by {@link OurGrammarParser#read}.
 	 * @param ctx the parse tree
 	 */
-	void exitReadStatement(OurGrammarParser.ReadStatementContext ctx);
+	void exitRead(OurGrammarParser.ReadContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link OurGrammarParser#expr}.
 	 * @param ctx the parse tree

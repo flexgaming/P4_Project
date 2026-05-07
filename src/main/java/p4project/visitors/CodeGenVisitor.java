@@ -22,7 +22,11 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     private static final String INDENT = "    ";
 
     private String indent() {
+        if (!ctx.ftable.containsKey("main")) {
+            return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth()+2));
+        }
         return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth())); // Ensure non-negative repeat count
+        
     }
 
     @Override

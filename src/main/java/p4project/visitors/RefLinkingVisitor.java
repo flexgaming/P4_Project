@@ -8,7 +8,6 @@ import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
 import p4project.context.Symbol;
-import p4project.context.FunctionSymbol;
 
 /*
     Phase 1: Symbol assignments and declerations
@@ -68,25 +67,10 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         return visitChildren(context);
     }
 
-    @Override
-    public Void visitReadIntStatement(OurGrammarParser.ReadIntStatementContext context) {
+    /* @Override
+    public Void visitRead(OurGrammarParser.ReadContext context) {
         return visitChildren(context);
-    }
-
-    @Override
-    public Void visitReadFloatStatement(OurGrammarParser.ReadFloatStatementContext context) {
-        return visitChildren(context);
-    }
-
-    @Override
-    public Void visitReadBoolStatement(OurGrammarParser.ReadBoolStatementContext context) {
-        return visitChildren(context);
-    }
-
-    @Override
-    public Void visitReadStringStatement(OurGrammarParser.ReadStringStatementContext context) {
-        return visitChildren(context);
-    }
+    } */
 
     @Override
     public Void visitBlock(OurGrammarParser.BlockContext context) {
