@@ -17,7 +17,7 @@ public class ParserDriver {
         // While loop example with break and continue:
         String input = """
 void main() { 
-    int x; 
+    shared int x; 
     print(x, "Hello World"); 
     x = read(int); 
     thread t1 => { 
@@ -64,7 +64,7 @@ void main() {
             // print the resolved symbols after phase 2:
             System.out.println("--- Resolved Symbols After Phase 2 ---");
             ctx.resolvedSymbols.forEach((node, sym) -> {
-                System.out.println(node.getText() + " -> " + sym + " (type: " + sym.type.name + ")");
+                System.out.println(node.getText() + " -> " + sym + " (type: " + sym.type.name + ")" + (sym.prefixes.isEmpty() ? "" : ", prefixes: " + sym.prefixes));
             });
             System.out.println("--------------------------------------\n");
 

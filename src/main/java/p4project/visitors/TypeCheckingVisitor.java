@@ -70,6 +70,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitThreadAssignment(OurGrammarParser.ThreadAssignmentContext context) {
+        // TODO check if thread has any prefixes and find out which ones if any are allowed.
         String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
 

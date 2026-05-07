@@ -144,7 +144,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         if (context.typeRef() != null && !context.typeRef().isEmpty()) {
             for (int i = 0; i < context.typeRef().size(); i++) {
                 String paramType = context.typeRef(i).TYPE().getText();
-                String paramName = context.ID(i).getText();     // Note: adjust index if needed
+                String paramName = context.ID(i).getText();
 
                 sb.append(paramType).append(" ").append(paramName);
 
@@ -163,7 +163,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         String id = context.ID().getText();
         String blockCode = visit(context.block());
         if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
-        return indent() + "Future<?> " + id + " = executor.submit(() -> " + blockCode + ");\n";
+        return indent() + "CompletableFuture<?> " + id + " = executor.submit(() -> " + blockCode + ").toCompletableFuture();\n";
     }
 
     @Override
