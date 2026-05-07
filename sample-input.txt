@@ -37,7 +37,7 @@
 			parallel_sum(arr, mid+1, high, result);
 		}
 		
-		await(t1, t2);
+		awaitAll(t1, t2);
 		
 		return;
 	}
@@ -72,7 +72,7 @@
 			print(arr1);
 		}
 		
-		await(sum, merge);
+		awaitAll(sum, merge);
 	}
 
 
@@ -106,7 +106,7 @@
 			parallel_merge_sort(arr, mid+1, high);
 		}
 		// wait until both b1 and b2 is true -> finished sorting
-		await(t1, t2);
+		awaitAll(t1, t2);
 		
 		merge(arr, low, mid, high);
 		return; // Terminates the current thread

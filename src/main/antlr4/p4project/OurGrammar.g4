@@ -52,7 +52,7 @@ threadAssignment
     ;
 
 awaitStatement
-    : 'await' '(' ID (',' ID)* ')'
+    : 'awaitAll' '(' ID (',' ID)* ')'
     | 'awaitAny' '(' ID (',' ID)* ')'
     ;
 

@@ -23,6 +23,10 @@ void main() {
     thread t1 => { 
         print("In thread, x = ", x); 
     }
+    thread t2 => { 
+        print("In thread, x = ", x); 
+    }
+    awaitAny(t1, t2);
     while (x > 0) { 
         if (x == 3) { 
             break; 

@@ -2,6 +2,7 @@ package p4project.visitors;
 
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import p4project.context.CompilationContext;
 import p4project.context.Symbol;
 
@@ -72,11 +73,32 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
 
+        // check if the operator is '=>'. if not throw an error
+        if (!context.getChild(2).getText().equals("=>")) {
+            throw new RuntimeException("Syntax Error: Invalid thread assignment operator '" + context.getChild(1).getText() + "'. Expected '=>'.");
+        }
         String declaredType = symbol.type.name.toLowerCase();
         if (!declaredType.equals("thread")) {
             throw new RuntimeException("Type Error: Cannot assign non-thread to thread variable '" + id + "'");
         }
         return declaredType;
+    }
+
+    @Override
+    public String visitAwaitStatement(OurGrammarParser.AwaitStatementContext context) {
+        // TODO check if the types are threads
+        for (TerminalNode idNode : context.ID()) {
+            String id = idNode.getText();
+            Symbol symbol = this.ctx.symbolTable.resolve(id);
+            if (symbol == null) {
+                throw new RuntimeException("Variable '" + id + "' not declared.");
+            }
+            String declaredType = symbol.type.name.toLowerCase();
+            if (!declaredType.equals("thread")) {
+                throw new RuntimeException("Type Error: Cannot await non-thread variable '" + id + "'");
+            }
+        }
+        return null;
     }
 
     @Override

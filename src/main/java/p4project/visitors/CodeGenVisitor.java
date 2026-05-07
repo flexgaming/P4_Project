@@ -3,6 +3,7 @@ package p4project.visitors;
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 /*
     Phase 1: Symbol assignments and declerations
@@ -157,8 +158,25 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitThreadAssignment(OurGrammarParser.ThreadAssignmentContext context) {
         String id = context.ID().getText();
-        System.out.println("Generating code for thread assignment to " + id);
-        return indent() + "Future<?> " + id + " = executor.submit(() -> " + context.block() + ");\n";
+        String blockCode = visit(context.block());
+        if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
+        return indent() + "Future<?> " + id + " = executor.submit(() -> " + blockCode + ");\n";
+    }
+
+    @Override
+    public String visitAwaitStatement(OurGrammarParser.AwaitStatementContext context) {
+        StringBuilder sb = new StringBuilder();
+        // check if it is await or awaitAny
+        if (context.awaitAny() != null) {
+            sb.append(indent()).append("awaitAny(");
+        } else {
+            sb.append(indent()).append("await(");
+        }
+        for (TerminalNode idNode : context.ID()) {
+            String id = idNode.getText();
+            sb.append(indent() + id + ".get();\n");
+        }
+        return sb.toString();
     }
 
     @Override

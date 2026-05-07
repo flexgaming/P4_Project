@@ -48,7 +48,7 @@ public class OurGrammarParser extends Parser {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "';'", "'='", "'('", "','", "')'", "'=>'", "'await'", "'awaitAny'", 
+			null, "';'", "'='", "'('", "','", "')'", "'=>'", "'awaitAll'", "'awaitAny'", 
 			"'cast'", "'['", "']'", "'if'", "'else if'", "'else'", "'for'", "'while'", 
 			"'continue'", "'break'", "'{'", "'}'", "'return'", "'critical'", "'print'", 
 			"'read'", "'&&'", "'||'", "'=='", "'!='", "'<'", "'>'", "'<='", "'>='", 
