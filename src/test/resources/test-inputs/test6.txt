@@ -1,0 +1,3 @@
+int x = 10;
+float y = cast(float) x;
+print(y, " ", x);

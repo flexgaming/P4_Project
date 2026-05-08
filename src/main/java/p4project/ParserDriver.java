@@ -1,5 +1,8 @@
 package p4project;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -17,13 +20,13 @@ import p4project.visitors.FtableGenVisitor;
 // TODO - acceptance testing with sample programs and expected outputs
 
 public class ParserDriver {
-
     public static boolean testing = true;
     public static void main(String[] args) {
-        // While loop example with break and continue:
-        String input;
-        if (!testing) {
-            input = """
+        // TODO - maybe delete
+        if (testing) {
+            p4project.IntegrationTest.runAllIntegrationTests();
+        }
+        String input = """
 void main() { 
     shared int x; 
     print(x, "Hello World"); 
@@ -45,22 +48,6 @@ void main() {
     } 
 }
         """;;
-        } else {
-            input = """
-                void main() {
-                    shared int x;
-                    print(x, "Hello World");
-                    x = read(int);
-                    thread t1 => {
-                        print("In thread, x = ", x);
-                    }
-                    thread t2 => {
-                        print("In thread, x = ", x);
-                    }
-                    awaitAll(t1, t2);
-                }
-            """;
-        }
 
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);
@@ -130,5 +117,71 @@ void main() {
             System.out.println("--- Generated Java Code Phase 5---");
             System.out.println(javaCode);
 
+    }
+    /**
+     * Runs the full compilation pipeline on the given input string.
+     * Returns the complete console-style output as a String.
+     * Throws RuntimeException if any phase fails (we will catch it in tests).
+     */
+    public static String runFullPipeline(String input) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+        PrintStream ps = new PrintStream(baos);
+        System.setOut(ps);
+
+        try {
+            CharStream charStream = CharStreams.fromString(input);
+            OurGrammarLexer lexer = new OurGrammarLexer(charStream);
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            OurGrammarParser parser = new OurGrammarParser(tokens);
+
+            ParseTree tree = parser.program();
+
+            CompilationContext ctx = new CompilationContext();
+            ctx.symbolTable.pushScope(tree); // global scope
+
+            // Phase 1: Symbol assignments and declarations
+            AssDecVisitor assDecVisitor = new AssDecVisitor(ctx);
+            assDecVisitor.visit(tree);
+
+            // Phase 2: Reference linking
+            RefLinkingVisitor refLinkingVisitor = new RefLinkingVisitor(ctx);
+            refLinkingVisitor.visit(tree);
+
+            // Phase 3: Type checking
+            TypeCheckingVisitor typeCheckingVisitor = new TypeCheckingVisitor(ctx);
+            typeCheckingVisitor.visit(tree);
+
+            // Phase 4: ftable generation
+            FtableGenVisitor ftableGenVisitor = new FtableGenVisitor(ctx);
+            ftableGenVisitor.visit(tree);
+
+            // Phase 5: Java Code Gen
+            CodeGenVisitor codeGenVisitor = new CodeGenVisitor(ctx);
+            StringBuilder javaCode = new StringBuilder();
+            javaCode.append("import java.util.Scanner;\n");
+            javaCode.append("import java.util.concurrent.*;\n");
+            javaCode.append("import java.util.concurrent.atomic.*;\n");
+            javaCode.append("import java.util.concurrent.CompletableFuture<T>;\n\n");
+
+            if (!ctx.ftable.containsKey("main")) {
+                javaCode.append("public class Main {\n");
+                javaCode.append("    public static void main(String[] args) {\n");
+                javaCode.append("        Scanner scanner = new Scanner(System.in);\n");
+                javaCode.append("        ExecutorService executor = Executors.newCachedThreadPool();\n");
+                javaCode.append(codeGenVisitor.visit(tree));
+                javaCode.append("        executor.shutdown();\n");
+                javaCode.append("        scanner.close();\n");
+                javaCode.append("    }\n");
+                javaCode.append("}\n");
+            } else {
+                javaCode.append(codeGenVisitor.visit(tree));
+            }
+
+            return baos.toString();
+
+        } finally {
+            System.setOut(originalOut);   // always restore console
+        }
     }
 }

@@ -1,0 +1,9 @@
+float square(float x) {
+    return x * x;
+}
+
+void main(){
+    float x = 5.0;
+    x = square(x);
+    print(x);
+}

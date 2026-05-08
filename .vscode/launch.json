@@ -21,6 +21,21 @@
         "${workspaceFolder}/lib/antlr4-runtime-4.13.1.jar"
       ],
       "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Run Integration Tests",
+      "type": "java",
+      "request": "launch",
+      "mainClass": "org.junit.platform.console.ConsoleLauncher",
+      "args": [
+        "--select-package=p4project"
+      ],
+      "classPaths": [
+        "${workspaceFolder}/target/test-classes",
+        "${workspaceFolder}/target/classes",
+        "${workspaceFolder}/lib/junit-platform-console-standalone-1.9.3.jar"
+      ],
+      "cwd": "${workspaceFolder}"
     }
   ]
 }
