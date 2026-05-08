@@ -200,7 +200,7 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
     public Void visitThreadAssignment(OurGrammarParser.ThreadAssignmentContext context) {
         String id = context.ID().getText();
         String typeStr = context.typeRef().TYPE().getText();
-
+        
         VariableSymbol symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr));
         
         if (!this.ctx.symbolTable.define(symbol)) {

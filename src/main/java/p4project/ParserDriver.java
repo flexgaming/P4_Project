@@ -12,6 +12,11 @@ import p4project.visitors.RefLinkingVisitor;
 import p4project.visitors.TypeCheckingVisitor;
 import p4project.visitors.FtableGenVisitor;
 
+// TODO - add arrayLiteral
+// TODO - add arrayIndex
+// TODO - add critical section
+// TODO - add shared mutexes
+
 public class ParserDriver {
     public static void main(String[] args) {
         // While loop example with break and continue:
@@ -88,15 +93,16 @@ void main() {
             StringBuilder javaCode = new StringBuilder();
             javaCode.append("import java.util.Scanner;\n");
             javaCode.append("import java.util.concurrent.*;\n");
-            javaCode.append("import java.util.concurrent.atomic.*;\n\n");
+            javaCode.append("import java.util.concurrent.atomic.*;\n");
+            javaCode.append("import java.util.concurrent.CompletableFuture<T>;\n\n");
             if (!ctx.ftable.containsKey("main")) {
                 javaCode.append("public class Main {\n");
                 javaCode.append("    public static void main(String[] args) {\n");
                 javaCode.append("        Scanner scanner = new Scanner(System.in);\n");
                 javaCode.append("        ExecutorService executor = Executors.newCachedThreadPool();\n");
                 javaCode.append(codeGenVisitor.visit(tree));
-                javaCode.append("    executor.shutdown();\n");
-                javaCode.append("    scanner.close();\n");
+                javaCode.append("        executor.shutdown();\n");
+                javaCode.append("        scanner.close();\n");
                 javaCode.append("    }\n");
                 javaCode.append("}\n");
             } else {

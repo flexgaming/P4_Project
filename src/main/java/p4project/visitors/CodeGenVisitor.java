@@ -4,10 +4,6 @@ import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
 
-import java.util.concurrent.CompletableFuture;
-
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 /*
     Phase 1: Symbol assignments and declerations
     Phase 2: Reference linking
