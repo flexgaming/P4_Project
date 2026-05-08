@@ -1,10 +1,10 @@
 package p4project.context;
 
 import java.util.IdentityHashMap;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -23,10 +23,5 @@ public class CompilationContext {
 
     // Concurrency: track which variables are declared 'shared' — Phase 3 uses this
     // to enforce that shared vars are only mutated inside critical sections
-    public final Set<String> sharedVariables = new HashSet<>();
-
-    // The function we're currently inside — Phase 3 needs this for return type checking
-    public FunctionSymbol currentFunction = null;
-
-
+    public final List<String> sharedVariables = new ArrayList<>();
 }

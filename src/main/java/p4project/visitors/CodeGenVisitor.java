@@ -4,6 +4,13 @@ import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
 
+import java.util.List;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
 /*
     Phase 1: Symbol assignments and declerations
     Phase 2: Reference linking
@@ -15,6 +22,9 @@ import p4project.context.CompilationContext;
 public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     private final CompilationContext ctx;
     private boolean inMain = false;
+    private boolean inCriticalSection = false;
+    private List<Integer> sharedIndexes = new ArrayList<>(); // To track the index of shared variables for mutex naming
+    private List<Integer> mutexList = new ArrayList<>(); // To track which mutexes are currently aquired.
 
     public CodeGenVisitor(CompilationContext ctx) {
         this.ctx = ctx;
@@ -26,7 +36,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         if (!ctx.ftable.containsKey("main")) {
             return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth()+2)); // compensate for the extra indent level of the generated main method
         }
-        return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth())); // Ensure non-negative repeat count
+        return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth()+1)); // Ensure non-negative repeat count
         
     }
 
@@ -43,6 +53,12 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
         return result.toString();
     }
+
+    /* @Override
+    public String visitFLOAT(OurGrammarParser.FLOATContext context) {
+        return context.FLOAT().getText() + "f"; // Append 'f' to indicate a float literal in Java
+    } */
+
 
     @Override
     public String visitStatement(OurGrammarParser.StatementContext context) {
@@ -70,11 +86,6 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             // Check if this is the main function to set the inMain flag.
             if (id.equals("main")) {
                 inMain = true;
-                // Function definition
-                String blockCode = visit(context.assFunc().block());
-                // If blockCode starts with the current indent, strip it so the '{' lands directly after the function header.
-                if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
-                return "public class Main " + blockCode;
             }
 
             // Function definition
@@ -160,6 +171,20 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         String blockCode = visit(context.block());
         if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
         return indent() + "CompletableFuture<?> " + id + " = executor.submit(() -> " + blockCode + ").toCompletableFuture();\n";
+    }
+
+    @Override
+    public String visitCriticalSection(OurGrammarParser.CriticalSectionContext context) {
+        StringBuilder sb = new StringBuilder();
+        for (TerminalNode id : context.ID()) {
+            Integer index = ctx.sharedVariables.indexOf(id.getText());
+            sharedIndexes.add(index);
+        } sharedIndexes.sort(Integer::compareTo); // Ensure locks are always acquired in the same order to prevent deadlocks
+        inCriticalSection = true;
+        String blockCode = visit(context.block());
+        if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
+        sb.append(indent() + blockCode + "\n");
+        return sb.toString();
     }
 
     @Override
@@ -278,6 +303,11 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             ctx.symbolTable.restoreScope(context);
             sb.append(indent() + "Scanner scanner = new Scanner(System.in);\n");
             sb.append(indent() + "ExecutorService executor = Executors.newCachedThreadPool();\n");
+
+            for (String shared : ctx.sharedVariables) {
+                sb.append(indent() +"Lock " + "m" + ctx.sharedVariables.indexOf(shared) + " = new ReentrantLock();\n");
+            }
+
             inMain = false;
             for (OurGrammarParser.StatementContext stmt : context.statement()) {
                 String stmtCode = visit(stmt);
@@ -288,6 +318,53 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             sb.append(indent() + "scanner.close();\n");
             ctx.symbolTable.popScope();
             sb.append(indent()).append("}\n");
+        } else if (inCriticalSection) {
+            inCriticalSection = false;
+
+            List<Integer> mutexLocalList = new ArrayList<>(sharedIndexes); // To track which mutexes we want to acquire.
+            List<Integer> unlockableMutexes = new ArrayList<>(mutexLocalList); // To track which mutexes are not needed in the parent scope.
+            sharedIndexes = new ArrayList<>(); // Reset sharedIndexes for the next critical section
+            for (int index : new ArrayList<>(unlockableMutexes)) {
+                if (mutexList.contains(index)) {
+                    mutexLocalList.removeAll(Collections.singletonList(index)); // Remove from mutexLocalList to avoid trying to re-aquire it in this critical section
+                    unlockableMutexes.removeAll(Collections.singletonList(index)); // Remove from unlockableMutexes if it's already aquired in an outer critical section
+                    mutexLocalList.sort(Integer::compareTo);
+                    unlockableMutexes.sort(Integer::compareTo);
+                }
+            }
+            
+            unlockableMutexes.sort(Integer::compareTo);
+            mutexLocalList.sort(Integer::compareTo);
+            for (int value : mutexList) {
+                if (!mutexList.isEmpty() && !mutexLocalList.isEmpty() && mutexLocalList.get(0) < value) {
+                    
+                    System.out.println("You should get here: " + value);
+                    for (int mutex : mutexList) {
+                        sb.append(indent() + "m" + mutex + ".unlock();\n");
+                        mutexLocalList.add(mutex);
+                    }
+                    mutexLocalList.sort(Integer::compareTo); // Ensure locks are always released in the same order they were acquired to prevent deadlocks.
+                    break;
+                } 
+            }
+            mutexList = new ArrayList<>(mutexLocalList); // Update the global mutexList to reflect the currently aquired locks after unlocking those that needed to be released.
+            
+            for (int index : mutexLocalList) { // Acquire locks in the current critical section using a spinlock approach with a exponentially increasing sleep time to reduce CPU contention.
+                sb.append(indent() + "for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) Thread.sleep((long) i);\n");
+            }
+            sb.append(indent() + "try {\n");
+            for (OurGrammarParser.StatementContext stmt : context.statement()) {
+                String stmtCode = visit(stmt);
+                if (stmtCode == null || stmtCode.isEmpty()) continue;
+                sb.append("    " + stmtCode);
+            }
+            sb.append(indent() + "} finally {\n");
+            for (int index : unlockableMutexes) {
+                sb.append(indent() + "    " + "m" + index + ".unlock();\n");
+            }
+            sb.append(indent() + "}\n");
+
+
         } else { // All other blocks
             for (OurGrammarParser.StatementContext stmt : context.statement()) {
                 String stmtCode = visit(stmt);

@@ -14,8 +14,8 @@ import p4project.visitors.FtableGenVisitor;
 
 // TODO - add arrayLiteral
 // TODO - add arrayIndex
-// TODO - add critical section
-// TODO - add shared mutexes
+// TODO - floats have to have f in java.
+// TODO - initialize every variable to be 0 or null.
 
 public class ParserDriver {
     public static void main(String[] args) {
@@ -32,6 +32,18 @@ void main() {
         print("In thread, x = ", x); 
     }
     awaitAll(t1, t2);
+    x = 1;
+    shared int y = 2;
+    shared int z = 3;
+    critical(x, z) {
+        critical(x, y, z) {
+            print("In critical section, x = ", x, " y = ", y, " z = ", z); 
+            x = x + 1; 
+            y = y + 1; 
+            z = z + 1; 
+            } 
+        }
+    
     while (x > 0) { 
         if (x == 3) { 
             break; 
@@ -93,21 +105,26 @@ void main() {
             StringBuilder javaCode = new StringBuilder();
             javaCode.append("import java.util.Scanner;\n");
             javaCode.append("import java.util.concurrent.*;\n");
-            javaCode.append("import java.util.concurrent.atomic.*;\n");
+            javaCode.append("import java.util.concurrent.Locks.*;\n");
             javaCode.append("import java.util.concurrent.CompletableFuture<T>;\n\n");
+            javaCode.append("public class Main {\n");
             if (!ctx.ftable.containsKey("main")) {
-                javaCode.append("public class Main {\n");
                 javaCode.append("    public static void main(String[] args) {\n");
                 javaCode.append("        Scanner scanner = new Scanner(System.in);\n");
                 javaCode.append("        ExecutorService executor = Executors.newCachedThreadPool();\n");
+                
+                for (String shared : ctx.sharedVariables) {
+                    javaCode.append("        Lock " + "m" + ctx.sharedVariables.indexOf(shared) + " = new ReentrantLock();\n");
+                }
+                
                 javaCode.append(codeGenVisitor.visit(tree));
                 javaCode.append("        executor.shutdown();\n");
                 javaCode.append("        scanner.close();\n");
                 javaCode.append("    }\n");
-                javaCode.append("}\n");
             } else {
                 javaCode.append(codeGenVisitor.visit(tree));
             }
+            javaCode.append("}\n");
             System.out.println("--- Generated Java Code Phase 5---");
             System.out.println(javaCode);
 

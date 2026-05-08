@@ -2,6 +2,8 @@ package p4project.visitors;
 
 import java.util.List;
 
+import javax.management.RuntimeErrorException;
+
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import p4project.OurGrammarBaseVisitor;
@@ -135,16 +137,13 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
 
     @Override
     public Void visitCriticalSection(OurGrammarParser.CriticalSectionContext context) {
-        this.ctx.symbolTable.restoreScope(context);
-        List<TerminalNode> sharedVars = context.ID().stream()
-            .filter(id -> this.ctx.sharedVariables.contains(id.getText()))
-            .toList();
-        for (var id : sharedVars) {
-            this.ctx.resolvedSymbols.put(id, this.ctx.symbolTable.resolve(id.getText()));
+        for (TerminalNode id : context.ID()) {
+            Symbol symbol = this.ctx.resolvedSymbols.get(id);
+            if (symbol != null && !symbol.isShared()) {
+                throw new RuntimeException("'" + id.getText() + "' must be declared 'shared' to be used in a critical section");
+            } 
         }
-        visitChildren(context);
-        this.ctx.symbolTable.popScope();
-        return null;
+        return visitChildren(context);
     }
     
     @Override

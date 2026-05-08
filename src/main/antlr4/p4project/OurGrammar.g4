@@ -173,7 +173,7 @@ functionCall
 
 NEGATIVE : '-';
 INT : [0-9]+ ;
-FLOAT : [0-9]+ ('.' [0-9]+?)? ;
+FLOAT : [0-9]+ ('.' [0-9]+)? ;
 BOOL : 'true' | 'false' ;
 CHAR : '\'' . '\'' ;
 STRING : '"' .*? '"' ;
