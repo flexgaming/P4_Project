@@ -15,8 +15,6 @@ import p4project.visitors.RefLinkingVisitor;
 import p4project.visitors.TypeCheckingVisitor;
 import p4project.visitors.FtableGenVisitor;
 
-// TODO - unit testing for each visitor phase
-// TODO - integration testing for the whole pipeline
 // TODO - acceptance testing with sample programs and expected outputs
 
 public class ParserDriver {
