@@ -17,9 +17,13 @@ import p4project.visitors.FtableGenVisitor;
 // TODO - acceptance testing with sample programs and expected outputs
 
 public class ParserDriver {
+
+    public static boolean testing = true;
     public static void main(String[] args) {
         // While loop example with break and continue:
-        String input = """
+        String input;
+        if (!testing) {
+            input = """
 void main() { 
     shared int x; 
     print(x, "Hello World"); 
@@ -41,6 +45,22 @@ void main() {
     } 
 }
         """;;
+        } else {
+            input = """
+                void main() {
+                    shared int x;
+                    print(x, "Hello World");
+                    x = read(int);
+                    thread t1 => {
+                        print("In thread, x = ", x);
+                    }
+                    thread t2 => {
+                        print("In thread, x = ", x);
+                    }
+                    awaitAll(t1, t2);
+                }
+            """;
+        }
 
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);
