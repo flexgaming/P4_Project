@@ -12,7 +12,7 @@ class IntegrationTest {
 
     private static final String TEST_DIR = "src/test/resources/";
     private static final String EXPECTED_DIR = TEST_DIR + "expected/";
-    private static final String OUTPUT_DIR = "test-outputs/";
+    private static final String OUTPUT_DIR = TEST_DIR + "test-outputs/";
 
     @BeforeAll
     static void setup() throws IOException {
@@ -54,11 +54,14 @@ class IntegrationTest {
             Files.writeString(Paths.get(outputPath), actualOutput);
 
             // Compare
-            String expected = Files.readString(Paths.get(expectedPath)).trim();
-            if (actualOutput.trim().equals(expected)) {
+            String expected = Files.readString(Paths.get(expectedPath)).trim().replace("\r\n", "\n");
+            actualOutput = actualOutput.trim().replace("\r\n", "\n");
+            
+            if (actualOutput.equals(expected)) {
                 System.out.println(testName + " = success! Matches expected");
             } else {
                 System.out.println(testName + " = Failure! didn't match expected result. See " + outputPath);
+                assertEquals(expected, actualOutput, testName + " output did not match expected");
             }
 
         } catch (RuntimeException e) {

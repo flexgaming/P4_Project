@@ -1,0 +1,3 @@
+RuntimeException caught:
+Variable 'x' not declared.
+java.lang.RuntimeException: Variable 'x' not declared.

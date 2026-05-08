@@ -20,12 +20,7 @@ import p4project.visitors.FtableGenVisitor;
 // TODO - acceptance testing with sample programs and expected outputs
 
 public class ParserDriver {
-    public static boolean testing = true;
     public static void main(String[] args) {
-        // TODO - maybe delete
-        if (testing) {
-            p4project.IntegrationTest.runAllIntegrationTests();
-        }
         String input = """
 void main() { 
     shared int x; 
@@ -178,7 +173,7 @@ void main() {
                 javaCode.append(codeGenVisitor.visit(tree));
             }
 
-            return baos.toString();
+            return javaCode.toString();
 
         } finally {
             System.setOut(originalOut);   // always restore console
