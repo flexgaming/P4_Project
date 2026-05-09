@@ -1,10 +1,17 @@
 package p4project;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import p4project.context.CompilationContext;
 import p4project.context.TypeSymbol;
@@ -14,8 +21,6 @@ import p4project.visitors.CodeGenVisitor;
 import p4project.visitors.FtableGenVisitor;
 import p4project.visitors.RefLinkingVisitor;
 import p4project.visitors.TypeCheckingVisitor;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class UnitTest {
 
@@ -50,21 +55,28 @@ class UnitTest {
         return parser.factor();
     }
 
-    @Test
-    void testAssDecVisitorAssignment() {
-        System.out.println("========== Running testAssDecVisitorAssignment ==========");
-        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment("int i = 5;");
+    @ParameterizedTest(name = "Testing assignment: {0}")
+    @CsvSource({
+        "'int i = 5;', 'i', 'int', false, false",
+        "'const int j = 10;', 'j', 'int', true, false",
+        "'shared float radius = 3.14;', 'radius', 'float', false, true"
+    })
+    void testAssDecVisitorAssignment(String input, String expectedVarName, String expectedType, boolean expectConst, boolean expectShared) {
+        System.out.println("========== Running testAssDecVisitorAssignment for: " + input + " ==========");
+        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment(input);
         ctx.symbolTable.pushScope(assignmentCtx); // Dummy global scope
 
         AssDecVisitor visitor = new AssDecVisitor(ctx);
         visitor.visitAssignment(assignmentCtx);
 
         try {
-            // Verify that variable 'i' was added to the symbol table
-            VariableSymbol symbol = (VariableSymbol) ctx.symbolTable.resolve("i");
-            assertNotNull(symbol, "Variable 'i' should be in the symbol table.");
-            assertEquals("int", symbol.type.name, "Type of 'i' should be 'int'.");
-            System.out.println("testAssDecVisitorAssignment = success! Variable 'i' added correctly");
+            // Verify that variable was added to the symbol table
+            VariableSymbol symbol = (VariableSymbol) ctx.symbolTable.resolve(expectedVarName);
+            assertNotNull(symbol, "Variable '" + expectedVarName + "' should be in the symbol table.");
+            assertEquals(expectedType, symbol.type.name, "Type of '" + expectedVarName + "' should be '" + expectedType + "'.");
+            assertEquals(expectConst, symbol.isConst(), "Const prefix check failed for '" + expectedVarName + "'.");
+            assertEquals(expectShared, symbol.isShared(), "Shared prefix check failed for '" + expectedVarName + "'.");
+            System.out.println("testAssDecVisitorAssignment = success! Variable '" + expectedVarName + "' added correctly");
         } catch (AssertionError e) {
             System.out.println("testAssDecVisitorAssignment = failure! Error: " + e.getMessage());
             throw e;
@@ -72,16 +84,19 @@ class UnitTest {
         System.out.println("------------------------------------------------------------");
     }
 
-    @Test
-    void testRefLinkingVisitorAssignment() {
-        System.out.println("========== Running testRefLinkingVisitorAssignment ==========");
-        // Setup table with existing int type if needed by the phase
-        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment("int j = 10;");
+    @ParameterizedTest(name = "Testing ref linking assignment: {0}")
+    @CsvSource({
+        "'int j = 10;', 'j', 'int'",
+        "'float radius = 3.14;', 'radius', 'float'",
+        "'shared float radius = 3.14;', 'radius', 'float'"
+    })
+    void testRefLinkingVisitorAssignment(String input, String expectedVarName, String expectedTypeName) {
+        System.out.println("========== Running testRefLinkingVisitorAssignment for: " + input + " ==========");
+        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment(input);
         ctx.symbolTable.pushScope(assignmentCtx);
         
-        // Setup initial phase
-        AssDecVisitor assDecVisitor = new AssDecVisitor(ctx);
-        assDecVisitor.visitAssignment(assignmentCtx);
+        // Simulating data received from AssDecVisitor
+        ctx.symbolTable.define(new VariableSymbol(expectedVarName, TypeSymbol.fromString(expectedTypeName)));
 
         RefLinkingVisitor visitor = new RefLinkingVisitor(ctx);
         visitor.visitAssignment(assignmentCtx);
@@ -89,7 +104,8 @@ class UnitTest {
         try {
             // Verify resolved types are tracked
             assertFalse(ctx.resolvedSymbols.isEmpty(), "Reference linking should resolve symbols.");
-            System.out.println("testRefLinkingVisitorAssignment = success! Symbols resolved properly");
+            assertEquals(expectedVarName, ctx.resolvedSymbols.get(assignmentCtx.ID()).ID, "Symbol '" + expectedVarName + "' should be resolved correctly.");
+            System.out.println("testRefLinkingVisitorAssignment = success! Symbol '" + expectedVarName + "' resolved properly");
         } catch (AssertionError e) {
             System.out.println("testRefLinkingVisitorAssignment = failure! Error: " + e.getMessage());
             throw e;
@@ -97,14 +113,21 @@ class UnitTest {
         System.out.println("------------------------------------------------------------");
     }
 
-    @Test
-    void testTypeCheckingVisitorAssignment() {
-        System.out.println("========== Running testTypeCheckingVisitorAssignment ==========");
-        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment("int k = 15;");
+    @ParameterizedTest(name = "Testing type checking assignment: {0}")
+    @CsvSource({
+        "'int k = 15;', 'k', 'int'",
+        "'float radius = 3.14;', 'radius', 'float'",
+        "'shared float radius = 3.14;', 'radius', 'float'"
+    })
+    void testTypeCheckingVisitorAssignment(String input, String expectedVarName, String expectedTypeName) {
+        System.out.println("========== Running testTypeCheckingVisitorAssignment for: " + input + " ==========");
+        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment(input);
         ctx.symbolTable.pushScope(assignmentCtx);
 
-        new AssDecVisitor(ctx).visitAssignment(assignmentCtx);
-        new RefLinkingVisitor(ctx).visitAssignment(assignmentCtx);
+        // Predefine data expected from past phases
+        VariableSymbol kSym = new VariableSymbol(expectedVarName, TypeSymbol.fromString(expectedTypeName));
+        ctx.symbolTable.define(kSym);
+        ctx.resolvedSymbols.put(assignmentCtx.ID(), kSym);
 
         TypeCheckingVisitor visitor = new TypeCheckingVisitor(ctx);
         try {
@@ -118,15 +141,21 @@ class UnitTest {
         System.out.println("------------------------------------------------------------");
     }
 
-    @Test
-    void testFtableGenVisitorAssignment() {
-        System.out.println("============ Running testFtableGenVisitorAssignment ==========");
-        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment("int l = 20;");
+    @ParameterizedTest(name = "Testing ftable gen assignment: {0}")
+    @CsvSource({
+        "'int l = 20;', 'l', 'int'",
+        "'float radius = 3.14;', 'radius', 'float'",
+        "'shared float radius = 3.14;', 'radius', 'float'"
+    })
+    void testFtableGenVisitorAssignment(String input, String expectedVarName, String expectedTypeName) {
+        System.out.println("============ Running testFtableGenVisitorAssignment for: " + input + " ==========");
+        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment(input);
         ctx.symbolTable.pushScope(assignmentCtx);
 
-        new AssDecVisitor(ctx).visitAssignment(assignmentCtx);
-        new RefLinkingVisitor(ctx).visitAssignment(assignmentCtx);
-        new TypeCheckingVisitor(ctx).visitAssignment(assignmentCtx);
+        // Predefine data expected from past phases
+        VariableSymbol lSym = new VariableSymbol(expectedVarName, TypeSymbol.fromString(expectedTypeName));
+        ctx.symbolTable.define(lSym);
+        ctx.resolvedSymbols.put(assignmentCtx.ID(), lSym);
 
         FtableGenVisitor visitor = new FtableGenVisitor(ctx);
         try {
@@ -139,23 +168,28 @@ class UnitTest {
         System.out.println("------------------------------------------------------------");
     }
 
-    @Test
-    void testCodeGenVisitorAssignment() {
-        System.out.println("========== Running testCodeGenVisitorAssignment ==========");
-        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment("int m = 25;");
+    @ParameterizedTest(name = "Testing code gen assignment: {0}")
+    @CsvSource({
+        "'int m = 25;', 'm', 'int', 'int m = 25;'",
+        "'float radius = 3.14;', 'radius', 'float', 'float radius = 3.14;'",
+        "'shared float radius = 3.14;', 'radius', 'float', 'float radius = 3.14;'"
+    })
+    void testCodeGenVisitorAssignment(String input, String expectedVarName, String expectedTypeName, String expectedCodeContent) {
+        System.out.println("========== Running testCodeGenVisitorAssignment for: " + input + " ==========");
+        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment(input);
         ctx.symbolTable.pushScope(assignmentCtx);
 
-        new AssDecVisitor(ctx).visitAssignment(assignmentCtx);
-        new RefLinkingVisitor(ctx).visitAssignment(assignmentCtx);
-        new TypeCheckingVisitor(ctx).visitAssignment(assignmentCtx);
-        new FtableGenVisitor(ctx).visitAssignment(assignmentCtx);
+        // Predefine data expected from past phases
+        VariableSymbol mSym = new VariableSymbol(expectedVarName, TypeSymbol.fromString(expectedTypeName));
+        ctx.symbolTable.define(mSym);
+        ctx.resolvedSymbols.put(assignmentCtx.ID(), mSym);
 
         CodeGenVisitor visitor = new CodeGenVisitor(ctx);
         String generatedCode = visitor.visitAssignment(assignmentCtx);
         
         try {
             assertNotNull(generatedCode, "CodeGenVisitor should return a non-null string.");
-            assertTrue(generatedCode.contains("int m = 25;"), "Generated code should contain 'int m = 25;'");
+            assertTrue(generatedCode.contains(expectedCodeContent), "Generated code should contain '" + expectedCodeContent + "', but got: " + generatedCode);
             System.out.println("testCodeGenVisitorAssignment = success! Generated matching java code string");
         } catch (AssertionError e) {
             System.out.println("testCodeGenVisitorAssignment = failure! Error: " + e.getMessage());
