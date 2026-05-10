@@ -33,6 +33,7 @@ void main() {
     }
     awaitAll(t1, t2);
     x = 1;
+    int[] l = [1, 2, 3];
     shared int y = 2;
     shared int z = 3;
     critical(x, z) {

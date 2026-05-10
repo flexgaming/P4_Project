@@ -338,7 +338,6 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             for (int value : mutexList) {
                 if (!mutexList.isEmpty() && !mutexLocalList.isEmpty() && mutexLocalList.get(0) < value) {
                     
-                    System.out.println("You should get here: " + value);
                     for (int mutex : mutexList) {
                         sb.append(indent() + "m" + mutex + ".unlock();\n");
                         mutexLocalList.add(mutex);

@@ -52,8 +52,21 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
 
         String id = context.ID().getText();
         String typeStr = context.typeRef().TYPE().getText();
+        String arrCheck = context.typeRef().getText();
 
-        VariableSymbol symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr));
+        int dims = (int) arrCheck.chars().filter(ch -> ch == '[').count();        
+        VariableSymbol symbol;
+        
+        if (dims > 0) {
+            int dimensions[] = new int[dims];
+            for (int i = 0; i < dims; i++) {
+                dimensions[i] = Integer.parseInt(context.typeRef().INT(i).getText());
+            }
+            symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr), dimensions);
+        } else {
+            symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr));
+        }
+
         symbol.prefixes.addAll(prefixes);
         if (!this.ctx.symbolTable.define(symbol)) {
             throw new RuntimeException("Duplicate declaration: '" + id + "'");
@@ -92,6 +105,9 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
 
         String id = context.ID().getText();
         String typeStr = context.typeRef().TYPE().getText();
+        String arrCheck = context.typeRef().getText();
+
+        int dims = (int) arrCheck.chars().filter(ch -> ch == '[').count();  
 
         // Function declaration with parameters
         if (context.assFunc() != null) {
@@ -123,8 +139,20 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
             return visitChildren(context);
         } 
         // Variable declaration with initialization
-        else if (context.assVar() != null) { 
-            VariableSymbol symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr));
+        else if (context.assVar() != null) {
+
+            VariableSymbol symbol;
+
+            if (dims > 0) {
+                int dimensions[] = new int[dims];
+                for (int i = 0; i < dims; i++) {
+                    dimensions[i] = Integer.parseInt(context.typeRef().INT(i).getText());
+                }
+                symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr), dimensions);
+            } else {
+                symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr));
+            }
+
             symbol.prefixes.addAll(prefixes);
             if (!this.ctx.symbolTable.define(symbol)) {
                 throw new RuntimeException("Duplicate declaration: '" + id + "'");
@@ -150,6 +178,13 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
 
         String id = context.ID().getText();
         String typeStr = context.typeRef().TYPE().getText();
+        String contexStr = context.getText();
+        
+        
+        int eqIndex = contexStr.indexOf("=");
+        String afterEquals = contexStr.substring(eqIndex + 1);
+        
+        int dims = (int) afterEquals.chars().filter(ch -> ch == '[').count();  
 
         // Function declaration with parameters
         if (context.assFunc() != null) {
@@ -182,7 +217,20 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
         } 
         // Variable declaration with initialization
         else if (context.assVar() != null) { 
-            VariableSymbol symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr));
+            
+            VariableSymbol symbol;
+
+            // Get the correct number of dimensions for array declarations by counting the brackets after the equals sign, not in the type reference
+            /* if (dims > 0) {
+                int dimensions[] = new int[dims];
+                for (int i = 0; i < dims; i++) {
+                    dimensions[i] = Integer.parseInt(context.typeRef().INT(i).getText());
+                }
+                symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr), dimensions);
+            } else { */
+                symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr));
+            //}
+
             symbol.prefixes.addAll(prefixes);
             if (!this.ctx.symbolTable.define(symbol)) {
                 throw new RuntimeException("Duplicate declaration: '" + id + "'");
