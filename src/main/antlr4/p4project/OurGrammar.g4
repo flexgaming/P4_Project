@@ -144,12 +144,10 @@ power
 
 arrayLiteral
     : ('[' expr (',' expr)* ']')+
-    | ('{' expr (',' expr)* '}')+
     ;
 
 arrayIndex
-    : ID '[' expr ']' ('[' expr ']')*
-    | ID ('[' expr ']')+
+    : ID ('[' expr ']')+
     ;
 
 factor

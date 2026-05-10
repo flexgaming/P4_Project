@@ -8,12 +8,15 @@ import p4project.context.Symbol;
 import p4project.context.TypeSymbol;
 import p4project.context.VariableSymbol;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 /*
     Phase 1: Symbol assignments and declerations
     Phase 2: Reference linking
     Phase 3: Type checking
     -> Phase 4: vtable and ftable generation
-    Phase 5: Java Code Gen
+    Phase 5: Mutex and deep nested critical section checking
+    Phase 6: Java Code Gen
 */
 
 public class FtableGenVisitor extends OurGrammarBaseVisitor<Void> {
@@ -30,7 +33,7 @@ public class FtableGenVisitor extends OurGrammarBaseVisitor<Void> {
 
         if (context.assFunc() != null) {
             if (!(symbol instanceof FunctionSymbol functionSymbol)) {
-                throw new RuntimeException("'" + id + "' is not a function declaration.");
+                throw new RuntimeException("'" + id + "' assigned a function but is not declared as a function.");
             }
 
             functionSymbol.declaredAtDepth = this.ctx.symbolTable.getDepth();
@@ -44,6 +47,7 @@ public class FtableGenVisitor extends OurGrammarBaseVisitor<Void> {
                 functionSymbol.parameters.add(new VariableSymbol(parameterName, TypeSymbol.fromString(parameterType)));
             }
 
+            functionSymbol.context = context; // store the context of the function
             this.ctx.ftable.putIfAbsent(id, functionSymbol);
             return visitChildren(context);
         }

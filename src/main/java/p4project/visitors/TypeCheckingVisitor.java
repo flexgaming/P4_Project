@@ -11,7 +11,8 @@ import p4project.context.Symbol;
     Phase 2: Reference linking
     -> Phase 3: Type checking
     Phase 4: vtable and ftable generation
-    Phase 5: Java Code Gen
+    Phase 5: Mutex and deep nested critical section checking
+    Phase 6: Java Code Gen
 */
 
 public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
