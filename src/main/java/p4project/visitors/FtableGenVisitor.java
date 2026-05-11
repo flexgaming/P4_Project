@@ -77,6 +77,14 @@ public class FtableGenVisitor extends OurGrammarBaseVisitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitWhileStatement(OurGrammarParser.WhileStatementContext context) {
+        this.ctx.symbolTable.pushScope(context);
+        visitChildren(context);
+        this.ctx.symbolTable.popScope();
+        return null;
+    }
+
     // In a simple script, no functions or classes exist.
     // When they do, intercept them here to populate your vt/ftables:
     //

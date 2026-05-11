@@ -11,6 +11,7 @@ import p4project.visitors.CodeGenVisitor;
 import p4project.visitors.RefLinkingVisitor;
 import p4project.visitors.TypeCheckingVisitor;
 import p4project.visitors.FtableGenVisitor;
+import p4project.visitors.MutexVisitor;
 
 // TODO - add arrayLiteral
 // TODO - add arrayIndex
@@ -52,7 +53,6 @@ void main() {
             x = x + 1; 
             y = y + 1; 
             z = z + 1; 
-            criticalFunc(x);
         } 
     }
     criticalFunc(x);
@@ -102,6 +102,7 @@ void main() {
             TypeCheckingVisitor typeCheckingVisitor = new TypeCheckingVisitor(ctx);
             typeCheckingVisitor.visit(tree);
             System.out.println("--- Type Checking Passed Phase 3 ---\n");
+            System.out.println("-----------------------------------\n");
 
         // 4. ftable generation
             FtableGenVisitor ftableGenVisitor = new FtableGenVisitor(ctx);
@@ -112,8 +113,13 @@ void main() {
             });
             System.out.println("-----------------------------------\n");
 
+        // 5. Mutex analysis
+            MutexVisitor mutexVisitor = new MutexVisitor(ctx);
+            System.out.println("--- Analyzing Mutexes Phase 5 ---");
+            mutexVisitor.visit(tree);
+            System.out.println("-----------------------------------\n");
 
-        // 5. Java Code Gen
+        // 6. Java Code Gen
             CodeGenVisitor codeGenVisitor = new CodeGenVisitor(ctx);
             StringBuilder javaCode = new StringBuilder();
             javaCode.append("import java.util.Scanner;\n");
@@ -138,7 +144,7 @@ void main() {
                 javaCode.append(codeGenVisitor.visit(tree));
             }
             javaCode.append("}\n");
-            System.out.println("--- Generated Java Code Phase 5---");
+            System.out.println("--- Generated Java Code Phase 6---");
             System.out.println(javaCode);
 
     }
