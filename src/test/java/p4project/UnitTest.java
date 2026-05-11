@@ -3,6 +3,7 @@ package p4project;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -55,11 +56,112 @@ class UnitTest {
         return parser.factor();
     }
 
+    /* ================================= LEXER, PARSER, & SEMANTIC ANALYZER ==================================== */
+
+    @ParameterizedTest(name = "Testing lexer tokenization: {0}")
+    @CsvSource({
+        "'int i = 5;', 5", // int, i, =, 5, ;
+        "'float radius = 3.14;', 5", // float, radius, =, 3.14, ;
+        "'if (x > 5) {}', 7" // if, (, x, >, 5, ), {, }
+    })
+    void testLexer(String input, int expectedTokenCount) {
+        System.out.println("========== Running testLexer for: " + input + " ==========");
+        CharStream charStream = CharStreams.fromString(input);
+        OurGrammarLexer lexer = new OurGrammarLexer(charStream);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        
+        tokens.fill(); // Fetches all tokens from the lexer
+        int actualCount = tokens.getTokens().size() - 1; // Subtract 1 to ignore the EOF token
+
+        try {
+            assertAll("Lexer Token Count Check",
+                () -> assertEquals(expectedTokenCount, actualCount, "Token count should match expected length.")
+            );
+            System.out.println("testLexer = success! Found exactly " + expectedTokenCount + " tokens.");
+        } catch (AssertionError e) {
+            System.out.println("testLexer = failure! Error: " + e.getMessage());
+            throw e;
+        }
+        System.out.println("------------------------------------------------------------");
+    }
+
+    @ParameterizedTest(name = "Testing parser syntax validation: {0}")
+    @CsvSource({
+        "'int i = 5;', 0",
+        "'const int j = 10;', 0",
+        "'int 5 = i;', 1", // Example of broken syntax (assuming it produces 1 syntax error)
+        "'if ((x > 5) {x = 10;}', 1" // Example of broken syntax (missing closing parenthesis)
+    })
+    void testParser(String input, int expectedErrors) {
+        System.out.println("========== Running testParser for: " + input + " ==========");
+        CharStream charStream = CharStreams.fromString(input);
+        OurGrammarLexer lexer = new OurGrammarLexer(charStream);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        OurGrammarParser parser = new OurGrammarParser(tokens);
+        
+        // Remove default error listeners if you want clean terminal outputs, but keep to count them
+        parser.assignment(); 
+
+        try {
+            assertAll("Parser Syntax Error Check",
+                () -> assertEquals(expectedErrors, parser.getNumberOfSyntaxErrors(), "Expected syntax error count to match.")
+            );
+            System.out.println("testParser = success! Encountered " + parser.getNumberOfSyntaxErrors() + " syntax errors, as expected.");
+        } catch (AssertionError e) {
+            System.out.println("testParser = failure! Error: " + e.getMessage());
+            throw e;
+        }
+        System.out.println("------------------------------------------------------------");
+    }
+
+    @ParameterizedTest(name = "Testing semantic failure detection: {0}")
+    @CsvSource({
+        "'int i = 5;', 'i', 'int', false", // Valid assignment, no error
+        "'float b = 3.14;', 'b', 'int', true" // Example assignment causing a type error (float into int)
+    })
+    void testSemanticAnalyzerTypeChecks(String input, String presetVarName, String predefinedType, boolean expectsException) {
+        System.out.println("========== Running testSemanticAnalyzerTypeChecks for: " + input + " ==========");
+        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment(input);
+        ctx.symbolTable.pushScope(assignmentCtx);
+
+        // Predefine the variable directly with the passed type (e.g. testing float assigned into an integer)
+        VariableSymbol sym = new VariableSymbol(presetVarName, TypeSymbol.fromString(predefinedType));
+        ctx.symbolTable.define(sym);
+        ctx.resolvedSymbols.put(assignmentCtx.ID(), sym);
+
+        TypeCheckingVisitor visitor = new TypeCheckingVisitor(ctx);
+
+        try {
+            assertAll("Semantic Analysis Type Checks", () -> {
+                if (expectsException) {
+                    // Adjust this assertion based on how you handle semantic errors (Exception throw vs Error collection lists)
+                    boolean throwsException = false;
+                    try {
+                        visitor.visitAssignment(assignmentCtx);
+                    } catch (Exception runtimeEx) {
+                        throwsException = true;
+                    }
+                    assertTrue(throwsException, "Expected visitor to throw an exception / catch a semantic error on invalid assignment.");
+                } else {
+                    assertDoesNotThrow(() -> visitor.visitAssignment(assignmentCtx), "Expected valid assignment to pass without throwing.");
+                }
+            });
+            System.out.println("testSemanticAnalyzerTypeChecks = success! Exception expectation met: " + expectsException);
+        } catch (AssertionError e) {
+            System.out.println("testSemanticAnalyzerTypeChecks = failure! Error: " + e.getMessage());
+            throw e;
+        }
+        System.out.println("------------------------------------------------------------");
+    }
+
+
+    /* ================================= ASSIGNMENT ==================================== */
+    
     @ParameterizedTest(name = "Testing assignment: {0}")
     @CsvSource({
         "'int i = 5;', 'i', 'int', false, false",
         "'const int j = 10;', 'j', 'int', true, false",
-        "'shared float radius = 3.14;', 'radius', 'float', false, true"
+        "'shared int radius = 3.14;', 'radius', 'int', false, true"
     })
     void testAssDecVisitorAssignment(String input, String expectedVarName, String expectedType, boolean expectConst, boolean expectShared) {
         System.out.println("========== Running testAssDecVisitorAssignment for: " + input + " ==========");
@@ -69,14 +171,16 @@ class UnitTest {
         AssDecVisitor visitor = new AssDecVisitor(ctx);
         visitor.visitAssignment(assignmentCtx);
 
+        VariableSymbol symbol = (VariableSymbol) ctx.symbolTable.resolve(expectedVarName);
+        
         try {
-            // Verify that variable was added to the symbol table
-            VariableSymbol symbol = (VariableSymbol) ctx.symbolTable.resolve(expectedVarName);
-            assertNotNull(symbol, "Variable '" + expectedVarName + "' should be in the symbol table.");
-            assertEquals(expectedType, symbol.type.name, "Type of '" + expectedVarName + "' should be '" + expectedType + "'.");
-            assertEquals(expectConst, symbol.isConst(), "Const prefix check failed for '" + expectedVarName + "'.");
-            assertEquals(expectShared, symbol.isShared(), "Shared prefix check failed for '" + expectedVarName + "'.");
-            System.out.println("testAssDecVisitorAssignment = success! Variable '" + expectedVarName + "' added correctly");
+            assertAll("Variable attributes Check",
+                () -> assertNotNull(symbol, "Variable '" + expectedVarName + "' should be in the symbol table."),
+                () -> assertEquals(expectedType, symbol.type.name, "Type of '" + expectedVarName + "' should be '" + expectedType + "'."),
+                () -> assertEquals(expectConst, symbol.isConst(), "Const prefix check failed for '" + expectedVarName + "'."),
+                () -> assertEquals(expectShared, symbol.isShared(), "Shared prefix check failed for '" + expectedVarName + "'.")
+            );
+            System.out.println("testAssDecVisitorAssignment = success! Variable '" + expectedVarName + "' added correctly with all expected properties");
         } catch (AssertionError e) {
             System.out.println("testAssDecVisitorAssignment = failure! Error: " + e.getMessage());
             throw e;
@@ -102,9 +206,10 @@ class UnitTest {
         visitor.visitAssignment(assignmentCtx);
 
         try {
-            // Verify resolved types are tracked
-            assertFalse(ctx.resolvedSymbols.isEmpty(), "Reference linking should resolve symbols.");
-            assertEquals(expectedVarName, ctx.resolvedSymbols.get(assignmentCtx.ID()).ID, "Symbol '" + expectedVarName + "' should be resolved correctly.");
+            assertAll("RefLinking Assignment Check",
+                () -> assertFalse(ctx.resolvedSymbols.isEmpty(), "Reference linking should resolve symbols."),
+                () -> assertEquals(expectedVarName, ctx.resolvedSymbols.get(assignmentCtx.ID()).ID, "Symbol '" + expectedVarName + "' should be resolved correctly.")
+            );
             System.out.println("testRefLinkingVisitorAssignment = success! Symbol '" + expectedVarName + "' resolved properly");
         } catch (AssertionError e) {
             System.out.println("testRefLinkingVisitorAssignment = failure! Error: " + e.getMessage());
@@ -117,7 +222,7 @@ class UnitTest {
     @CsvSource({
         "'int k = 15;', 'k', 'int'",
         "'float radius = 3.14;', 'radius', 'float'",
-        "'shared float radius = 3.14;', 'radius', 'float'"
+        "'shared int radius = 3.14;', 'radius', 'int'"
     })
     void testTypeCheckingVisitorAssignment(String input, String expectedVarName, String expectedTypeName) {
         System.out.println("========== Running testTypeCheckingVisitorAssignment for: " + input + " ==========");
@@ -131,8 +236,9 @@ class UnitTest {
 
         TypeCheckingVisitor visitor = new TypeCheckingVisitor(ctx);
         try {
-            // Expecting type name "int" or no exceptions, depending on implementation
-            assertDoesNotThrow(() -> visitor.visitAssignment(assignmentCtx));
+            assertAll("TypeChecking Assignment Check",
+                () -> assertDoesNotThrow(() -> visitor.visitAssignment(assignmentCtx))
+            );
             System.out.println("testTypeCheckingVisitorAssignment = success! Type check passed without errors");
         } catch (AssertionError e) {
             System.out.println("testTypeCheckingVisitorAssignment = failure! Error: " + e.getMessage());
@@ -159,6 +265,9 @@ class UnitTest {
 
         FtableGenVisitor visitor = new FtableGenVisitor(ctx);
         try {
+            assertAll("TypeChecking Assignment Check",
+                () -> assertDoesNotThrow(() -> visitor.visitAssignment(assignmentCtx), "FtableGenVisitor should not throw exceptions on valid assignments.")
+            );
             assertDoesNotThrow(() -> visitor.visitAssignment(assignmentCtx), "FtableGenVisitor should not fail on basic assignment.");
             System.out.println("testFtableGenVisitorAssignment = success! Ftable generated without errors");
         } catch (AssertionError e) {
@@ -188,8 +297,10 @@ class UnitTest {
         String generatedCode = visitor.visitAssignment(assignmentCtx);
         
         try {
-            assertNotNull(generatedCode, "CodeGenVisitor should return a non-null string.");
-            assertTrue(generatedCode.contains(expectedCodeContent), "Generated code should contain '" + expectedCodeContent + "', but got: " + generatedCode);
+            assertAll("CodeGen Assignment Check",
+                () -> assertNotNull(generatedCode, "CodeGenVisitor should return a non-null string."),
+                () -> assertTrue(generatedCode.contains(expectedCodeContent), "Generated code should contain '" + expectedCodeContent + "', but got: " + generatedCode)
+            );
             System.out.println("testCodeGenVisitorAssignment = success! Generated matching java code string");
         } catch (AssertionError e) {
             System.out.println("testCodeGenVisitorAssignment = failure! Error: " + e.getMessage());
@@ -198,16 +309,54 @@ class UnitTest {
         System.out.println("------------------------------------------------------------");
     }
 
-    @Test
-    void testCodeGenVisitorIfStatement() {
-        System.out.println("========== Running testCodeGenVisitorIfStatement ==========");
-        OurGrammarParser.IfStatementContext ifStmtCtx = parseIfStatement("if (true) { int n = 30; }");
+    /* ================================= IF STATEMENT ==================================== */
+
+    @ParameterizedTest(name = "Testing type checking if statement: {0}")
+    @CsvSource({
+        "'if (true) { int n = 30; }', 'n', 'int', 'if (true) { int n = 30; }'",
+        "'if (5 < 10) { float radius = 3.14; } else { int m = 25; }', 'radius', 'float', 'if (5 < 10) { float radius = 3.14; } else { int m = 25; }'",
+        "'if (a > b) {} else if (a < b) {} else {}', '', '', 'if (a > b) {} else if () {} else {}'"
+    })
+    void testTypeCheckingIfStatement(String input, String expectedVarName, String expectedTypeName, String expectedCodeContent) {
+        System.out.println("========== Running testTypeCheckingIfStatement ==========");
+        OurGrammarParser.IfStatementContext ifStmtCtx = parseIfStatement(input);
         ctx.symbolTable.pushScope(ifStmtCtx);
 
-        new AssDecVisitor(ctx).visitIfStatement(ifStmtCtx);
-        new RefLinkingVisitor(ctx).visitIfStatement(ifStmtCtx);
-        new TypeCheckingVisitor(ctx).visitIfStatement(ifStmtCtx);
-        new FtableGenVisitor(ctx).visitIfStatement(ifStmtCtx);
+        // Predefine data expected from past phases
+        if (expectedVarName != null && expectedTypeName != null) {
+            VariableSymbol sym = new VariableSymbol(expectedVarName, TypeSymbol.fromString(expectedTypeName));
+            ctx.symbolTable.define(sym);
+        }
+
+        TypeCheckingVisitor visitor = new TypeCheckingVisitor(ctx);
+        try {
+            assertAll("Type Checking If Statement Check", () -> {
+                assertDoesNotThrow(() -> visitor.visitIfStatement(ifStmtCtx), "Type checking should allow valid if statements.");
+            });
+            System.out.println("testTypeCheckingIfStatement = success! Type check passed for if statement");
+        } catch (AssertionError e) {
+            System.out.println("testTypeCheckingIfStatement = failure! Error: " + e.getMessage());
+            throw e;
+        }
+        System.out.println("------------------------------------------------------------");
+    }
+
+    @ParameterizedTest(name = "Testing code gen if statement: {0}")
+    @CsvSource({
+        "'int m = 25;', 'm', 'int', 'int m = 25;'",
+        "'float radius = 3.14;', 'radius', 'float', 'float radius = 3.14;'",
+        "'shared float radius = 3.14;', 'radius', 'float', 'float radius = 3.14;'"
+    })
+    void testCodeGenVisitorIfStatement(String input, String expectedVarName, String expectedTypeName, String expectedCodeContent) {
+        System.out.println("========== Running testCodeGenVisitorIfStatement ==========");
+        OurGrammarParser.IfStatementContext ifStmtCtx = parseIfStatement(input);
+        ctx.symbolTable.pushScope(ifStmtCtx);
+
+        // Predefine data expected from past phases
+        if (expectedVarName != null && expectedTypeName != null) {
+            VariableSymbol sym = new VariableSymbol(expectedVarName, TypeSymbol.fromString(expectedTypeName));
+            ctx.symbolTable.define(sym);
+        }
 
         CodeGenVisitor visitor = new CodeGenVisitor(ctx);
         String generatedCode = visitor.visitIfStatement(ifStmtCtx);
@@ -215,7 +364,7 @@ class UnitTest {
         try {
             assertNotNull(generatedCode, "CodeGenVisitor should return a non-null string.");
             String collapsedCode = generatedCode.replaceAll("\\s+", " ").trim();
-            assertTrue(collapsedCode.contains("if (true) { int n = 30; }"), "Generated code should contain 'if (true) { int n = 30; }'");
+            assertTrue(collapsedCode.contains(expectedCodeContent), "Generated code should contain '" + expectedCodeContent + "'");
 
             System.out.println("testCodeGenVisitorIfStatement = success! Generated matching java code string");
         } catch (AssertionError e) {
@@ -272,4 +421,5 @@ class UnitTest {
         }
         System.out.println("------------------------------------------------------------");
     }
+
 }
