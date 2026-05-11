@@ -13,16 +13,16 @@ public class StubSymbolTable extends SymbolTable {
     private final Map<String, Symbol> fakeSymbols = new HashMap<>();
 
     /**
-     * Constructor - creates a root scope so currentScope is never null
+     * Constructor - CRITICAL: creates the root scope
      */
     public StubSymbolTable() {
-        pushScope(null);   // This creates the first root Scope
+        pushScope(null);   // ← This fixes the NullPointerException
     }
 
     public void defineFake(String name, String typeName) {
         VariableSymbol symbol = new VariableSymbol(name, TypeSymbol.fromString(typeName));
         fakeSymbols.put(name, symbol);
-        define(symbol);                    // also registers it in the real scope
+        define(symbol);                    // also registers in real scope
     }
 
     @Override
@@ -30,7 +30,7 @@ public class StubSymbolTable extends SymbolTable {
         if (s != null) {
             fakeSymbols.put(s.ID, s);
         }
-        return super.define(s);   // let real Scope do its job
+        return super.define(s);   // let real Scope do the work
     }
 
     @Override
