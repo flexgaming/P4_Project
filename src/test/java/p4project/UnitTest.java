@@ -14,11 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import p4project.context.CompilationContext;
 import p4project.context.TypeSymbol;
 import p4project.context.VariableSymbol;
 import p4project.stubsAndDrivers.StubCompilationContext;
-import p4project.stubsAndDrivers.StubSymbolTable;
 import p4project.visitors.AssDecVisitor;
 import p4project.visitors.CodeGenVisitor;
 import p4project.visitors.FtableGenVisitor;
@@ -27,7 +25,7 @@ import p4project.visitors.TypeCheckingVisitor;
 
 class UnitTest {
 
-    private CompilationContext ctx;
+    private StubCompilationContext ctx;
 
     @BeforeEach
     void setUp() {
@@ -199,37 +197,35 @@ class UnitTest {
     }
 
     @ParameterizedTest(name = "Testing ref linking assignment: {0}")
-    @CsvSource({
-        "'int j = 10;', 'j', 'int'",
-        "'float radius = 3.14;', 'radius', 'float'",
-        "'shared float radius = 3.14;', 'radius', 'float'"
-    })
-    void testRefLinkingVisitorAssignment(String input, String expectedVarName, String expectedTypeName) {
-        System.out.println("========== Running testRefLinkingVisitorAssignment for: " + input + " ==========");
-        
-        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment(input);
+@CsvSource({
+    "'int j = 10;', 'j', 'int'",
+    "'float radius = 3.14;', 'radius', 'float'",
+    "'shared float radius = 3.14;', 'radius', 'float'"
+})
+void testRefLinkingVisitorAssignment(String input, String expectedVarName, String expectedTypeName) {
+    System.out.println("========== Running testRefLinkingVisitorAssignment for: " + input + " ==========");
+    
+    OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment(input);
 
-        ctx = new StubCompilationContext();           // fresh stub context
-        ctx.defineFake(expectedVarName, expectedTypeName);   // ← Now this works!
-        ctx.symbolTable.pushScope(assignmentCtx);
+    ctx = new StubCompilationContext();           // fresh stub
+    ctx.defineFake(expectedVarName, expectedTypeName);   // ← this now works
+    ctx.symbolTable.pushScope(assignmentCtx);
 
-        RefLinkingVisitor visitor = new RefLinkingVisitor(ctx);
-        visitor.visitAssignment(assignmentCtx);
+    RefLinkingVisitor visitor = new RefLinkingVisitor(ctx);
+    visitor.visitAssignment(assignmentCtx);
 
-        try {
-            assertAll("RefLinking Assignment Check",
-                () -> assertFalse(ctx.resolvedSymbols.isEmpty(), "Should have resolved a symbol"),
-                () -> assertEquals(expectedVarName, 
-                                ctx.resolvedSymbols.get(assignmentCtx.ID()).ID)
-            );
-            System.out.println("✓ SUCCESS (" + expectedVarName + ")");
-        } catch (AssertionError e) {
-            System.out.println("✗ FAILURE: " + e.getMessage());
-            throw e;
-        }
-        System.out.println("------------------------------------------------------------");
+    try {
+        assertAll("RefLinking Assignment Check",
+            () -> assertFalse(ctx.resolvedSymbols.isEmpty()),
+            () -> assertEquals(expectedVarName, ctx.resolvedSymbols.get(assignmentCtx.ID()).ID)
+        );
+        System.out.println("✓ SUCCESS (" + expectedVarName + ")");
+    } catch (AssertionError e) {
+        System.out.println("✗ FAILURE: " + e.getMessage());
+        throw e;
     }
-
+    System.out.println("------------------------------------------------------------");
+}
     @ParameterizedTest(name = "Testing type checking assignment: {0}")
     @CsvSource({
         "'int k = 15;', 'k', 'int'",

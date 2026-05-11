@@ -12,9 +12,17 @@ public class StubSymbolTable extends SymbolTable {
 
     private final Map<String, Symbol> fakeSymbols = new HashMap<>();
 
+    /**
+     * Constructor - creates a root scope so currentScope is never null
+     */
+    public StubSymbolTable() {
+        pushScope(null);   // This creates the first root Scope
+    }
+
     public void defineFake(String name, String typeName) {
         VariableSymbol symbol = new VariableSymbol(name, TypeSymbol.fromString(typeName));
         fakeSymbols.put(name, symbol);
+        define(symbol);                    // also registers it in the real scope
     }
 
     @Override
@@ -22,16 +30,18 @@ public class StubSymbolTable extends SymbolTable {
         if (s != null) {
             fakeSymbols.put(s.ID, s);
         }
-        return true;
+        return super.define(s);   // let real Scope do its job
     }
 
     @Override
     public Symbol resolve(String name) {
-        return fakeSymbols.get(name);
+        Symbol stub = fakeSymbols.get(name);
+        return (stub != null) ? stub : super.resolve(name);
     }
 
     @Override
     public Symbol resolveLocal(String name) {
-        return fakeSymbols.get(name);
+        Symbol stub = fakeSymbols.get(name);
+        return (stub != null) ? stub : super.resolveLocal(name);
     }
 }

@@ -26,11 +26,6 @@ public class StubCompilationContext extends CompilationContext {
     public StubCompilationContext() {
         this.symbolTable = new StubSymbolTable();
     }
-
-    public StubCompilationContext(StubSymbolTable table) {
-        this.symbolTable = table;
-    }
-
     // === HELPER METHOD - This solves your error ===
     public void defineFake(String name, String typeName) {
         symbolTable.defineFake(name, typeName);
