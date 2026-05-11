@@ -111,6 +111,68 @@ void main() {
             System.out.println(javaCode);
 
     }
+
+    /**
+     * Runs only the Lexer and Parser, returning the Parse Tree as a string.
+     * Throws if parsing fails.
+     */
+    public static String runLexerParserPipeline(String input) {
+        CharStream charStream = CharStreams.fromString(input);
+        OurGrammarLexer lexer = new OurGrammarLexer(charStream);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        OurGrammarParser parser = new OurGrammarParser(tokens);
+
+        // Fail fast on syntax errors instead of just printing to console
+        parser.removeErrorListeners();
+        parser.addErrorListener(new org.antlr.v4.runtime.BaseErrorListener() {
+            @Override
+            public void syntaxError(org.antlr.v4.runtime.Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, org.antlr.v4.runtime.RecognitionException e) {
+                throw new RuntimeException("Syntax error at line " + line + ":" + charPositionInLine + " - " + msg);
+            }
+        });
+
+        ParseTree tree = parser.program();
+        return tree.toStringTree(parser);
+    }
+
+    /**
+     * Runs Lexer, Parser, and Semantic Analysis (Symbol AssDec, RefLinking, TypeChecking).
+     * Returns a simple success message if no exceptions occur.
+     */
+    public static String runParserSemanticPipeline(String input) {
+        CharStream charStream = CharStreams.fromString(input);
+        OurGrammarLexer lexer = new OurGrammarLexer(charStream);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        OurGrammarParser parser = new OurGrammarParser(tokens);
+
+        parser.removeErrorListeners();
+        parser.addErrorListener(new org.antlr.v4.runtime.BaseErrorListener() {
+            @Override
+            public void syntaxError(org.antlr.v4.runtime.Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, org.antlr.v4.runtime.RecognitionException e) {
+                throw new RuntimeException("Syntax error at line " + line + ":" + charPositionInLine + " - " + msg);
+            }
+        });
+
+        ParseTree tree = parser.program();
+
+        CompilationContext ctx = new CompilationContext();
+        ctx.symbolTable.pushScope(tree);
+
+        // Phase 1: Symbol assignments and declarations
+        AssDecVisitor assDecVisitor = new AssDecVisitor(ctx);
+        assDecVisitor.visit(tree);
+
+        // Phase 2: Reference linking
+        RefLinkingVisitor refLinkingVisitor = new RefLinkingVisitor(ctx);
+        refLinkingVisitor.visit(tree);
+
+        // Phase 3: Type checking
+        TypeCheckingVisitor typeCheckingVisitor = new TypeCheckingVisitor(ctx);
+        typeCheckingVisitor.visit(tree);
+
+        return "success";
+    }
+
     /**
      * Runs the full compilation pipeline on the given input string.
      * Returns the complete console-style output as a String.
