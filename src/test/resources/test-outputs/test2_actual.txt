@@ -1,0 +1,18 @@
+import java.util.Scanner;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
+import java.util.concurrent.CompletableFuture<T>;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        ExecutorService executor = Executors.newCachedThreadPool();
+        for (int i = 0; i < 10; i = i + 1) {
+            if (i == 3) continue;
+
+            System.out.print(i);
+        }
+        executor.shutdown();
+        scanner.close();
+    }
+}
