@@ -60,11 +60,9 @@ public class MutexVisitor extends OurGrammarBaseVisitor<Void> {
              * Instead of throwing an error, it should be handlel like nested critical sections,
              * as is done in CodeGenVisitor, but for now we will just throw an error.
              */ 
-            for (Symbol param : functionSymbol.parameters) {
-                if (param.isShared()) {
-                    throw new RuntimeException("Cannot call function '" + functionName +
-                    "' from a critical section with shared variables.");
-                }
+            if (functionSymbol != null && functionSymbol.containsCriticalSection) {
+                throw new RuntimeException("Function '" + functionName +
+                "' contains a critical section and cannot be called within another critical section.");
             }
 
             visitAssignment(functionSymbol.context); // visit the function's context to check for nested critical sections.
@@ -72,7 +70,5 @@ public class MutexVisitor extends OurGrammarBaseVisitor<Void> {
 
         }
         return visitChildren(context);
-    }
-
-    
+    }   
 }

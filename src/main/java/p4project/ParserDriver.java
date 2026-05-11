@@ -36,14 +36,22 @@ void main() {
     int[] l = [1, 2, 3];
     shared int y = 2;
     shared int z = 3;
+    void criticalFunc(shared int a) {
+        critical(a) {
+            print("In criticalFunc, a = ", a);
+            a = a + 1;
+        }
+    }
     critical(x, z) {
         critical(x, y, z) {
             print("In critical section, x = ", x, " y = ", y, " z = ", z); 
             x = x + 1; 
             y = y + 1; 
             z = z + 1; 
-            } 
-        }
+            criticalFunc(x);
+        } 
+    }
+    criticalFunc(x);
     
     while (x > 0) { 
         if (x == 3) { 

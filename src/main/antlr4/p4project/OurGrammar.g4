@@ -143,7 +143,7 @@ power
     ;
 
 arrayLiteral
-    : ('[' expr (',' expr)* ']')+
+    : ('{' expr (',' expr)* '}')+
     ;
 
 arrayIndex

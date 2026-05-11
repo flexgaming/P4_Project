@@ -32,10 +32,11 @@ public class FtableGenVisitor extends OurGrammarBaseVisitor<Void> {
         Symbol symbol = this.ctx.symbolTable.resolve(id);
 
         if (context.assFunc() != null) {
-            if (!(symbol instanceof FunctionSymbol functionSymbol)) {
-                throw new RuntimeException("'" + id + "' assigned a function but is not declared as a function.");
+            if (!(symbol instanceof FunctionSymbol)) {
+                throw new RuntimeException("'" + id + "' assigned as a function but does not resolve to a FunctionSymbol.");
             }
 
+            FunctionSymbol functionSymbol = (FunctionSymbol) symbol;
             functionSymbol.declaredAtDepth = this.ctx.symbolTable.getDepth();
             functionSymbol.parameters.clear();
 
@@ -45,6 +46,12 @@ public class FtableGenVisitor extends OurGrammarBaseVisitor<Void> {
                 String parameterName = parameterNames.get(i).getText();
                 String parameterType = parameterTypes.get(i).TYPE().getText();
                 functionSymbol.parameters.add(new VariableSymbol(parameterName, TypeSymbol.fromString(parameterType)));
+            }
+
+            for (int i = 0; i < context.assFunc().getChildCount(); i++) {
+                if (context.assFunc().getChild(i) instanceof OurGrammarParser.CriticalSectionContext) {
+                    functionSymbol.containsCriticalSection = true;
+                }
             }
 
             functionSymbol.context = context; // store the context of the function

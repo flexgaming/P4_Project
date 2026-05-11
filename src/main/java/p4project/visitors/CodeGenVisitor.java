@@ -24,6 +24,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     private final CompilationContext ctx;
     private boolean inMain = false;
     private boolean inCriticalSection = false;
+    private boolean inFuncAssignment = false;
     private List<Integer> sharedIndexes = new ArrayList<>(); // To track the index of shared variables for mutex naming
     private List<Integer> mutexList = new ArrayList<>(); // To track which mutexes are currently aquired.
 
@@ -83,7 +84,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         String id = context.ID().getText();
 
         if (context.assFunc() != null) {
-            
+            inFuncAssignment = true;
             // Check if this is the main function to set the inMain flag.
             if (id.equals("main")) {
                 inMain = true;
@@ -92,6 +93,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             // Function definition
             String params = visit(context.assFunc());
             String blockCode = visit(context.assFunc().block());
+            inFuncAssignment = false;
             if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
             return indent() + type + " " + id + params + blockCode + "\n";
         } 
@@ -181,7 +183,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             Integer index = ctx.sharedVariables.indexOf(id.getText());
             sharedIndexes.add(index);
         } sharedIndexes.sort(Integer::compareTo); // Ensure locks are always acquired in the same order to prevent deadlocks
-        inCriticalSection = true;
+        if(!inFuncAssignment) inCriticalSection = true;
         String blockCode = visit(context.block());
         if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
         sb.append(indent() + blockCode + "\n");
@@ -347,9 +349,11 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                     break;
                 } 
             }
-            mutexList = new ArrayList<>(mutexLocalList); // Update the global mutexList to reflect the currently aquired locks after unlocking those that needed to be released.
+            // Update the global mutexList to reflect the currently aquired locks after unlocking those that needed to be released.
+            mutexList = new ArrayList<>(mutexLocalList); 
             
-            for (int index : mutexLocalList) { // Acquire locks in the current critical section using a spinlock approach with a exponentially increasing sleep time to reduce CPU contention.
+            // Acquire locks in the current critical section using a spinlock approach with a exponentially increasing sleep time to reduce CPU contention.
+            for (int index : mutexLocalList) { 
                 sb.append(indent() + "for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) Thread.sleep((long) i);\n");
             }
             sb.append(indent() + "try {\n");

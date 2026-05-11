@@ -37,6 +37,11 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         if (symbol == null) {
             throw new RuntimeException("Variable '" + id + "' not declared.");
         }
+        if (context.assFunc() != null) {
+            if (!(symbol instanceof p4project.context.FunctionSymbol)) {
+                throw new RuntimeException("'" + id + "' assigned a function but is not declared as a function.");
+            }
+        }
 
         this.ctx.resolvedSymbols.put(context.ID(), symbol);
         return visitChildren(context);
