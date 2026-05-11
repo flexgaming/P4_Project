@@ -71,4 +71,20 @@ public class MutexVisitor extends OurGrammarBaseVisitor<Void> {
         }
         return visitChildren(context);
     }   
+
+    @Override
+    public Void visitBlock(OurGrammarParser.BlockContext context) {
+        this.ctx.symbolTable.restoreScope(context);
+        Void result = visitChildren(context);
+        this.ctx.symbolTable.popScope();
+        return result;
+    }
+
+    @Override
+    public Void visitForStatement(OurGrammarParser.ForStatementContext context) {
+        this.ctx.symbolTable.restoreScope(context);
+        visitChildren(context);
+        this.ctx.symbolTable.popScope();
+        return null;
+    }
 }

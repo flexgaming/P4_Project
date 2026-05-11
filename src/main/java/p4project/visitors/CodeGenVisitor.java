@@ -563,7 +563,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitFunctionCall(OurGrammarParser.FunctionCallContext context) {
         StringBuilder sb = new StringBuilder();
-        sb.append(context.ID().getText());
+        sb.append(indent() + context.ID().getText());
         sb.append("(");
         if (context.expr() != null && !context.expr().isEmpty()) {
             for (int i = 0; i < context.expr().size(); i++) {
@@ -571,7 +571,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 if (i < context.expr().size() - 1) sb.append(", ");
             }
         }
-        sb.append(")");
+        sb.append(");\n");
         return sb.toString();
     }
 
