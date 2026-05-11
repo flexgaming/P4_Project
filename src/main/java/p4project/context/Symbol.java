@@ -23,7 +23,7 @@ public class Symbol {
     public Symbol(String name, TypeSymbol type, int[] dimensions) {
         this.ID = name;
         this.arrType = new ArrayTypeSymbol(type, dimensions);
-        this.type = this.arrType;
+        this.type = new TypeSymbol(type.type, type.name);
     }
     
 }

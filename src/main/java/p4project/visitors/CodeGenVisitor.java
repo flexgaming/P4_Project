@@ -3,6 +3,7 @@ package p4project.visitors;
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
+import p4project.context.Symbol;
 
 import java.util.List;
 
@@ -82,6 +83,10 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     public String visitAssignment(OurGrammarParser.AssignmentContext context) {
         String type = context.typeRef().TYPE().getText();
         String id = context.ID().getText();
+        Symbol symbol = this.ctx.symbolTable.resolve(id);
+        if (symbol.arrType != null) {
+            type = symbol.arrType.toString();
+        }
 
         if (context.assFunc() != null) {
             inFuncAssignment = true;
@@ -109,8 +114,16 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitReassignment(OurGrammarParser.ReassignmentContext context) {
         // check if it is called in a for header
+        String id = context.ID().getText();
+        Symbol symbol = this.ctx.symbolTable.resolve(id);
         if (this.ctx.symbolTable.getNodeScope().getText().contains("for")) {
-            return context.ID().getText() + " = " + visit(context.expr());
+            return id + " = " + visit(context.expr());
+        } else if (symbol.arrType != null) {
+            String brackets = "";
+            for (int i = 0; i < symbol.arrType.dimensions; i++) {
+                brackets += "[]";
+            }
+            return indent() + id + " = new " + symbol.type.toString() + brackets + visit(context.expr()) + ";\n";
         }
 
         return indent() + context.ID().getText() + " = " + visit(context.expr()) + ";\n";
@@ -118,7 +131,16 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitDeclaration(OurGrammarParser.DeclarationContext context) {
-        return indent() + context.typeRef().TYPE().getText() + " " + context.ID().getText() + ";\n";
+        String id = context.ID().getText();
+        Symbol symbol = this.ctx.symbolTable.resolve(id);
+        if (symbol.arrType != null) {
+            String brackets = "";
+            for (int i = 0; i < symbol.arrType.dimensions; i++) {
+                brackets += "[]";
+            }
+            return indent() + symbol.type.toString() + brackets + " " + id + " = new " + symbol.arrType.toString() + ";\n";
+        }
+        return indent() + context.typeRef().TYPE().getText() + " " + id + ";\n";
     }
 
     @Override
@@ -503,9 +525,12 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitArrayIndex(OurGrammarParser.ArrayIndexContext context) {
-        String base = visit(context.expr(0));
-        String index = visit(context.expr(1));
-        return base + "[" + index + "]";
+        String id = context.ID().getText();
+        StringBuilder sb = new StringBuilder();
+        for (OurGrammarParser.ExprContext index : context.expr()) {
+            sb.append("[" + visit(index) + "]"); 
+        }
+        return id + sb.toString();
     }
 
     @Override

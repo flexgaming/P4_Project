@@ -16,6 +16,7 @@ import p4project.visitors.FtableGenVisitor;
 // TODO - add arrayIndex
 // TODO - floats have to have f in java.
 // TODO - initialize every variable to be 0 or null.
+// TODO - mutex show m-1 instead of starting with 0.
 
 public class ParserDriver {
     public static void main(String[] args) {
@@ -33,7 +34,10 @@ void main() {
     }
     awaitAll(t1, t2);
     x = 1;
-    int[] l = [1, 2, 3];
+    int[][] l;
+    l = [3][10];
+    l = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
+    print(cast(string)l[2]);
     shared int y = 2;
     shared int z = 3;
     void criticalFunc(shared int a) {

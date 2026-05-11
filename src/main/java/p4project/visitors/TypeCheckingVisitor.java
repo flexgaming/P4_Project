@@ -4,7 +4,7 @@ import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import p4project.context.CompilationContext;
-import p4project.context.Symbol;
+import p4project.context.*;
 
 /*
     Phase 1: Symbol assignments and declarations
@@ -358,12 +358,19 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             Symbol symbol = this.ctx.resolvedSymbols.get(ai.ID());
             if (symbol == null) {
                 throw new RuntimeException("Variable '" + ai.ID().getText() + "' not declared.");
+            } else if (symbol.arrType == null) {
+                throw new RuntimeException("Type Error: '" + ai.ID().getText() + "' is not an array.");
             }
+
+            System.out.println("Symbol arrType: " + symbol.arrType.toString());
+
+
             return symbol.type.name.toLowerCase();
         }
 
         // array literal
         if (context.arrayLiteral() != null) {
+            System.out.println("We here baby");
             OurGrammarParser.ArrayLiteralContext al = context.arrayLiteral();
             if (al.expr() != null && !al.expr().isEmpty()) {
                 String firstType = visit(al.expr(0));
