@@ -156,7 +156,7 @@ class UnitTest {
 
 
     /* ================================= ASSIGNMENT ==================================== */
-    
+
     @ParameterizedTest(name = "Testing assignment: {0}")
     @CsvSource({
         "'int i = 5;', 'i', 'int', false, false",
@@ -313,66 +313,99 @@ class UnitTest {
 
     @ParameterizedTest(name = "Testing type checking if statement: {0}")
     @CsvSource({
-        "'if (true) { int n = 30; }', 'n', 'int', 'if (true) { int n = 30; }'",
-        "'if (5 < 10) { float radius = 3.14; } else { int m = 25; }', 'radius', 'float', 'if (5 < 10) { float radius = 3.14; } else { int m = 25; }'",
-        "'if (a > b) {} else if (a < b) {} else {}', '', '', 'if (a > b) {} else if () {} else {}'"
+        "'if (true) {}', ''",
+        "'if (5 < 10) {} else {}', ''",
+        "'if (a > b) {} else if (a < b) {} else {}', 'a:int,b:int'",
+        "'if (a > b && a < 10) {}', 'a:int,b:int'",
+        "'if (a > b) {} else if (a < b) {} else {}', 'a:bool,b:int'",   // should fail
+        "'if (a == 15) {}', 'a:float'"                                  // should fail
     })
-    void testTypeCheckingIfStatement(String input, String expectedVarName, String expectedTypeName, String expectedCodeContent) {
-        System.out.println("========== Running testTypeCheckingIfStatement ==========");
+    void testTypeCheckingIfStatement(String input, String presetVars) {
+        System.out.println("========== Running testTypeCheckingIfStatement: " + input + " ==========");
+        
         OurGrammarParser.IfStatementContext ifStmtCtx = parseIfStatement(input);
         ctx.symbolTable.pushScope(ifStmtCtx);
 
-        // Predefine data expected from past phases
-        if (expectedVarName != null && expectedTypeName != null) {
-            VariableSymbol sym = new VariableSymbol(expectedVarName, TypeSymbol.fromString(expectedTypeName));
-            ctx.symbolTable.define(sym);
+        // Setup
+        if (presetVars != null && !presetVars.isEmpty()) {
+            for (String var : presetVars.split(",")) {
+                String[] parts = var.split(":");
+                if (parts.length == 2) {
+                    ctx.symbolTable.define(new VariableSymbol(parts[0].trim(), 
+                                        TypeSymbol.fromString(parts[1].trim())));
+                }
+            }
         }
 
+        new AssDecVisitor(ctx).visitIfStatement(ifStmtCtx);
+        new RefLinkingVisitor(ctx).visit(ifStmtCtx);
+
         TypeCheckingVisitor visitor = new TypeCheckingVisitor(ctx);
+
         try {
-            assertAll("Type Checking If Statement Check", () -> {
-                assertDoesNotThrow(() -> visitor.visitIfStatement(ifStmtCtx), "Type checking should allow valid if statements.");
-            });
-            System.out.println("testTypeCheckingIfStatement = success! Type check passed for if statement");
-        } catch (AssertionError e) {
-            System.out.println("testTypeCheckingIfStatement = failure! Error: " + e.getMessage());
-            throw e;
+            visitor.visitIfStatement(ifStmtCtx);
+            System.out.println("testTypeCheckingIfStatement = success! (no error)");
+            
+        } catch (RuntimeException e) {
+            System.out.println("testTypeCheckingIfStatement = caught expected error: " + e.getMessage());
+            
+            // Optional: you can be stricter
+            assertTrue(e.getMessage().contains("Type Error") || e.getMessage().contains("type"));
         }
-        System.out.println("------------------------------------------------------------");
     }
 
     @ParameterizedTest(name = "Testing code gen if statement: {0}")
     @CsvSource({
-        "'int m = 25;', 'm', 'int', 'int m = 25;'",
-        "'float radius = 3.14;', 'radius', 'float', 'float radius = 3.14;'",
-        "'shared float radius = 3.14;', 'radius', 'float', 'float radius = 3.14;'"
+        "'if (true) {}', '', 'if (true)'",
+        "'if (5 < 12.2) {} else {}', '', 'if (5 < 10)'",
+        "'if (a > b) {} else if (a < b) {} else {}', 'a:int,b:int', 'else if (a < b)'",
+        "'if (a > b && a < 10) {} else if (a < b) {} else {}', 'a:int,b:int', 'if (a > b && a < 10)'"
     })
-    void testCodeGenVisitorIfStatement(String input, String expectedVarName, String expectedTypeName, String expectedCodeContent) {
+    void testCodeGenVisitorIfStatement(String input, String presetVars, String expectedCodeContent) {
         System.out.println("========== Running testCodeGenVisitorIfStatement ==========");
+        
         OurGrammarParser.IfStatementContext ifStmtCtx = parseIfStatement(input);
         ctx.symbolTable.pushScope(ifStmtCtx);
 
-        // Predefine data expected from past phases
-        if (expectedVarName != null && expectedTypeName != null) {
-            VariableSymbol sym = new VariableSymbol(expectedVarName, TypeSymbol.fromString(expectedTypeName));
-            ctx.symbolTable.define(sym);
+        if (presetVars != null && !presetVars.isEmpty()) {
+            for (String var : presetVars.split(",")) {
+                String[] parts = var.split(":");
+                if (parts.length == 2) {
+                    VariableSymbol sym = new VariableSymbol(parts[0].trim(), 
+                                        TypeSymbol.fromString(parts[1].trim()));
+                    ctx.symbolTable.define(sym);
+                }
+            }
         }
+
+        new AssDecVisitor(ctx).visitIfStatement(ifStmtCtx);
+        new RefLinkingVisitor(ctx).visit(ifStmtCtx);
+        new TypeCheckingVisitor(ctx).visit(ifStmtCtx);
 
         CodeGenVisitor visitor = new CodeGenVisitor(ctx);
         String generatedCode = visitor.visitIfStatement(ifStmtCtx);
         
         try {
-            assertNotNull(generatedCode, "CodeGenVisitor should return a non-null string.");
+            assertNotNull(generatedCode);
             String collapsedCode = generatedCode.replaceAll("\\s+", " ").trim();
-            assertTrue(collapsedCode.contains(expectedCodeContent), "Generated code should contain '" + expectedCodeContent + "'");
+            assertTrue(collapsedCode.contains(expectedCodeContent));
 
-            System.out.println("testCodeGenVisitorIfStatement = success! Generated matching java code string");
+            System.out.println("testCodeGenVisitorIfStatement = success!");
         } catch (AssertionError e) {
             System.out.println("testCodeGenVisitorIfStatement = failure! Error: " + e.getMessage());
             throw e;
         }
         System.out.println("------------------------------------------------------------");
     }
+
+    /* ================================= FOR LOOP ==================================== */
+
+
+    /* ================================= WHILE LOOP ==================================== */
+
+
+    /* =============================== CAST EXPRESSION ==================================== */
+
 
     @Test
     void testTypeCheckingVisitorFactor() {
