@@ -38,18 +38,15 @@ class IntegrationTest {
         System.out.println("=== Testing Lexer + Parser for: " + testFileName + " ===");
 
         try {
-            // Target stage directly
             String output = ParserDriver.runLexerParserPipeline(input);
 
-            // Basic sanity check for this layer
             assertNotNull(output, "Parser output should not be null");
             assertFalse(output.trim().isEmpty(), "Parser should produce non-empty output");
 
-            // Save for debugging
             String outputPath = OUTPUT_DIR + "lexer_parser_" + testFileName;
             Files.writeString(Paths.get(outputPath), output);
             
-            System.out.println("✓ " + testFileName + " - Lexer+Parser pipeline SUCCESS");
+            System.out.println(testFileName + " - Lexer+Parser pipeline SUCCESS");
 
         } catch (RuntimeException e) {
             System.out.println(testFileName + " - Runtime error caught during lexer/parser integration (expected for some tests): " + e.getMessage());

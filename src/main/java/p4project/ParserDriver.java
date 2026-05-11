@@ -122,7 +122,6 @@ void main() {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         OurGrammarParser parser = new OurGrammarParser(tokens);
 
-        // Fail fast on syntax errors instead of just printing to console
         parser.removeErrorListeners();
         parser.addErrorListener(new org.antlr.v4.runtime.BaseErrorListener() {
             @Override
