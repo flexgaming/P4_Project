@@ -3,12 +3,7 @@ package p4project;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,11 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import p4project.context.TypeSymbol;
 import p4project.context.VariableSymbol;
 import p4project.stubsAndDrivers.StubCompilationContext;
-import p4project.visitors.AssDecVisitor;
-import p4project.visitors.CodeGenVisitor;
-import p4project.visitors.FtableGenVisitor;
-import p4project.visitors.RefLinkingVisitor;
-import p4project.visitors.TypeCheckingVisitor;
+import p4project.visitors.*;
 
 class UnitTest {
 
