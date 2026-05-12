@@ -49,11 +49,54 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
 
     @Override
     public Void visitReassignment(OurGrammarParser.ReassignmentContext context) {
-        String id = context.ID().getText();
+        String id = "";
+        if (context.arrayIndex() == null) {
+            id = context.ID().getText();
+        } else {
+            id = context.arrayIndex().ID().getText();
+        }
         Symbol symbol = this.ctx.symbolTable.resolve(id); // looks up the symbol in the symbol table using the variable name (id)
-
+        
         if (symbol == null) {
             throw new RuntimeException("Variable '" + id + "' not declared.");
+        } 
+        statement: if (symbol.arrType != null) {
+            int[] dimensions = symbol.arrType.dimSize;
+            int dimCount = dimensions.length;
+            String contextStr = context.getText();
+            int equalsIndex = contextStr.indexOf('=');
+            
+            System.out.println("Array reassignment: " + context.getText());
+            // If the string does not contain any brackets before the equals sign, 
+            // we can treat it as a normal array reassignment and link it to the symbol without further checks.
+            if (!contextStr.contains("[")) {
+                break statement; // Jumps out of the if statement.
+            }
+            String afterEquals = contextStr.substring(equalsIndex + 1);
+            String beforeEquals = contextStr.substring(0, equalsIndex);
+            
+            if (beforeEquals.contains("[")) {
+                // If a string like "test[1][2] = 5" is given, we only extract "[1][2]".
+                beforeEquals = beforeEquals.substring(contextStr.indexOf('['), equalsIndex);
+                for (int i = 0; i < dimCount && beforeEquals.contains("["); i++) {
+                    int currentDimIndex = Integer.parseInt(beforeEquals.substring(1, beforeEquals.indexOf(']')));
+                    if (!(currentDimIndex <= dimensions[i])) {
+                        throw new RuntimeException("Array index out of bounds for dimension " + i + ": " + currentDimIndex + " >= " + dimensions[i]);
+                    }
+                    beforeEquals = beforeEquals.substring(beforeEquals.indexOf(']') + 1);
+                }
+                if (afterEquals.contains("{") || afterEquals.contains("[")) {
+                    throw new RuntimeException("Right-hand side of array reassignment must not contain braces or brackets.");
+                } 
+                // set the specific array element to the variable.
+
+
+            } 
+            if (afterEquals.contains("{") || afterEquals.contains("[")) {
+                // set either the size of the array or to the defined array literal.
+                
+
+            }
         }
 
         this.ctx.resolvedSymbols.put(context.ID(), symbol);

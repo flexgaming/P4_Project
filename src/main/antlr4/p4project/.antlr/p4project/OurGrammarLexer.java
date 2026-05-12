@@ -1,4 +1,4 @@
-// Generated from c:/Users/emil/Documents/Github UNI/P4_Project/src/main/antlr4/p4project/OurGrammar.g4 by ANTLR 4.13.1
+// Generated from d:/Github Rep UNI/P4_Project/src/main/antlr4/p4project/OurGrammar.g4 by ANTLR 4.13.1
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;

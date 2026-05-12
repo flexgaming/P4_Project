@@ -69,6 +69,8 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
                         int sqBracket2 = contexStr.indexOf("]");
                         dimensions[i] = Integer.parseInt(contexStr.substring(sqBracket1 + 1, sqBracket2));
                         contexStr = contexStr.substring(contexStr.indexOf("]") + 1); // Move to the next dimension by removing the processed part.
+                    } else {
+                        dimensions[i] = 0;
                     }
                 } 
             }
@@ -217,7 +219,7 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
                 for (int i = 0; i < paramNames.size(); i++) {
                     // Skip the function name itself if it's included
                     if (i == 0 && paramNames.get(i).getText().equals(id)) continue;
-
+                    
                     String paramName = paramNames.get(i).getText();
                     String paramTypeStr = paramTypes.get(i).TYPE().getText();
                     
@@ -227,7 +229,7 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
                     }
                 }
             }
-
+            
             if (!this.ctx.symbolTable.define(f)) {
                 throw new RuntimeException("Duplicate function declaration: '" + id + "'");
             }

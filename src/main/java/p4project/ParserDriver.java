@@ -17,7 +17,7 @@ import p4project.visitors.MutexVisitor;
 // TODO - add arrayIndex
 // TODO - floats have to have f in java. DONE
 // TODO - initialize every variable to be 0 or null.
-// TODO - mutex show m-1 instead of starting with 0.
+// TODO - mutex show m-1 instead of starting with 0. DONE
 // TODO - make functions be generated outside main. DONE
 // TODO - enable nested critical sections. DONE
 // TODO - add mutex to function calls. DONE
@@ -43,6 +43,7 @@ void main() {
     x = 1;
     int[][] l;
     l = [3][10];
+    l[1][2] = 1222;
     l = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
     print(cast(string)l[2]);
     shared int y = 2;
@@ -134,7 +135,7 @@ void main() {
             javaCode.append("import java.util.Scanner;\n");
             javaCode.append("import java.util.concurrent.*;\n");
             javaCode.append("import java.util.concurrent.Locks.*;\n");
-            javaCode.append("import java.util.concurrent.CompletableFuture<T>;\n\n");
+            javaCode.append("import java.util.concurrent.CompletableFuture;\n\n");
             javaCode.append("public class Main {\n");
             if (!ctx.ftable.containsKey("main")) {
                 javaCode.append("    public static void main(String[] args) {\n");

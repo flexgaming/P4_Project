@@ -16,8 +16,7 @@ statement
     ;
 
 statementPrime
-    : arrayIndex '=' expr
-    | reassignment
+    : reassignment
     | declaration 
     | awaitStatement 
     | continueStatement 
@@ -41,6 +40,7 @@ assFunc
 
 reassignment
     : ID '=' expr
+    | arrayIndex '=' expr
     ;
 
 declaration
@@ -144,6 +144,7 @@ power
 
 arrayLiteral
     : ('{' expr (',' expr)* '}')+
+    | ('[' expr ']')+
     ;
 
 arrayIndex

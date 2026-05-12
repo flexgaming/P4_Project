@@ -29,13 +29,13 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     private boolean inFuncAssignment = false;
     private List<Integer> sharedIndexes = new ArrayList<>(); // To track the index of shared variables for mutex naming
     private List<Integer> mutexList = new ArrayList<>(); // To track which mutexes are currently aquired.
-
+    
     public CodeGenVisitor(CompilationContext ctx) {
         this.ctx = ctx;
     }
-
+    
     private static final String INDENT = "    ";
-
+    
     private String indent() {
         if (!ctx.ftable.containsKey("main")) {
             return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth()+2)); // compensate for the extra indent level of the generated main method
@@ -43,7 +43,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth()+1)); // Ensure non-negative repeat count
         
     }
-
+    
     @Override
     public String visitProgram(OurGrammarParser.ProgramContext context) {
         StringBuilder result = new StringBuilder();
@@ -74,9 +74,6 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitStatementPrime(OurGrammarParser.StatementPrimeContext context) {
-        if (context.expr() != null) {
-            return indent() + visit(context.expr()) + ";\n";
-        }
         return visitChildren(context);
     }
 
@@ -122,14 +119,36 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         Symbol symbol = this.ctx.symbolTable.resolve(id);
         if (this.ctx.symbolTable.getNodeScope().getText().contains("for")) {
             return id + " = " + visit(context.expr());
-        } else if (symbol.arrType != null) {
-            String brackets = "";
-            for (int i = 0; i < symbol.arrType.dimensions; i++) {
-                brackets += "[]";
-            }
-            return indent() + id + " = new " + symbol.type.toString() + brackets + visit(context.expr()) + ";\n";
-        }
 
+        } else if (symbol.arrType != null) {
+            int equals = context.getText().indexOf('=');
+            String beforeEquals = context.getText().substring(0, equals);
+            String afterEquals = context.getText().substring(equals + 1);
+            String bracketType = (afterEquals.contains("[")) ? "[" : (afterEquals.contains("{")) ? "{" : "";
+            
+            System.out.println("beforeeqsrer: " + beforeEquals);
+            System.out.println("context: " + context.getText());
+
+            if (beforeEquals.contains("[")) {
+                System.out.println("HALOOOOOO.-.-.-");
+
+                return indent() + beforeEquals + " = " + visit(context.expr()) + ";\n";
+            }
+
+            if (bracketType.equals("[")) { // Handle array resizing with the new size of the array.
+                return indent() + id + " = new " + symbol.type.toString() + afterEquals + ";\n";
+
+            } else if (bracketType.equals("{")) { // Handle array resizing with actual input.
+                String brackets = "";
+                for (int i = 0; i < symbol.arrType.dimensions; i++) {
+                    brackets += "[]";
+                }
+                return indent() + id + " = new " + symbol.type.toString() + brackets + visit(context.expr()) + ";\n";
+
+            } else { // Throw runtime exception if trying to assign a non-array value to an array variable.
+                throw new RuntimeException("Cannot assign non-array value to array variable '" + id + "'");
+            }
+        }
         return indent() + context.ID().getText() + " = " + visit(context.expr()) + ";\n";
     }
 
@@ -144,7 +163,21 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             }
             return indent() + symbol.type.toString() + brackets + " " + id + " = new " + symbol.arrType.toString() + ";\n";
         }
-        return indent() + context.typeRef().TYPE().getText() + " " + id + ";\n";
+        String type = context.typeRef().TYPE().getText();
+        switch(type) {
+            case "int":
+                return indent() + type + " " + id + " = 0;\n";
+            case "float":
+                return indent() + type + " " + id + " = 0f;\n";
+            case "bool":
+                return indent() + type + " " + id + " = NULL;\n";
+            case "string":
+                return indent() + type + " " + id + " = " + " " +  ";\n";
+            case "char":
+                return indent() + type + " " + id + " = '\\u0000';\n"; // default char value
+            default:
+                return indent() + type + " " + id + ";\n";
+        }
     }
 
     @Override
