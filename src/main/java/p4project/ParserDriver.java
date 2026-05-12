@@ -15,10 +15,12 @@ import p4project.visitors.MutexVisitor;
 
 // TODO - add arrayLiteral
 // TODO - add arrayIndex
-// TODO - floats have to have f in java.
+// TODO - floats have to have f in java. DONE
 // TODO - initialize every variable to be 0 or null.
 // TODO - mutex show m-1 instead of starting with 0.
-// TODO - make functions be generated outside main.
+// TODO - make functions be generated outside main. DONE
+// TODO - enable nested critical sections. DONE
+// TODO - add mutex to function calls. DONE
 
 public class ParserDriver {
     public static void main(String[] args) {
@@ -44,11 +46,11 @@ void main() {
     l = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
     print(cast(string)l[2]);
     shared int y = 2;
-    shared int z = 3;
-    void criticalFunc(shared int a) {
+    shared float z = 3.0;
+    void criticalFunc(shared float a) {
         critical(a) {
             print("In criticalFunc, a = ", a);
-            a = a + 1;
+            a = a + 1.0;
         }
     }
     critical(x, z) {
@@ -56,12 +58,10 @@ void main() {
             print("In critical section, x = ", x, " y = ", y, " z = ", z); 
             x = x + 1; 
             y = y + 1; 
-            z = z + 1; 
+            z = z + 1.0; 
         } 
     }
 
-    criticalFunc(x);
-    criticalFunc(y);
     criticalFunc(z);
 
     func();

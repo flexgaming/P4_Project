@@ -560,7 +560,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             return context.INT().getText();
         }
         if (context.FLOAT() != null) {
-            return context.FLOAT().getText();
+            return context.FLOAT().getText() + "f";
         }
         if (context.BOOL() != null) {
             return context.BOOL().getText();
@@ -641,7 +641,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             sb.append(indent() + "try {\n");
 
             //Construct the function call as usual here.
-            sb.append(indent() + context.ID().getText());
+            sb.append(indent() + "    " + context.ID().getText());
             sb.append("(");
             if (context.expr() != null && !context.expr().isEmpty()) {
                 for (int i = 0; i < context.expr().size(); i++) {
