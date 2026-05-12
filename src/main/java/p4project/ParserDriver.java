@@ -11,9 +11,9 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import p4project.context.CompilationContext;
 import p4project.visitors.AssDecVisitor;
 import p4project.visitors.CodeGenVisitor;
+import p4project.visitors.FtableGenVisitor;
 import p4project.visitors.RefLinkingVisitor;
 import p4project.visitors.TypeCheckingVisitor;
-import p4project.visitors.FtableGenVisitor;
 
 // TODO - acceptance testing with sample programs and expected outputs
 
@@ -93,7 +93,7 @@ void main() {
             javaCode.append("import java.util.Scanner;\n");
             javaCode.append("import java.util.concurrent.*;\n");
             javaCode.append("import java.util.concurrent.atomic.*;\n");
-            javaCode.append("import java.util.concurrent.CompletableFuture<T>;\n\n");
+            javaCode.append("import java.util.concurrent.CompletableFuture;\n\n");
             if (!ctx.ftable.containsKey("main")) {
                 javaCode.append("public class Main {\n");
                 javaCode.append("    public static void main(String[] args) {\n");
@@ -216,7 +216,7 @@ void main() {
             javaCode.append("import java.util.Scanner;\n");
             javaCode.append("import java.util.concurrent.*;\n");
             javaCode.append("import java.util.concurrent.atomic.*;\n");
-            javaCode.append("import java.util.concurrent.CompletableFuture<T>;\n\n");
+            javaCode.append("import java.util.concurrent.CompletableFuture;\n\n");
 
             if (!ctx.ftable.containsKey("main")) {
                 javaCode.append("public class Main {\n");

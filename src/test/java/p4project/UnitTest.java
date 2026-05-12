@@ -62,7 +62,7 @@ class UnitTest {
     @CsvSource({
         "'int i = 5;', 5", // int, i, =, 5, ;
         "'float radius = 3.14;', 5", // float, radius, =, 3.14, ;
-        "'if (x > 5) {}', 7" // if, (, x, >, 5, ), {, }
+        "'if (x > 5) {}', 8" // if, (, x, >, 5, ), {, }
     })
     void testLexer(String input, int expectedTokenCount) {
         System.out.println("========== Running testLexer for: " + input + " ==========");
@@ -220,11 +220,11 @@ class UnitTest {
 
     @ParameterizedTest(name = "Testing type checking assignment: {0}")
     @CsvSource({
-        "'int k = 15;', 'k', 'int'",
-        "'float radius = 3.14;', 'radius', 'float'",
-        "'shared int radius = 3.14;', 'radius', 'int'"
+        "'int k = 15;', 'k', 'int', false",
+        "'float radius = 3.14;', 'radius', 'float', false",
+        "'float radius = 3;', 'radius', 'float', true"
     })
-    void testTypeCheckingVisitorAssignment(String input, String expectedVarName, String expectedTypeName) {
+    void testTypeCheckingVisitorAssignment(String input, String expectedVarName, String expectedTypeName, boolean expectsException) {
         System.out.println("========== Running testTypeCheckingVisitorAssignment for: " + input + " ==========");
         OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment(input);
         ctx.symbolTable.pushScope(assignmentCtx);
@@ -237,9 +237,20 @@ class UnitTest {
         TypeCheckingVisitor visitor = new TypeCheckingVisitor(ctx);
         try {
             assertAll("TypeChecking Assignment Check",
-                () -> assertDoesNotThrow(() -> visitor.visitAssignment(assignmentCtx))
+                () -> {
+                    if (expectsException) {
+                        assertTrue(
+                            org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> visitor.visitAssignment(assignmentCtx))
+                                .getMessage()
+                                .contains("Type Error: Cannot assign int to float"),
+                            "Expected a type error when assigning an int to a float."
+                        );
+                    } else {
+                        assertDoesNotThrow(() -> visitor.visitAssignment(assignmentCtx));
+                    }
+                }
             );
-            System.out.println("testTypeCheckingVisitorAssignment = success! Type check passed without errors");
+            System.out.println("testTypeCheckingVisitorAssignment = success! Type check expectation met: " + expectsException);
         } catch (AssertionError e) {
             System.out.println("testTypeCheckingVisitorAssignment = failure! Error: " + e.getMessage());
             throw e;
@@ -356,12 +367,12 @@ class UnitTest {
 
     @ParameterizedTest(name = "Testing code gen if statement: {0}")
     @CsvSource({
-        "'if (true) {}', '', 'if (true)'",
-        "'if (5 < 12.2) {} else {}', '', 'if (5 < 10)'",
-        "'if (a > b) {} else if (a < b) {} else {}', 'a:int,b:int', 'else if (a < b)'",
-        "'if (a > b && a < 10) {} else if (a < b) {} else {}', 'a:int,b:int', 'if (a > b && a < 10)'"
+        "'if (true) {}', '', 'if (true)', false",
+        "'if (5 < 12.2) {} else {}', '', '', true",
+        "'if (a > b) {} else if (a < b) {} else {}', 'a:int,b:int', 'else if (a < b)', false",
+        "'if (a > b && a < 10) {} else if (a < b) {} else {}', 'a:int,b:int', 'if (a > b && a < 10)', false"
     })
-    void testCodeGenVisitorIfStatement(String input, String presetVars, String expectedCodeContent) {
+    void testCodeGenVisitorIfStatement(String input, String presetVars, String expectedCodeContent, boolean expectError) {
         System.out.println("========== Running testCodeGenVisitorIfStatement ==========");
         
         OurGrammarParser.IfStatementContext ifStmtCtx = parseIfStatement(input);
@@ -380,20 +391,34 @@ class UnitTest {
 
         new AssDecVisitor(ctx).visitIfStatement(ifStmtCtx);
         new RefLinkingVisitor(ctx).visit(ifStmtCtx);
-        new TypeCheckingVisitor(ctx).visit(ifStmtCtx);
-
-        CodeGenVisitor visitor = new CodeGenVisitor(ctx);
-        String generatedCode = visitor.visitIfStatement(ifStmtCtx);
         
         try {
-            assertNotNull(generatedCode);
-            String collapsedCode = generatedCode.replaceAll("\\s+", " ").trim();
-            assertTrue(collapsedCode.contains(expectedCodeContent));
+            new TypeCheckingVisitor(ctx).visit(ifStmtCtx);
+            
+            if (expectError) {
+                throw new AssertionError("Expected a type error but none was thrown");
+            }
 
-            System.out.println("testCodeGenVisitorIfStatement = success!");
-        } catch (AssertionError e) {
-            System.out.println("testCodeGenVisitorIfStatement = failure! Error: " + e.getMessage());
-            throw e;
+            CodeGenVisitor visitor = new CodeGenVisitor(ctx);
+            String generatedCode = visitor.visitIfStatement(ifStmtCtx);
+            
+            try {
+                assertNotNull(generatedCode);
+                String collapsedCode = generatedCode.replaceAll("\\s+", " ").trim();
+                assertTrue(collapsedCode.contains(expectedCodeContent));
+
+                System.out.println("testCodeGenVisitorIfStatement = success!");
+            } catch (AssertionError e) {
+                System.out.println("testCodeGenVisitorIfStatement = failure! Error: " + e.getMessage());
+                throw e;
+            }
+        } catch (RuntimeException e) {
+            if (expectError) {
+                System.out.println("testCodeGenVisitorIfStatement = success! (caught expected error: " + e.getMessage() + ")");
+                assertTrue(e.getMessage().contains("Type Error") || e.getMessage().contains("type"));
+            } else {
+                throw e;
+            }
         }
         System.out.println("------------------------------------------------------------");
     }
