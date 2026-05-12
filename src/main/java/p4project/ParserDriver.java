@@ -18,11 +18,15 @@ import p4project.visitors.MutexVisitor;
 // TODO - floats have to have f in java.
 // TODO - initialize every variable to be 0 or null.
 // TODO - mutex show m-1 instead of starting with 0.
+// TODO - make functions be generated outside main.
 
 public class ParserDriver {
     public static void main(String[] args) {
         // While loop example with break and continue:
         String input = """
+int func() {
+    return 42;
+}
 void main() { 
     shared int x; 
     print(x, "Hello World"); 
@@ -55,7 +59,12 @@ void main() {
             z = z + 1; 
         } 
     }
+
     criticalFunc(x);
+    criticalFunc(y);
+    criticalFunc(z);
+
+    func();
     
     while (x > 0) { 
         if (x == 3) { 
@@ -109,7 +118,7 @@ void main() {
             ftableGenVisitor.visit(tree);
             System.out.println("--- Function Table After Phase 4 ---");
             ctx.ftable.forEach((name, func) -> {
-                System.out.println(name + " -> " + func);
+                System.out.println(name + " -> " + func.toString() + ", parameters: " + func.parameters.size() + ", containsCriticalSection: " + func.containsCriticalSection);
             });
             System.out.println("-----------------------------------\n");
 

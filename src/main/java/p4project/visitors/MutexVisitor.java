@@ -30,8 +30,10 @@ public class MutexVisitor extends OurGrammarBaseVisitor<Void> {
         // Check if assignment is to a function, if so, check if we are in a critical section.
         if (context.assFunc() != null && inCriticalSection) {
             // -- Check if function contains critical section, if it does, we are doomed.. --
-            throw new RuntimeException("Function '" + context.ID().getText() +
-                "' contains a critical section and cannot be called from another critical section.");
+            if (this.ctx.ftable.get(context.assFunc().ID().toString()).containsCriticalSection) {
+                throw new RuntimeException("Function '" + context.ID().getText() +
+                    "' contains a critical section and cannot be called from another critical section.");
+            }
         }
         return visitChildren(context);
     }

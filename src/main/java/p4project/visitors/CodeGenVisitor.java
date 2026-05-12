@@ -3,6 +3,7 @@ package p4project.visitors;
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
+import p4project.context.FunctionSymbol;
 import p4project.context.Symbol;
 
 import java.util.List;
@@ -93,6 +94,9 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             // Check if this is the main function to set the inMain flag.
             if (id.equals("main")) {
                 inMain = true;
+                String blockCode = visit(context.assFunc().block());
+                if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
+                return indent() + "public static void main(String[] args) " + blockCode + "\n";
             }
 
             // Function definition
@@ -201,11 +205,13 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitCriticalSection(OurGrammarParser.CriticalSectionContext context) {
         StringBuilder sb = new StringBuilder();
-        for (TerminalNode id : context.ID()) {
-            Integer index = ctx.sharedVariables.indexOf(id.getText());
-            sharedIndexes.add(index);
-        } sharedIndexes.sort(Integer::compareTo); // Ensure locks are always acquired in the same order to prevent deadlocks
-        if(!inFuncAssignment) inCriticalSection = true;
+        if(!inFuncAssignment) {
+            for (TerminalNode id : context.ID()) {
+                Integer index = ctx.sharedVariables.indexOf(id.getText());
+                sharedIndexes.add(index);
+            } sharedIndexes.sort(Integer::compareTo); // Ensure locks are always acquired in the same order to prevent deadlocks
+            inCriticalSection = true;
+        }
         String blockCode = visit(context.block());
         if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
         sb.append(indent() + blockCode + "\n");
@@ -324,8 +330,6 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
         ctx.symbolTable.restoreScope(context);
         if (inMain) { // Main block
-            sb.append(indent() + "public static void main(String[] args) {\n");
-            ctx.symbolTable.restoreScope(context);
             sb.append(indent() + "Scanner scanner = new Scanner(System.in);\n");
             sb.append(indent() + "ExecutorService executor = Executors.newCachedThreadPool();\n");
 
@@ -341,8 +345,6 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             }
             sb.append(indent() + "executor.shutdown();\n");
             sb.append(indent() + "scanner.close();\n");
-            ctx.symbolTable.popScope();
-            sb.append(indent()).append("}\n");
         } else if (inCriticalSection) {
             inCriticalSection = false;
 
@@ -388,6 +390,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             for (int index : unlockableMutexes) {
                 sb.append(indent() + "    " + "m" + index + ".unlock();\n");
             }
+            mutexList.removeAll(unlockableMutexes); // Remove the unlocked mutexes from the global mutexList to reflect that they are no longer aquired.
             sb.append(indent() + "}\n");
 
 
@@ -588,6 +591,77 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitFunctionCall(OurGrammarParser.FunctionCallContext context) {
         StringBuilder sb = new StringBuilder();
+        FunctionSymbol funcSymbol = (FunctionSymbol) ctx.ftable.get(context.ID().getText());
+        System.out.println(funcSymbol.toString() + " containsCriticalSection: " + funcSymbol.containsCriticalSection);
+        if (funcSymbol.containsCriticalSection) {
+            if (inCriticalSection) {
+                throw new RuntimeException("Cannot call function '" + funcSymbol.toString() + "' from a critical section because it contains a critical section itself.");
+            }
+            for (OurGrammarParser.ExprContext expr : context.expr()) {
+                String arg = expr.getText();
+                if (this.ctx.sharedVariables.contains(arg)) {
+                    Integer index = ctx.sharedVariables.indexOf(arg);
+                    sharedIndexes.add(index);
+                }
+            }
+            sharedIndexes.sort(Integer::compareTo); // Ensure locks are always acquired in the same order to prevent deadlocks
+            
+            List<Integer> mutexLocalList = new ArrayList<>(sharedIndexes); // To track which mutexes we want to acquire.
+            List<Integer> unlockableMutexes = new ArrayList<>(mutexLocalList); // To track which mutexes are not needed in the parent scope.
+            sharedIndexes = new ArrayList<>(); // Reset sharedIndexes for the next critical section
+            for (int index : new ArrayList<>(unlockableMutexes)) {
+                if (mutexList.contains(index)) {
+                    mutexLocalList.removeAll(Collections.singletonList(index)); // Remove from mutexLocalList to avoid trying to re-aquire it in this critical section
+                    unlockableMutexes.removeAll(Collections.singletonList(index)); // Remove from unlockableMutexes if it's already aquired in an outer critical section
+                    mutexLocalList.sort(Integer::compareTo);
+                    unlockableMutexes.sort(Integer::compareTo);
+                }
+            }
+            
+            unlockableMutexes.sort(Integer::compareTo);
+            mutexLocalList.sort(Integer::compareTo);
+            for (int value : mutexList) {
+                if (!mutexList.isEmpty() && !mutexLocalList.isEmpty() && mutexLocalList.get(0) < value) {
+                    
+                    for (int mutex : mutexList) {
+                        sb.append(indent() + "m" + mutex + ".unlock();\n");
+                        mutexLocalList.add(mutex);
+                    }
+                    mutexLocalList.sort(Integer::compareTo); // Ensure locks are always released in the same order they were acquired to prevent deadlocks.
+                    break;
+                } 
+            }
+            // Update the global mutexList to reflect the currently aquired locks after unlocking those that needed to be released.
+            mutexList = new ArrayList<>(mutexLocalList); 
+            
+            // Acquire locks in the current critical section using a spinlock approach with a exponentially increasing sleep time to reduce CPU contention.
+            for (int index : mutexLocalList) { 
+                sb.append(indent() + "for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) Thread.sleep((long) i);\n");
+            }
+            sb.append(indent() + "try {\n");
+
+            //Construct the function call as usual here.
+            sb.append(indent() + context.ID().getText());
+            sb.append("(");
+            if (context.expr() != null && !context.expr().isEmpty()) {
+                for (int i = 0; i < context.expr().size(); i++) {
+                    sb.append(visit(context.expr(i)));
+                    if (i < context.expr().size() - 1) sb.append(", ");
+                }
+            }
+            sb.append(");\n");
+            
+            sb.append(indent() + "} finally {\n");
+            for (int index : unlockableMutexes) {
+                sb.append(indent() + "    " + "m" + index + ".unlock();\n");
+            }
+            mutexList.removeAll(unlockableMutexes); // Remove the unlocked mutexes from the global mutexList to reflect that they are no longer aquired.
+            sb.append(indent() + "}\n");
+
+            
+            
+            return sb.toString();
+        }
         sb.append(indent() + context.ID().getText());
         sb.append("(");
         if (context.expr() != null && !context.expr().isEmpty()) {
