@@ -1,0 +1,21 @@
+package p4project;
+
+import java.util.Scanner;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
+import java.util.concurrent.CompletableFuture;
+
+float square(float x) {
+    return x * x;
+}
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        ExecutorService executor = Executors.newCachedThreadPool();
+        float x = 5.0;
+        x = square(x);
+        System.out.print(x);
+        executor.shutdown();
+        scanner.close();
+    }
+}

@@ -15,7 +15,7 @@
       "name": "Run Parser Driver",
       "type": "java",
       "request": "launch",
-      "mainClass": "p4project.ParserDriver",
+      "mainClass": "p4project.Main",
       "classPaths": [
         "${workspaceFolder}/target/classes",
         "${workspaceFolder}/lib/antlr4-runtime-4.13.1.jar"
