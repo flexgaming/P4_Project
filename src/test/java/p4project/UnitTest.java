@@ -98,7 +98,8 @@ class UnitTest {
         "'int i = 5;', 0",
         "'const int j = 10;', 0",
         "'int 5 = i;', 1", // Example of broken syntax (assuming it produces 1 syntax error)
-        "'if ((x > 5) {x = 10;}', 1" // Example of broken syntax (missing closing parenthesis)
+        "'if ((x > 5) {x = 10;}', 1", // Example of broken syntax (missing closing parenthesis)
+        "'for (int i = 0; i < 10; i = i + 1) {}', 0"
     })
     void testParser(String input, int expectedErrors) {
         System.out.println("========== Running testParser for: " + input + " ==========");
@@ -107,8 +108,7 @@ class UnitTest {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         OurGrammarParser parser = new OurGrammarParser(tokens);
         
-        // Remove default error listeners if you want clean terminal outputs, but keep to count them
-        parser.assignment(); 
+        parser.program(); 
 
         try {
             assertAll("Parser Syntax Error Check",
@@ -174,7 +174,6 @@ class UnitTest {
     void testAssDecVisitorAssignment(String input, String expectedVarName, String expectedType, boolean expectConst, boolean expectShared) {
         System.out.println("========== Running testAssDecVisitorAssignment for: " + input + " ==========");
         OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment(input);
-        ctx.symbolTable.pushScope(assignmentCtx); // Dummy global scope
 
         AssDecVisitor visitor = new AssDecVisitor(ctx);
         visitor.visitAssignment(assignmentCtx);
@@ -197,35 +196,36 @@ class UnitTest {
     }
 
     @ParameterizedTest(name = "Testing ref linking assignment: {0}")
-@CsvSource({
-    "'int j = 10;', 'j', 'int'",
-    "'float radius = 3.14;', 'radius', 'float'",
-    "'shared float radius = 3.14;', 'radius', 'float'"
-})
-void testRefLinkingVisitorAssignment(String input, String expectedVarName, String expectedTypeName) {
-    System.out.println("========== Running testRefLinkingVisitorAssignment for: " + input + " ==========");
-    
-    OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment(input);
+    @CsvSource({
+        "'int j = 10;', 'j', 'int'",
+        "'float radius = 3.14;', 'radius', 'float'",
+        "'shared float radius = 3.14;', 'radius', 'float'"
+    })
+    void testRefLinkingVisitorAssignment(String input, String expectedVarName, String expectedTypeName) {
+        System.out.println("========== Running testRefLinkingVisitorAssignment for: " + input + " ==========");
+        
+        OurGrammarParser.AssignmentContext assignmentCtx = parseAssignment(input);
 
-    ctx = new StubCompilationContext();           // fresh stub
-    ctx.defineFake(expectedVarName, expectedTypeName);   // ← this now works
-    ctx.symbolTable.pushScope(assignmentCtx);
+        ctx = new StubCompilationContext();           // fresh stub
+        ctx.defineFake(expectedVarName, expectedTypeName);   // ← this now works
+        ctx.symbolTable.pushScope(assignmentCtx);
 
-    RefLinkingVisitor visitor = new RefLinkingVisitor(ctx);
-    visitor.visitAssignment(assignmentCtx);
+        RefLinkingVisitor visitor = new RefLinkingVisitor(ctx);
+        visitor.visitAssignment(assignmentCtx);
 
-    try {
-        assertAll("RefLinking Assignment Check",
-            () -> assertFalse(ctx.resolvedSymbols.isEmpty()),
-            () -> assertEquals(expectedVarName, ctx.resolvedSymbols.get(assignmentCtx.ID()).ID)
-        );
-        System.out.println("✓ SUCCESS (" + expectedVarName + ")");
-    } catch (AssertionError e) {
-        System.out.println("✗ FAILURE: " + e.getMessage());
-        throw e;
+        try {
+            assertAll("RefLinking Assignment Check",
+                () -> assertFalse(ctx.resolvedSymbols.isEmpty()),
+                () -> assertEquals(expectedVarName, ctx.resolvedSymbols.get(assignmentCtx.ID()).ID)
+            );
+            System.out.println("✓ SUCCESS (" + expectedVarName + ")");
+        } catch (AssertionError e) {
+            System.out.println("✗ FAILURE: " + e.getMessage());
+            throw e;
+        }
+        System.out.println("------------------------------------------------------------");
     }
-    System.out.println("------------------------------------------------------------");
-}
+
     @ParameterizedTest(name = "Testing type checking assignment: {0}")
     @CsvSource({
         "'int k = 15;', 'k', 'int'",
