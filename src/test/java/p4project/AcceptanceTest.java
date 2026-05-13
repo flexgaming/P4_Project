@@ -26,15 +26,46 @@ class AcceptanceTest {
     // Requirement 1: Create, maintain, and terminate threads
     @Test
     void testRequirement1() {
-        System.out.println("=== Running Acceptance Test: requirement 1 ===");
+        String input = """
+            void main() {
+                thread t1 => {};
+                thread t2 => {};
+            }
+
+            """;
+
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        assertTrue(normalized.contains("CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {});"));
+        assertTrue(normalized.contains("CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {});"));
     }
 
-    // req 2
+    // Requirement 2: 
 
-    // Data Types: char, int, float, bool
+    // Requirement 5: Data Types: char, int, float, bool
     @Test
     void testRequirement5() {
-        System.out.println("=== Running Acceptance Test: requirement 5 ===");
+        String input = """
+            void main() {
+                char c = 'a';
+                int i = 42;
+                float f = 3.14;
+                bool b = true;
+            }
+            """;
+
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        assertTrue(normalized.contains("char c = 'a';"));
+        assertTrue(normalized.contains("int i = 42;"));
+        assertTrue(normalized.contains("float f = 3.14f;"));
+        assertTrue(normalized.contains("bool b = true;"));
     }
     // Arrays
     @Test
@@ -116,16 +147,32 @@ class AcceptanceTest {
     }
 
 
-    // maybe req 10
+    // Requirement 10: Functionality to prevent deadlocks
 
-    // req 11
+    // Requirement 11: Reassignments
+    @Test
+    void requirement11() {
+        String input = """
+            void main() {
+                int x = 5;
+                x = 10;
+            }
+            """;
 
-    // req 12
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
 
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        assertTrue(normalized.contains("int x = 5;"));
+        assertTrue(normalized.contains("x = 10;"));
+    }
 
-    // req 13 (maybe 12 also in one)
+    // Requirement 12: Wait function
 
-    // req 14
+    // Requirement 13: Data type: Thread
+
+    // Requirement 14: Parallel Implementation avoiding deadlocks and race conditions
 
     // Requirement 15: Strings
     @Test
@@ -147,6 +194,19 @@ class AcceptanceTest {
     // Requirement 18: Shared variables gets wrapped in mutex
     @Test
     void requirement18() {
+        String input = """
+            void main() {
+                shared int counter = 0;
+            }
+            """;
+
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
+        
     }
 
 

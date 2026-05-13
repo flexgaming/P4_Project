@@ -159,7 +159,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         String id = context.ID().getText();
         String blockCode = visit(context.block());
         if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
-        return indent() + "CompletableFuture<?> " + id + " = executor.submit(() -> " + blockCode + ").toCompletableFuture();\n";
+        return indent() + "CompletableFuture<Void> " + id + " = CompletableFuture.runAsync(() -> " + blockCode + ");\n";
     }
 
     @Override
