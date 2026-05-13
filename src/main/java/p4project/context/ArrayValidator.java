@@ -23,20 +23,20 @@ public class ArrayValidator {
     // the symbol's type accordingly
     // -------------------------------------------------------
 
-    public void inferDimensions(String literal, Symbol sym, ParserRuleContext cx) {
+    public void inferDimensions(String literal, Symbol sym, ParserRuleContext context) {
         if (sym.arrType == null) {
             throw new RuntimeException("Cannot infer dimensions for variable '" + sym.ID + "' because it is not declared as an array.");
         }
         ArrayTypeSymbol base = sym.arrType;
 
-        int[] dims = inferDimensionsRecursive(literal.trim(), cx);
+        int[] dims = inferDimensionsRecursive(literal.trim(), context);
         if (dims != null) { 
             base.dimSize = dims;
             base.dimensions = dims.length;
         }
     }
 
-    private int[] inferDimensionsRecursive(String input, ParserRuleContext cx) {
+    private int[] inferDimensionsRecursive(String input, ParserRuleContext context) {
         if (!input.startsWith("{") || !input.endsWith("}")) {
             throw new RuntimeException("Expected '{...}' but got: " + input);
         }
@@ -48,12 +48,12 @@ public class ArrayValidator {
         boolean nested = elements.stream().anyMatch(e -> e.trim().startsWith("{"));
         if (nested) {
             // Recurse into the first element to get inner dimensions
-            int[] innerDims = inferDimensionsRecursive(elements.get(0).trim(), cx);
+            int[] innerDims = inferDimensionsRecursive(elements.get(0).trim(), context);
             if (innerDims == null) return null;
 
             // Validate all elements have the same inner dimensions
             for (int i = 1; i < elements.size(); i++) {
-                int[] otherDims = inferDimensionsRecursive(elements.get(i).trim(), cx);
+                int[] otherDims = inferDimensionsRecursive(elements.get(i).trim(), context);
                 if (otherDims == null) return null;
                 if (!Arrays.equals(innerDims, otherDims))
                     throw new RuntimeException("Inconsistent dimensions in array literal at element " + i);
@@ -74,11 +74,11 @@ public class ArrayValidator {
     // array symbol in both dimensions and element types
     // -------------------------------------------------------
 
-    public void validateLiteral(String literal, ArrayTypeSymbol type, ParserRuleContext cx) {
-        validateDimension(literal.trim(), type, 0, cx);
+    public void validateLiteral(String literal, ArrayTypeSymbol type, ParserRuleContext context) {
+        validateDimension(literal.trim(), type, 0, context);
     }
 
-    private void validateDimension(String input, ArrayTypeSymbol type, int depth, ParserRuleContext cx) {
+    private void validateDimension(String input, ArrayTypeSymbol type, int depth, ParserRuleContext context) {
         int expectedSize = type.dimSize[depth];
 
         if (!input.startsWith("{") || !input.endsWith("}")) {
@@ -92,22 +92,10 @@ public class ArrayValidator {
         }
 
         if (depth < type.dimSize.length - 1) {
-            for (String element : elements) validateDimension(element.trim(), type, depth + 1, cx);
+            for (String element : elements) validateDimension(element.trim(), type, depth + 1, context);
         } else {
-            for (String element : elements) validateBaseType(element.trim(), type.elementType, cx);
+            //for (String element : elements) validateBaseType(element.trim(), type.elementType, context);
         }
-    }
-
-    private void validateBaseType(String value, TypeSymbol expected, ParserRuleContext cx) {
-        boolean valid = switch (expected.type.toString().toLowerCase()) {
-            case "int"    -> value.matches("-?[0-9]+");
-            case "float"  -> value.matches("-?[0-9]+(\\.[0-9]+)?");
-            case "bool"   -> value.equals("true") || value.equals("false");
-            case "char"   -> value.matches("'.'");
-            case "string" -> value.startsWith("\"") && value.endsWith("\"");
-            default     -> false;
-        };
-        if (!valid) throw new RuntimeException("Expected " + expected + " but got: " + value);
     }
 
     // -------------------------------------------------------

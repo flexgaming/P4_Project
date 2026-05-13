@@ -133,7 +133,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             
             System.out.println("beforeeqsrer: " + beforeEquals);
             System.out.println("context: " + context.getText());
-
+            System.out.println("WOOD" + context.expr().getText());
             if (beforeEquals.contains("[")) {
                 System.out.println("HALOOOOOO.-.-.-");
 
@@ -150,12 +150,15 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 }
                 return indent() + id + " = new " + symbol.type.toString() + brackets + visit(context.expr()) + ";\n";
 
-            } else { // Throw runtime exception if trying to assign a non-array value to an array variable.
+            } else if (this.ctx.symbolTable.resolve(context.expr().getText()).arrType != null) { 
+                return indent() + context.ID().getText() + " = " + visit(context.expr()) + ".clone();\n";
+            } else {
                 throw new RuntimeException("Cannot assign non-array value to array variable '" + id + "'");
             }
         }
         return indent() + context.ID().getText() + " = " + visit(context.expr()) + ";\n";
     }
+    
 
     @Override
     public String visitDeclaration(OurGrammarParser.DeclarationContext context) {

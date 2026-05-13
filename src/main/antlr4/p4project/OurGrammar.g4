@@ -23,7 +23,7 @@ statementPrime
     | breakStatement 
     | returnStatement 
     | printStatement
-    | functionCall
+    | expr
     ;
 
 assignment

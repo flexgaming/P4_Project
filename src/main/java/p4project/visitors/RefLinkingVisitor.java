@@ -74,6 +74,9 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
             // If the string does not contain any brackets before the equals sign, 
             // we can treat it as a normal array reassignment and link it to the symbol without further checks.
             if (!contextStr.contains("[")) {
+                /* if (this.ctx.symbolTable.resolve(context.expr().ID().getText()).arrType == null) {
+                    throw new RuntimeException("Variable '" + context.expr().ID().getText() + "' not declared.");
+                } */
                 break statement; // Jumps out of the if statement.
             }
             String afterEquals = contextStr.substring(equalsIndex + 1, contextStr.length());

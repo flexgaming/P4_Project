@@ -3,7 +3,7 @@ package p4project.visitors;
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import p4project.context.CompilationContext;
+
 import p4project.context.*;
 
 /*
@@ -67,8 +67,14 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
         String declaredType = symbol.type.name.toLowerCase();
         String exprType = visit(context.expr());
-
-        if (!declaredType.equals(exprType)) {
+        Symbol contextSymbol = this.ctx.symbolTable.resolve(context.expr().getText());
+        if (contextSymbol != null && symbol.arrType == null && contextSymbol.arrType != null) {
+            throw new RuntimeException("Type Error: Cannot assign array value '"
+            + contextSymbol.ID + "' to non-array variable '" + id + "'");
+        } else if (contextSymbol != null && symbol.arrType != null && contextSymbol.arrType == null) {
+            throw new RuntimeException("Type Error: Cannot assign value '"
+            + contextSymbol.ID +"' to array variable '" + id + "'");
+        } else if (!declaredType.equals(exprType)) {
             throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
         }
         return declaredType;
@@ -155,7 +161,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         }
 
         String declaredType = symbol.type.name.toLowerCase();
-
+        // TODO - Ensure forvar is not void or thread, as those types cannot be used as loop variables.
         if (context.assVar() != null) {
             String exprType = visit(context.assVar().expr());
             if (!declaredType.equals(exprType)) {
