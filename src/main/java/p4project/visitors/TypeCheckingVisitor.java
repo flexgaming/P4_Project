@@ -362,9 +362,6 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
                 throw new RuntimeException("Type Error: '" + ai.ID().getText() + "' is not an array.");
             }
 
-            System.out.println("Symbol arrType: " + symbol.arrType.toString());
-
-
             return symbol.type.name.toLowerCase();
         }
 

@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
+import p4project.context.ArrayTypeSymbol;
 import p4project.context.CompilationContext;
 import p4project.context.Symbol;
 
@@ -91,10 +92,15 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
                 // set the specific array element to the variable.
 
 
-            } 
+            } /// ER KOMMET HERTIL
             if (afterEquals.contains("{") || afterEquals.contains("[")) {
+                System.out.println("This?: " + this.ctx.symbolTable.resolve(id).arrType);
                 // set either the size of the array or to the defined array literal.
-                
+                if (this.ctx.symbolTable.resolve(id).arrType instanceof ArrayTypeSymbol) {
+                    int[] arr = this.ctx.symbolTable.resolve(id).arrType.dimSize;
+
+                    System.out.println("Old value from arr: " + arr.toString());
+                }
 
             }
         }
