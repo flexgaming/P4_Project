@@ -167,7 +167,8 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         StringBuilder sb = new StringBuilder();
         // check if it is awaitAll or awaitAny
         if (context.getChild(0).getText().equals("awaitAll")) {
-            sb.append(indent() + "CompletableFuture.allOf(");
+            
+            sb.append(indent()).append("try {\n    CompletableFuture.allOf(");
             for (int i = 0; i < context.ID().size(); i++) {
                 String id = context.ID(i).getText();
                 sb.append(id);
@@ -175,10 +176,10 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                     sb.append(", ");
                 }
             }
-            sb.append(").get();\n");
+            sb.append(").get();} catch (InterruptedException | ExecutionException e) { Thread.currentThread().interrupt(); e.printStackTrace();}");
         } 
         else if (context.getChild(0).getText().equals("awaitAny")) {
-            sb.append(indent() + "CompletableFuture.anyOf(");
+            sb.append(indent()).append("try {\n    CompletableFuture.anyOf(");
             for (int i = 0; i < context.ID().size(); i++) {
                 String id = context.ID(i).getText();
                 sb.append(id);
@@ -186,7 +187,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                     sb.append(", ");
                 }
             }
-            sb.append(").get();\n");
+            sb.append(").get();} catch (InterruptedException | ExecutionException e) { Thread.currentThread().interrupt(); e.printStackTrace(); }");
             
         } 
         else {

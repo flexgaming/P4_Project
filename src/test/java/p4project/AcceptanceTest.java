@@ -169,7 +169,45 @@ class AcceptanceTest {
     }
 
     // Requirement 12: Wait function
+    @Test
+    void requirement12() {
+        String input = """
+                void main() {
 
+                thread t1 => { print("in t1")}
+                thread t2 => { print("in t2")}
+                awaitAll(t1, t2);
+            }
+            """;
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        assertTrue(normalized.contains("CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> { System.out.print(\"in t1\"); });"));
+        assertTrue(normalized.contains("CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> { System.out.print(\"in t2\"); });"));
+        assertTrue(normalized.contains("CompletableFuture.allOf(t1, t2).get();"));
+    }
+
+    @Test
+    void requirement12a() {
+        String input = """
+                void main() {
+                thread t1 => { print("in t1")}
+                thread t2 => { print("in t2")}
+                awaitAny(t1, t2);
+            }
+            """;
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        assertTrue(normalized.contains("CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> { System.out.print(\"in t1\"); });"));
+        assertTrue(normalized.contains("CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> { System.out.print(\"in t2\"); });"));
+        assertTrue(normalized.contains("CompletableFuture.anyOf(t1, t2).get();"));
+    }
+    
     // Requirement 13: Data type: Thread
 
     // Requirement 14: Parallel Implementation avoiding deadlocks and race conditions
@@ -249,6 +287,9 @@ class AcceptanceTest {
                 print("Enter your name:");
                 string name = read(string);
                 print("Hello", name + "!");
+
+                print("Age?: ");
+                int age = read(int);
             }
             """;
 
