@@ -25,6 +25,7 @@ public class MutexVisitor extends OurGrammarBaseVisitor<Void> {
         this.ctx = ctx;
     }
     
+    //This visitor visits assignments from function calls to check for mutex violations.
     @Override
     public Void visitAssignment(OurGrammarParser.AssignmentContext context) {
         // Check if assignment is to a function, if so, check if we are in a critical section.
@@ -57,21 +58,12 @@ public class MutexVisitor extends OurGrammarBaseVisitor<Void> {
             // Check if the function being called contains shared variables. If it does, throw an error.
             String functionName = context.ID().getText();
             FunctionSymbol functionSymbol = this.ctx.ftable.get(functionName);
-
-            /** 
-             * In the future, we should instead check if the function contains critical sections,
-             * but for now we will just check the parameters of the function being called.
-             * Instead of throwing an error, it should be handlel like nested critical sections,
-             * as is done in CodeGenVisitor, but for now we will just throw an error.
-             */ 
             if (functionSymbol != null && functionSymbol.containsCriticalSection) {
                 throw new RuntimeException("Function '" + functionName +
                 "' contains a critical section and cannot be called within another critical section.");
             }
             System.out.println("Visited function call to '" + functionName + "' from within a critical section. " + functionName + " containsCriticalSection: " + functionSymbol.containsCriticalSection);
             visitAssignment(functionSymbol.context); // visit the function's context to check for nested critical sections.
-            // THINGS ARE GETTING SPICY!!! 🌶️🌶️🌶️
-
         }
         return visitChildren(context);
     }   

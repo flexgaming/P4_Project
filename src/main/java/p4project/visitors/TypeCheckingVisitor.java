@@ -53,7 +53,12 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitReassignment(OurGrammarParser.ReassignmentContext context) {
-        String id = context.ID().getText();
+        String id = "";
+        if (context.ID() == null) {
+            id = context.arrayIndex().ID().getText();
+        } else {
+            id = context.ID().getText();
+        }
         Symbol symbol = this.ctx.symbolTable.resolve(id);
         
         if (symbol == null) {
@@ -288,6 +293,8 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             return "int";
         } else if (leftType.equals("float") && rightType.equals("float")) {
             return "float";
+        } else if(leftType.equals("string") && rightType.equals("string") && context.getChild(1).getText().equals("+")) {
+            return "string";
         } else {
             throw new RuntimeException("Type Error: Cannot apply operator '" + context.getChild(1).getText() + "' to types " + leftType + " and " + rightType);
         }

@@ -44,7 +44,7 @@ void main() {
     int[][] l;
     l = [3][10];
     l[1][2] = 1222;
-    l = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
+    l = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
     print(cast(string)l[2]);
     shared int y = 2;
     shared float z = 3.0;
@@ -104,7 +104,11 @@ void main() {
             // print the resolved symbols after phase 2:
             System.out.println("--- Resolved Symbols After Phase 2 ---");
             ctx.resolvedSymbols.forEach((node, sym) -> {
-                System.out.println(node.getText() + " -> " + sym + " (type: " + sym.type.name + ")" + (sym.prefixes.isEmpty() ? "" : ", prefixes: " + sym.prefixes));
+                if(node != null) {
+                    System.out.println(node.getText() + " -> " + sym + " (type: " + sym.type.name + ")" + (sym.prefixes.isEmpty() ? "" : ", prefixes: " + sym.prefixes));
+                } else {
+                    System.out.println("\n!-!-!-!- COMPILATION CONTEXT RESOLVED SYMBOL " + node + " = NULL -!-!-!-!\n");
+                }
             });
             System.out.println("--------------------------------------\n");
 

@@ -115,7 +115,12 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitReassignment(OurGrammarParser.ReassignmentContext context) {
         // check if it is called in a for header
-        String id = context.ID().getText();
+        String id = "";
+        if (context.ID() == null) {
+            id = context.arrayIndex().ID().getText();
+        } else {
+            id = context.ID().getText();
+        }
         Symbol symbol = this.ctx.symbolTable.resolve(id);
         if (this.ctx.symbolTable.getNodeScope().getText().contains("for")) {
             return id + " = " + visit(context.expr());
@@ -232,7 +237,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         String id = context.ID().getText();
         String blockCode = visit(context.block());
         if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
-        return indent() + "CompletableFuture<?> " + id + " = executor.submit(() -> " + blockCode + ").toCompletableFuture();\n";
+        return indent() + "CompletableFuture<Void> " + id + " = CompletableFuture.runAsync(() -> " + blockCode + ");\n";
     }
 
     @Override

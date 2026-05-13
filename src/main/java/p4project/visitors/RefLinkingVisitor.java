@@ -11,6 +11,7 @@ import p4project.OurGrammarParser;
 import p4project.context.ArrayTypeSymbol;
 import p4project.context.CompilationContext;
 import p4project.context.Symbol;
+import p4project.context.ArrayValidator;
 
 /*
     Phase 1: Symbol assignments and declerations
@@ -24,9 +25,11 @@ import p4project.context.Symbol;
 public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
 
     private final CompilationContext ctx;
+    private final ArrayValidator arrayValidator;
 
     public RefLinkingVisitor(CompilationContext ctx) {
         this.ctx = ctx;
+        this.arrayValidator = new ArrayValidator(ctx);
     }
 
     @Override
@@ -73,7 +76,7 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
             if (!contextStr.contains("[")) {
                 break statement; // Jumps out of the if statement.
             }
-            String afterEquals = contextStr.substring(equalsIndex + 1);
+            String afterEquals = contextStr.substring(equalsIndex + 1, contextStr.length());
             String beforeEquals = contextStr.substring(0, equalsIndex);
             
             if (beforeEquals.contains("[")) {
@@ -94,14 +97,30 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
 
             } /// ER KOMMET HERTIL
             if (afterEquals.contains("{") || afterEquals.contains("[")) {
-                System.out.println("This?: " + this.ctx.symbolTable.resolve(id).arrType);
                 // set either the size of the array or to the defined array literal.
-                if (this.ctx.symbolTable.resolve(id).arrType instanceof ArrayTypeSymbol) {
-                    int[] arr = this.ctx.symbolTable.resolve(id).arrType.dimSize;
-
-                    System.out.println("Old value from arr: " + arr.toString());
+                System.out.println("Old value from arr: " + java.util.Arrays.toString(dimensions));
+                if (afterEquals.contains("{")) {
+                    arrayValidator.inferDimensions(afterEquals, symbol, context);
+                } else if (afterEquals.contains("[")) {
+                    // If the right-hand side is an array size, we re-assign the size of the array.
+                    for (int dim : dimensions) {
+                        if (dim != 0) {
+                            throw new RuntimeException("Cannot reassign size of an array that already has a defined size. Current size: " + java.util.Arrays.toString(dimensions));
+                        }
+                    }
+                    int[] newSize = new int[dimCount];
+                    System.out.println("Reassigning array size for '" + id + "', using string " + afterEquals);
+                    for (int i = 0; i < dimCount && afterEquals.contains("["); i++) {
+                        newSize[i] = Integer.parseInt(afterEquals.substring(1, afterEquals.indexOf(']')));
+                        System.out.println("New size for dimension " + i + ": " + newSize[i]);
+                        if (newSize[i] <= 0) {
+                            throw new RuntimeException("Array size must be greater than 0 for dimension " + i + ": Size " + newSize[i]);
+                        }
+                        afterEquals = afterEquals.substring(afterEquals.indexOf(']') + 1);
+                    }
+                    symbol.arrType.dimSize = newSize;
+                    System.out.println("Dimcount: " + dimCount + ", New value from arr: " + java.util.Arrays.toString(symbol.arrType.dimSize));
                 }
-
             }
         }
 
