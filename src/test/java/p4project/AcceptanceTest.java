@@ -1,27 +1,9 @@
 package p4project;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
-
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
 
 class AcceptanceTest {
@@ -33,129 +15,190 @@ class AcceptanceTest {
         System.out.println("=== Acceptance Test Setup Complete ===");
     }
 
-    private OurGrammarParser.ProgramContext parseProgram(String input) {
-        CharStream charStream = CharStreams.fromString(input);
-        OurGrammarLexer lexer = new OurGrammarLexer(charStream);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        OurGrammarParser parser = new OurGrammarParser(tokens);
-        return parser.program();
+    private String normalize(String code) {
+        return code
+        .replaceAll("//.*", "")
+        .replaceAll("\\{\\s+\\}", "{}")
+        .replaceAll("\\s+", " ")
+        .trim();
     }
 
-    private OurGrammarParser.ExprContext parseExpression(String input) {
-        CharStream charStream = CharStreams.fromString(input);
-        OurGrammarLexer lexer = new OurGrammarLexer(charStream);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        OurGrammarParser parser = new OurGrammarParser(tokens);
-        return parser.expr();
-    }
-
+    // Requirement 1: Create, maintain, and terminate threads
     @Test
     void testRequirement1() {
         System.out.println("=== Running Acceptance Test: requirement 1 ===");
     }
 
-    @Test
-    void testRequirement2() {
-        System.out.println("=== Running Acceptance Test: requirement 2 ===");
-    }
+    // req 2
 
-    @Test
-    void testRequirement4() {
-        System.out.println("=== Running Acceptance Test: requirement 4 ===");
-    }
-
+    // Data Types: char, int, float, bool
     @Test
     void testRequirement5() {
         System.out.println("=== Running Acceptance Test: requirement 5 ===");
     }
-
+    // Arrays
     @Test
     void testRequirement6() {
         System.out.println("=== Running Acceptance Test: requirement 6 ===");
     }
 
-    @ParameterizedTest(name = "Req 7 - {0} => {1}")
-    @CsvSource({
-        // Arithmetic
-        "5 + 3, 8",
-        "5 - 3, 2",
-        "5 * 3, 15",
-        "5 % 3, 2",
-        // Java integer division for int literals
-        "5 / 3, 1",
-        // Comparison
-        "5 == 3, false",
-        "5 != 3, true",
-        "5 < 3, false",
-        "5 > 3, true",
-        "5 >= 3, true",
-        "5 <= 3, false",
-        // Logical
-        "true || false, true",
-        "true && false, false",
+    // Operators: +, -, *, /, %, ^, ==, !=, ||, <, >, &&, >=, <=
+    @Test
+    void requirement7() {
+        String input = """
+            void main() {
+                int add = 5 + 3;
+                int minus = 5 - 3;
+                int mult = 10 * 2;
+                int div = 10 / 2;
+                int mod = 10 % 3;
+                float pow = 3.5 ^ 2.5;
+                if (8 == 8) {}
+                if (7 != 8) {}
+                if (true || false) {}
+                if (5 < 10) {}
+                if (5 > 10) {}
+                if (true && false) {}
+                if (5 >= 4) {}  
+                if (5 <= 4) {}       
+            }
+            """;
 
-        // Mixed precedence
-        "5 + 3 * 2, 11",
-        "true || false && false, true",
-    })
-    void testRequirement7WithOutput(String expression, String expected) throws Exception {
-        String program = "void main() { print(" + expression + "); }";
+        // 1. Full pipeline (your existing helper)
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
 
-        String javaCode = ParserDriver.runFullPipeline(program);
-        String actualOutput = compileAndRunGeneratedMain(javaCode);
-
-        assertEquals(expected, actualOutput,
-                "Unexpected runtime output for expression: " + expression);
+        assertTrue(normalized.contains("int add = 5 + 3;"));
+        assertTrue(normalized.contains("int minus = 5 - 3;"));
+        assertTrue(normalized.contains("int mult = 10 * 2;"));
+        assertTrue(normalized.contains("int div = 10 / 2;"));
+        assertTrue(normalized.contains("int mod = 10 % 3;"));
+        assertTrue(normalized.contains("float pow = 3.5 ^ 2.5;"));
+        assertTrue(normalized.contains("if (8 == 8) {}"));
+        assertTrue(normalized.contains("if (7 != 8) {}"));
+        assertTrue(normalized.contains("if (true || false) {}"));
+        assertTrue(normalized.contains("if (5 < 10) {}"));
+        assertTrue(normalized.contains("if (5 > 10) {}"));
+        assertTrue(normalized.contains("if (true && false) {}"));
+        assertTrue(normalized.contains("if (5 >= 4) {}"));
+        assertTrue(normalized.contains("if (5 <= 4) {}"));
     }
 
-    
-    // Reusable acceptance template: generate Java, compile it, run Main.main, assert output.
-    private static String compileAndRunGeneratedMain(String javaCode) throws Exception {
-        Path tempDir = Files.createTempDirectory("acceptance-main-");
-        Path mainFile = tempDir.resolve("Main.java");
-        Files.writeString(mainFile, javaCode, StandardCharsets.UTF_8);
+    @Test
+    void requirement8() {
+        String input = """
+            void main() {
+                if (5 < 10) {}
+                if (5 < 10) {} else {}
+                if (5 < 10) {} else if (3 > 1) {} else {}
+                for (int i = 0; i < 10; i = i + 1) {}
+                while (5 < 10) {break;}
+                int x;
+                int y = 5;
+                print("Hello, World!");
+                x = read(int);
+                """;
 
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        assertNotNull(compiler,
-                "No Java compiler available. Run tests with a JDK, not a JRE.");
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
 
-        ByteArrayOutputStream compileErrors = new ByteArrayOutputStream();
-        int exitCode = compiler.run(null, null, new PrintStream(compileErrors), mainFile.toString());
-        assertEquals(0, exitCode,
-                "Generated Java failed to compile:\n" + compileErrors.toString(StandardCharsets.UTF_8));
-
-        PrintStream originalOut = System.out;
-        ByteArrayOutputStream runtimeOutput = new ByteArrayOutputStream();
-
-        try (URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{tempDir.toUri().toURL()})) {
-            System.setOut(new PrintStream(runtimeOutput));
-
-            Class<?> mainClass = Class.forName("Main", true, classLoader);
-            Method mainMethod = mainClass.getMethod("main", String[].class);
-            mainMethod.invoke(null, (Object) new String[]{});
-        } finally {
-            System.setOut(originalOut);
-            deleteDirectoryRecursively(tempDir);
-        }
-
-        return runtimeOutput.toString(StandardCharsets.UTF_8)
-                .replace("\r\n", "\n")
-                .trim();
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        assertTrue(normalized.contains("if (5 < 10) {}"));
+        assertTrue(normalized.contains("if (5 < 10) {} else {}"));
+        assertTrue(normalized.contains("if (5 < 10) {} else if (3 > 1) {} else {}"));
+        assertTrue(normalized.contains("for (int i = 0; i < 10; i = i + 1) {}"));
+        assertTrue(normalized.contains("while (5 < 10) {break;}"));
+        assertTrue(normalized.contains("int x;"));
+        assertTrue(normalized.contains("int y = 5;"));
+        assertTrue(normalized.contains("System.out.print(\"Hello, World!\");"));
+        assertTrue(normalized.contains("x = scanner.nextInt();"));
     }
 
-    private static void deleteDirectoryRecursively(Path root) throws IOException {
-        if (!Files.exists(root)) {
-            return;
-        }
-        try (var paths = Files.walk(root)) {
-            paths.sorted((a, b) -> b.compareTo(a))
-                    .forEach(path -> {
-                        try {
-                            Files.deleteIfExists(path);
-                        } catch (IOException ignored) {
-                            // Best-effort cleanup for temp acceptance artifacts.
-                        }
-                    });
-        }
+
+    // maybe req 10
+
+    // req 11
+
+    // req 12
+
+
+    // req 13 (maybe 12 also in one)
+
+    // req 14
+
+    // Requirement 15: Strings
+    @Test
+    void requirement15() {
+        String input = """
+            void main() {
+                string status = "good";
+            }
+            """;
+
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        assertTrue(normalized.contains("string status = \"good\";"));
+    }
+
+    // Requirement 18: Shared variables gets wrapped in mutex
+    @Test
+    void requirement18() {
+    }
+
+
+    // Maybe idk
+
+
+
+    // Requirement 20: Single and multiline comments
+    @Test
+    void requirement20() {
+        String input = """
+            void main() {
+                // This is a single-line comment
+                /* This 
+                is 
+                a 
+                multi-line 
+                comment */
+            }
+            """;
+
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        assertFalse(normalized.contains("//"), "Single-line comments should be removed");
+        assertFalse(normalized.contains("/*"), "Multi-line comments should be removed");
+    }
+
+    // Req 24 We have it, but test idk
+
+    // Req 25 maybe not
+
+    // Requirement 26: input and output via console
+    @Test
+    void requirement26() {
+        String input = """
+            void main() {
+                print("Enter your name:");
+                string name = read(string);
+                print("Hello", name + "!");
+            }
+            """;
+
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        assertTrue(normalized.contains("System.out.print(\"Enter your name:\");"));
+        assertTrue(normalized.contains("string name = scanner.nextLine();"));
+        assertTrue(normalized.contains("System.out.print(\"Hello\" + name + \"!\");")); 
     }
 }

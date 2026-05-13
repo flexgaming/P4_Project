@@ -1,8 +1,9 @@
 package p4project.visitors;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import p4project.context.CompilationContext;
 import p4project.context.Symbol;
 
@@ -287,6 +288,8 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             return "int";
         } else if (leftType.equals("float") && rightType.equals("float")) {
             return "float";
+        } else if (leftType.equals("string") && rightType.equals("string") && context.getChild(1).getText().equals("+")) {
+            return "string"; 
         } else {
             throw new RuntimeException("Type Error: Cannot apply operator '" + context.getChild(1).getText() + "' to types " + leftType + " and " + rightType);
         }
