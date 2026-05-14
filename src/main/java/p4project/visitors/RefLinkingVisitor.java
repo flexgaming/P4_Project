@@ -132,7 +132,6 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
                     }
                     symbol.arrType.dimSize = newSize.clone();
                 }
-
             }
         }
 
@@ -216,16 +215,6 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         return visitChildren(context);
     }
 
-    @Override
-    public Void visitCriticalSection(OurGrammarParser.CriticalSectionContext context) {
-        for (TerminalNode id : context.ID()) {
-            Symbol symbol = this.ctx.resolvedSymbols.get(id);
-            if (symbol != null && !symbol.isShared()) {
-                throw new RuntimeException("'" + id.getText() + "' must be declared 'shared' to be used in a critical section");
-            } 
-        }
-        return visitChildren(context);
-    }
     
     @Override
     public Void visitIfStatement(OurGrammarParser.IfStatementContext context) {

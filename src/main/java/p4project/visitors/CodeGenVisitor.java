@@ -105,13 +105,16 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         } 
         else if (context.assVar() != null) {
             String exprCode = visit(context.assVar().expr());
-            String arrayPrefix = symbol.type.name.toLowerCase();
-            if (symbol.arrType != null) {
-                for (int i : symbol.arrType.dimSize) {
-                    arrayPrefix += "[]";
+            if (this.ctx.symbolTable.resolve(id).arrType != null) {
+                String arrayPrefix = "" + symbol.type.name.toLowerCase();
+                if (symbol.arrType != null) {
+                    for (int i : symbol.arrType.dimSize) {
+                        arrayPrefix += "[]";
+                    }
                 }
+                return indent() + arrayPrefix + " " + id + " = " + "new " + arrayPrefix + exprCode + ";\n";
             }
-            return indent() + arrayPrefix + " " + id + " = " + "new " + arrayPrefix + exprCode + ";\n";
+            else return indent() + type + " " + id + " = " + exprCode + ";\n";
         } 
         else {
             return "";
@@ -268,6 +271,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         StringBuilder sb = new StringBuilder();
         // check if it is awaitAll or awaitAny
         if (context.getChild(0).getText().equals("awaitAll")) {
+
             sb.append(indent() + "CompletableFuture.allOf(");
             for (int i = 0; i < context.ID().size(); i++) {
                 String id = context.ID(i).getText();
@@ -276,10 +280,14 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                     sb.append(", ");
                 }
             }
-            sb.append(").get();\n");
-        } 
-        else if (context.getChild(0).getText().equals("awaitAny")) {
-            sb.append(indent() + "CompletableFuture.anyOf(");
+            sb.append(").get();\n")
+            .append(indent() + "} catch (InterruptedException | ExecutionException e) {\n")
+            .append(indent() + ("    e.printStackTrace();\n"))
+            .append(indent() + ("}\n"));
+
+        } else if (context.getChild(0).getText().equals("awaitAny")) {
+            sb.append(indent() + "try {\n")
+            .append(indent() + "    CompletableFuture.anyOf(");
             for (int i = 0; i < context.ID().size(); i++) {
                 String id = context.ID(i).getText();
                 sb.append(id);
@@ -287,10 +295,12 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                     sb.append(", ");
                 }
             }
-            sb.append(").get();\n");
+            sb.append(").get();\n")
+            .append(indent() + "} catch (InterruptedException | ExecutionException e) {\n")
+            .append(indent() + "    e.printStackTrace();\n")
+            .append(indent() + "}\n");
             
-        } 
-        else {
+        } else {
             throw new RuntimeException("Unexpected await statement type: " + context.getChild(0).getText());
         }
         

@@ -92,6 +92,17 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override 
+    public String visitCriticalSection(OurGrammarParser.CriticalSectionContext context) {
+        for (TerminalNode id : context.ID()) {
+            Symbol symbol = this.ctx.resolvedSymbols.get(id);
+            if (symbol != null && !symbol.isShared()) {
+                throw new RuntimeException("'" + id.getText() + "' must be declared 'shared' to be used in a critical section");
+            } 
+        }
+        return visitChildren(context);
+    }
+
+    @Override 
     public String visitArrayLiteral(OurGrammarParser.ArrayLiteralContext context) {
         String type = "";
         for (int i = 0; i < context.getChildCount(); i++) {
