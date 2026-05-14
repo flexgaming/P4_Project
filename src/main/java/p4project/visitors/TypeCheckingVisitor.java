@@ -26,7 +26,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     public TypeCheckingVisitor(CompilationContext ctx) {
         this.ctx = ctx;
-        this.arrayValidator = new ArrayValidator(ctx);
+        this.arrayValidator = new ArrayValidator();
     }
 
     @Override

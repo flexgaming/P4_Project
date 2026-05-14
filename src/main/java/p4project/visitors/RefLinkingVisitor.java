@@ -24,7 +24,7 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
 
     public RefLinkingVisitor(CompilationContext ctx) {
         this.ctx = ctx;
-        this.arrayValidator = new ArrayValidator(ctx);
+        this.arrayValidator = new ArrayValidator();
     }
 
     @Override
