@@ -150,7 +150,6 @@ public class ArrayValidator {
     }
 
     public int[] validate(String input, ArrayTypeSymbol base) {
-        System.out.println("base dim size: " + java.util.Arrays.toString(base.dimSize));
         int[] arrLiteral = new int[base.dimensions];
         int[] dimensionSize = new int[base.dimensions];
         Arrays.fill(arrLiteral, -1);
@@ -186,11 +185,6 @@ public class ArrayValidator {
         if (!Arrays.equals(arrLiteral, base.dimSize)) {
             throw new RuntimeException("Array dimensions size '"+ java.util.Arrays.toString(arrLiteral) + "' does not match the variable'" + java.util.Arrays.toString(base.dimSize) + "'.");
         }
-
-        System.out.println("input string: " + input);
-        System.out.print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n\n");
-        System.out.println("dimensions size: " + dimensionSize);
-        System.out.println("base dim size: " + base.dimSize);
 
 
         return arrLiteral;

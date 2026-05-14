@@ -637,7 +637,6 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     public String visitFunctionCall(OurGrammarParser.FunctionCallContext context) {
         StringBuilder sb = new StringBuilder();
         FunctionSymbol funcSymbol = (FunctionSymbol) ctx.ftable.get(context.ID().getText());
-        System.out.println(funcSymbol.toString() + " containsCriticalSection: " + funcSymbol.containsCriticalSection);
         if (funcSymbol.containsCriticalSection) {
             if (inCriticalSection) {
                 throw new RuntimeException("Cannot call function '" + funcSymbol.toString() + "' from a critical section because it contains a critical section itself.");

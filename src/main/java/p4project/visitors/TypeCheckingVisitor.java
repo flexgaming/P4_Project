@@ -41,10 +41,6 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             if (!declaredType.equals(exprType)) {
                 throw new RuntimeException("Type Error: Cannot assign '" + exprType + " to '" + declaredType + "'");
             } else if (symbol.arrType != null) {
-                /* System.out.println("arrType: " + symbol.arrType);
-                System.out.println("context: " + context.getText() + "\n");
-                System.out.println("Symbol id: " + symbol.ID);
-                System.out.println("\n\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! \n\n\n"); */
                 int[] arr = arrayValidator.validate(context.assVar().expr().getText(), symbol.arrType);
 
             }
@@ -71,7 +67,6 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         
         if (symbol.arrType != null) {
             if (context.expr().getText().chars().filter(ch -> ch == '{').count() > 0) {
-                System.out.println("GOOOOOOD SHIT?: " + context.getText());
                 int[] arr = arrayValidator.validate(context.expr().getText(), symbol.arrType);
             }
         }
@@ -85,6 +80,11 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         } else if (contextSymbol != null && symbol.arrType != null && contextSymbol.arrType == null) {
             throw new RuntimeException("Type Error: Cannot assign value '"
             + contextSymbol.ID +"' to array variable '" + id + "'");
+        } else if (contextSymbol != null && symbol.arrType != null && contextSymbol.arrType != null) {
+            if (!Arrays.equals(symbol.arrType.dimSize, contextSymbol.arrType.dimSize)) {
+                throw new RuntimeException("Array dimension size mismatch: '" + symbol.ID + "' " + symbol.arrType + " = '" + contextSymbol.ID + "' " + contextSymbol.arrType);
+            }
+
         } else if (!declaredType.equals(exprType)) {
             throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
         }

@@ -62,7 +62,6 @@ public class MutexVisitor extends OurGrammarBaseVisitor<Void> {
                 throw new RuntimeException("Function '" + functionName +
                 "' contains a critical section and cannot be called within another critical section.");
             }
-            System.out.println("Visited function call to '" + functionName + "' from within a critical section. " + functionName + " containsCriticalSection: " + functionSymbol.containsCriticalSection);
             visitAssignment(functionSymbol.context); // visit the function's context to check for nested critical sections.
         }
         return visitChildren(context);

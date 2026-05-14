@@ -52,16 +52,11 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
             String afterEquals = contextStr.substring(equalsIndex + 1, contextStr.length());
 
             if (afterEquals.contains("{")) {
-                
-
-                System.out.println("id: " + symbol.ID);
-                System.out.println("arrType: " + symbol.arrType);
                 int[] correctDimSize = arrayValidator.validate(afterEquals);
 
                 for (int i = 0; i < symbol.arrType.dimensions; i++) {
                     symbol.arrType.dimSize[i] = correctDimSize[i];
                 }
-                System.out.println("REFLINKING DIM: " + java.util.Arrays.toString(symbol.arrType.dimSize));
             }
         }
 
@@ -88,7 +83,6 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
             String contextStr = context.getText();
             int equalsIndex = contextStr.indexOf('=');
             
-            System.out.println("Array reassignment: " + context.getText());
             // If the string does not contain any brackets before the equals sign, 
             // we can treat it as a normal array reassignment and link it to the symbol without further checks.
             if (!contextStr.contains("[")) {
@@ -119,7 +113,6 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
             } // Reassign the size of each dimension.
             if (afterEquals.contains("{") || afterEquals.contains("[")) {
                 // set either the size of the array or to the defined array literal.
-                System.out.println("Old value from arr: " + java.util.Arrays.toString(dimensions));
                 if (afterEquals.contains("{")) {
 
                     int[] correctDimSize = arrayValidator.validate(afterEquals, symbol.arrType);
@@ -135,17 +128,14 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
                         }
                     }
                     int[] newSize = new int[dimCount];
-                    System.out.println("Reassigning array size for '" + id + "', using string " + afterEquals);
                     for (int i = 0; i < dimCount && afterEquals.contains("["); i++) {
                         newSize[i] = Integer.parseInt(afterEquals.substring(1, afterEquals.indexOf(']')));
-                        System.out.println("New size for dimension " + i + ": " + newSize[i]);
                         if (newSize[i] <= 0) {
                             throw new RuntimeException("Array size must be greater than 0 for dimension " + i + ": Size " + newSize[i]);
                         }
                         afterEquals = afterEquals.substring(afterEquals.indexOf(']') + 1);
                     }
                     symbol.arrType.dimSize = newSize.clone();
-                    System.out.println("Dimcount: " + dimCount + ", New value from arr '" + symbol.ID + "': " + java.util.Arrays.toString(symbol.arrType.dimSize));
                 }
 
             }
