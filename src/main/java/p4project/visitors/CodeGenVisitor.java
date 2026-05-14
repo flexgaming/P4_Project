@@ -131,12 +131,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             String afterEquals = context.getText().substring(equals + 1);
             String bracketType = (afterEquals.contains("[")) ? "[" : (afterEquals.contains("{")) ? "{" : "";
             
-            System.out.println("beforeeqsrer: " + beforeEquals);
-            System.out.println("context: " + context.getText());
-            System.out.println("WOOD" + context.expr().getText());
             if (beforeEquals.contains("[")) {
-                System.out.println("HALOOOOOO.-.-.-");
-
                 return indent() + beforeEquals + " = " + visit(context.expr()) + ";\n";
             }
 

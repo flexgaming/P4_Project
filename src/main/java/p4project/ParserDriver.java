@@ -31,7 +31,6 @@ int func() {
 }
 void main() { 
     shared int x; 
-    print(x, "Hello World"); 
     x = read(int); 
     thread t1 => { 
         print("In thread, x = ", x); 
@@ -56,6 +55,7 @@ void main() {
             a = a + 1.0;
         }
     }
+
     critical(x, z) {
         critical(x, y, z) {
             print("In critical section, x = ", x, " y = ", y, " z = ", z); 
@@ -68,15 +68,6 @@ void main() {
     criticalFunc(z);
 
     func();
-    
-    while (x > 0) { 
-        if (x == 3) { 
-            break; 
-        } else if (x == 4) { 
-            continue;
-        } 
-        x = x - 1; 
-    } 
 }
         """;;
 
@@ -160,7 +151,7 @@ void main() {
                 javaCode.append(codeGenVisitor.visit(tree));
             }
             javaCode.append("}\n");
-            System.out.println("--- Generated Java Code Phase 6---");
+            System.out.println("--- Generated Java Code Phase 6---\n");
             System.out.println(javaCode);
 
     }

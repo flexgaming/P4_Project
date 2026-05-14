@@ -380,7 +380,6 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
         // array literal
         if (context.arrayLiteral() != null) {
-            System.out.println("We here baby");
             OurGrammarParser.ArrayLiteralContext al = context.arrayLiteral();
             if (al.expr() != null && !al.expr().isEmpty()) {
                 String firstType = visit(al.expr(0));
