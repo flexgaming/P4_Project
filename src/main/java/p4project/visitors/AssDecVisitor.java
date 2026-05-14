@@ -125,36 +125,7 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
         
         int dims = (int) afterEquals.chars().filter(ch -> ch == '{').count(); // Get the number of dimensions.
         // Function declaration with parameters
-        if (context.assFunc() != null) {
-            FunctionSymbol f = new FunctionSymbol(id, TypeSymbol.fromString(typeStr));
-            f.prefixes.addAll(prefixes);
-
-            if (context.assFunc().typeRef() != null) {
-                var paramTypes = context.assFunc().typeRef();
-                var paramNames = context.assFunc().ID();
-
-                for (int i = 0; i < paramNames.size(); i++) {
-                    // Skip the function name itself if it's included
-                    if (i == 0 && paramNames.get(i).getText().equals(id)) continue;
-
-                    String paramName = paramNames.get(i).getText();
-                    String paramTypeStr = paramTypes.get(i).TYPE().getText();
-
-                    VariableSymbol param = new VariableSymbol(paramName, TypeSymbol.fromString(paramTypeStr));
-                    if (!this.ctx.symbolTable.define(param)) {
-                        throw new RuntimeException("Duplicate parameter name: '" + paramName + "'");
-                    }
-                }
-            }
-
-            if (!this.ctx.symbolTable.define(f)) {
-                throw new RuntimeException("Duplicate function declaration: '" + id + "'");
-            }
-
-            return visitChildren(context);
-        } 
-        // Variable declaration with initialization
-        else if (context.assVar() != null) {
+        if (context.assVar() != null) {
 
             VariableSymbol symbol;
 

@@ -8,8 +8,6 @@ import p4project.context.Symbol;
 import p4project.context.TypeSymbol;
 import p4project.context.VariableSymbol;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 /*
     Phase 1: Symbol assignments and declerations
     Phase 2: Reference linking

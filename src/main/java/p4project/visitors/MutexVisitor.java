@@ -4,7 +4,6 @@ import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
 import p4project.context.FunctionSymbol;
-import p4project.context.Symbol;
 
 /*
     Phase 1: Symbol assignments and declerations

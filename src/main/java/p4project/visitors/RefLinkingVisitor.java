@@ -1,14 +1,9 @@
 package p4project.visitors;
 
-import java.util.List;
-
-import javax.management.RuntimeErrorException;
-
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
-import p4project.context.ArrayTypeSymbol;
 import p4project.context.CompilationContext;
 import p4project.context.Symbol;
 import p4project.context.ArrayValidator;
@@ -262,5 +257,3 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         return null;
     }
 }
-
-// ctx.resolvedSymbols skal skrives til. Husk det er et hashmap<String, Symbol> hvor key er navnet på symbolet og value er selve symbolet. Det skal fyldes ud i denne visitor, og så kan de andre visitors bruge det til at slå op i stedet for at skulle gøre det selv.

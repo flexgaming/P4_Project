@@ -329,17 +329,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         String type = context.typeRef().TYPE().getText();
         String id = context.ID().getText();
 
-        if (context.assFunc() != null) {
-            // Function definition
-            String params = visit(context.assFunc());     // Let assFunc generate the parameter list
-            String blockCode = visit(context.assFunc().block());
-            // If blockCode starts with the current indent, strip it so the '{' lands
-            // directly after the function header (`void main() {`).
-            if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
-
-            return type + " " + id + params + blockCode;
-        } 
-        else if (context.assVar() != null) {
+        if (context.assVar() != null) {
             String exprCode = visit(context.assVar().expr());
             return type + " " + id + " = " + exprCode;
         } 
@@ -550,9 +540,8 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     public String visitPower(OurGrammarParser.PowerContext context) {
         String left = visit(context.factor());
         if (context.power() != null) {
-            String op = context.getChild(1).getText();
             String right = visit(context.power());
-            return left + " " + op + " " + right;
+            return "Math.pow(" + left + ", " + right + ")";
         }
         return left;
     }

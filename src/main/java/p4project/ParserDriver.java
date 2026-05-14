@@ -13,7 +13,6 @@ import p4project.visitors.TypeCheckingVisitor;
 import p4project.visitors.FtableGenVisitor;
 import p4project.visitors.MutexVisitor;
 
-
 public class ParserDriver {
     public static void main(String[] args) {
         // While loop example with break and continue:
@@ -54,7 +53,7 @@ void main() {
         critical(x, y, z) {
             print("In critical section, x = ", x, " y = ", y, " z = ", z); 
             x = x + 1; 
-            y = y + 1; 
+            y = y ^ 1; 
             z = z + 1.0; 
         } 
     }
