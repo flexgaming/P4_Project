@@ -103,7 +103,7 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
                 // set either the size of the array or to the defined array literal.
                 System.out.println("Old value from arr: " + java.util.Arrays.toString(dimensions));
                 if (afterEquals.contains("{")) {
-                    arrayValidator.inferDimensions(afterEquals, symbol, context);
+                    arrayValidator.inferDimensions(afterEquals, symbol);
                 } else if (afterEquals.contains("[")) {
                     // If the right-hand side is an array size, we re-assign the size of the array.
                     for (int dim : dimensions) {

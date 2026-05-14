@@ -240,13 +240,13 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
         else if (context.assVar() != null) { 
             String contexStr = context.getText();
             
+            VariableSymbol symbol;
+            
             int eqIndex = contexStr.indexOf("=");
             String beforeEquals = contexStr.substring(0, eqIndex);
-            String afterEquals = contexStr.substring(eqIndex + 1);
             
-            int dims = (int) afterEquals.chars().filter(ch -> ch == '{').count(); // Get the number of dimensions.
+            int dims = (int) beforeEquals.chars().filter(ch -> ch == '[').count(); // Get the number of dimensions.
             
-            VariableSymbol symbol;
 
             // Get the correct number of dimensions for array declarations by counting the brackets after the equals sign, not in the type reference
             if (dims > 0) {
@@ -261,10 +261,8 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
                             beforeEquals = beforeEquals.substring(beforeEquals.indexOf("]") + 1); // Move to the next dimension by removing the processed part.
                         }
                     } 
-                    if (dimensions[i] == -1) { // If the size of the dimension is not defined in the brackets, get it from the number of elements in the initialization list.
-                        int commaNum = (int) afterEquals.substring(afterEquals.indexOf("{"), afterEquals.indexOf("}")).chars().filter(ch -> ch == ',').count();
-                        dimensions[i] = commaNum + 1; // Number of commas + 1 gives the number of elements in that dimension
-                        afterEquals = afterEquals.substring(afterEquals.indexOf("}") + 1); // Move to the next dimension by cutting off the part of the string we've already processed
+                    if (dimensions[i] == -1) { // If the size of the dimension is not defined in the brackets, initialize to 0.
+                        dimensions[i] = 0;
                     } 
                 }
                 symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr), dimensions);

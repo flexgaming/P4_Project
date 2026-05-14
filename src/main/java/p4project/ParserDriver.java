@@ -40,12 +40,14 @@ void main() {
     }
     awaitAll(t1, t2);
     x = 1;
+    int wow = 69;
     int[][] l;
     l = [3][10];
     int[4][5] m;
     l = m;
     l[1][2] = 1222;
     l = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
+    int[][] n = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
     print(cast(string)l[2]);
     shared int y = 2;
     shared float z = 3.0;

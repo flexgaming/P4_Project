@@ -18,10 +18,12 @@ import p4project.context.*;
 public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     private final CompilationContext ctx;
+    private final ArrayValidator arrayValidator;
     private int loopDepth = 0;
 
     public TypeCheckingVisitor(CompilationContext ctx) {
         this.ctx = ctx;
+        this.arrayValidator = new ArrayValidator(ctx);
     }
 
     @Override

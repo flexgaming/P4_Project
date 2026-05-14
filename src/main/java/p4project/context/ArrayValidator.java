@@ -3,19 +3,11 @@ package p4project.context;
 import java.util.Arrays;
 import java.util.List;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-
 import java.util.ArrayList;
 
-import p4project.OurGrammarParser;
-import p4project.OurGrammarParser.*;
-import p4project.context.*;
-
 public class ArrayValidator {
-    private final CompilationContext ctx;
 
     public ArrayValidator(CompilationContext ctx) {
-        this.ctx = ctx;
     }
 
     // -------------------------------------------------------
@@ -23,20 +15,21 @@ public class ArrayValidator {
     // the symbol's type accordingly
     // -------------------------------------------------------
 
-    public void inferDimensions(String literal, Symbol sym, ParserRuleContext context) {
+    public void inferDimensions(String literal, Symbol sym) {
         if (sym.arrType == null) {
             throw new RuntimeException("Cannot infer dimensions for variable '" + sym.ID + "' because it is not declared as an array.");
         }
         ArrayTypeSymbol base = sym.arrType;
 
-        int[] dims = inferDimensionsRecursive(literal.trim(), context);
+        int[] dims = inferDimensionsRecursive(literal.trim());
         if (dims != null) { 
             base.dimSize = dims;
             base.dimensions = dims.length;
         }
     }
 
-    private int[] inferDimensionsRecursive(String input, ParserRuleContext context) {
+    // Recursive helper to infer dimensions from a nested array literal
+    private int[] inferDimensionsRecursive(String input) {
         if (!input.startsWith("{") || !input.endsWith("}")) {
             throw new RuntimeException("Expected '{...}' but got: " + input);
         }
@@ -48,12 +41,12 @@ public class ArrayValidator {
         boolean nested = elements.stream().anyMatch(e -> e.trim().startsWith("{"));
         if (nested) {
             // Recurse into the first element to get inner dimensions
-            int[] innerDims = inferDimensionsRecursive(elements.get(0).trim(), context);
+            int[] innerDims = inferDimensionsRecursive(elements.get(0).trim());
             if (innerDims == null) return null;
 
             // Validate all elements have the same inner dimensions
             for (int i = 1; i < elements.size(); i++) {
-                int[] otherDims = inferDimensionsRecursive(elements.get(i).trim(), context);
+                int[] otherDims = inferDimensionsRecursive(elements.get(i).trim());
                 if (otherDims == null) return null;
                 if (!Arrays.equals(innerDims, otherDims))
                     throw new RuntimeException("Inconsistent dimensions in array literal at element " + i);
@@ -74,11 +67,11 @@ public class ArrayValidator {
     // array symbol in both dimensions and element types
     // -------------------------------------------------------
 
-    public void validateLiteral(String literal, ArrayTypeSymbol type, ParserRuleContext context) {
-        validateDimension(literal.trim(), type, 0, context);
+    public void validateLiteral(String literal, ArrayTypeSymbol type) {
+        validateDimension(literal.trim(), type, 0);
     }
 
-    private void validateDimension(String input, ArrayTypeSymbol type, int depth, ParserRuleContext context) {
+    private void validateDimension(String input, ArrayTypeSymbol type, int depth) {
         int expectedSize = type.dimSize[depth];
 
         if (!input.startsWith("{") || !input.endsWith("}")) {
@@ -92,9 +85,9 @@ public class ArrayValidator {
         }
 
         if (depth < type.dimSize.length - 1) {
-            for (String element : elements) validateDimension(element.trim(), type, depth + 1, context);
+            for (String element : elements) validateDimension(element.trim(), type, depth + 1);
         } else {
-            //for (String element : elements) validateBaseType(element.trim(), type.elementType, context);
+            //for (String element : elements) validateBaseType(element.trim(), type.elementType);
         }
     }
 
