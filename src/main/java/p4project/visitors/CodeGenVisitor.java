@@ -168,7 +168,8 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         // check if it is awaitAll or awaitAny
         if (context.getChild(0).getText().equals("awaitAll")) {
             
-            sb.append(indent()).append("try {\n CompletableFuture.allOf(");
+            sb.append(indent()).append("try {\n")
+            .append(indent()).append("    CompletableFuture.allOf(");
             for (int i = 0; i < context.ID().size(); i++) {
                 String id = context.ID(i).getText();
                 sb.append(id);
@@ -176,10 +177,14 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                     sb.append(", ");
                 }
             }
-            sb.append(").get();\n } catch (InterruptedException | ExecutionException e) {\n Thread.currentThread().interrupt();\n e.printStackTrace();}");
+            sb.append(").get();\n")
+            .append(indent()).append("} catch (InterruptedException | ExecutionException e) {\n")
+            .append(indent()).append("    e.printStackTrace();\n")
+            .append(indent()).append("}\n");
         } 
         else if (context.getChild(0).getText().equals("awaitAny")) {
-            sb.append(indent()).append("try {\n CompletableFuture.anyOf(");
+            sb.append(indent()).append("try {\n")
+            .append(indent()).append("    CompletableFuture.anyOf(");
             for (int i = 0; i < context.ID().size(); i++) {
                 String id = context.ID(i).getText();
                 sb.append(id);
@@ -187,8 +192,10 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                     sb.append(", ");
                 }
             }
-            sb.append(").get();\n } catch (InterruptedException | ExecutionException e) {\n Thread.currentThread().interrupt();\n e.printStackTrace(); }");
-            
+            sb.append(").get();\n")
+            .append(indent()).append("} catch (InterruptedException | ExecutionException e) {\n")
+            .append(indent()).append("    e.printStackTrace();\n")
+            .append(indent()).append("}\n");
         } 
         else {
             throw new RuntimeException("Unexpected await statement type: " + context.getChild(0).getText());
