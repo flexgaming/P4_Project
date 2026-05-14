@@ -16,7 +16,7 @@ import p4project.visitors.MutexVisitor;
 // TODO - add arrayLiteral
 // TODO - add arrayIndex
 // TODO - floats have to have f in java. DONE
-// TODO - initialize every variable to be 0 or null.
+// TODO - initialize every variable to be 0 or null. DONE
 // TODO - mutex show m-1 instead of starting with 0. DONE
 // TODO - make functions be generated outside main. DONE
 // TODO - enable nested critical sections. DONE
@@ -46,8 +46,8 @@ void main() {
     int[4][5] m;
     l = m;
     l[1][2] = 1222;
-    l = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
-    int[][] n = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
+    l = {{2}, {2}};
+    //int[][] n = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
     print(cast(string)l[2]);
     shared int y = 2;
     shared float z = 3.0;
@@ -100,7 +100,10 @@ void main() {
             System.out.println("--- Resolved Symbols After Phase 2 ---");
             ctx.resolvedSymbols.forEach((node, sym) -> {
                 if(node != null) {
-                    System.out.println(node.getText() + " -> " + sym + " (type: " + sym.type.name + ")" + (sym.prefixes.isEmpty() ? "" : ", prefixes: " + sym.prefixes));
+                    System.out.println(node.getText() + " -> " + sym + 
+                    " (type: " + sym.type.name + ")" + ((sym.arrType == null) ? "" : "dimSize: " + 
+                    java.util.Arrays.toString(sym.arrType.dimSize)) + 
+                    (sym.prefixes.isEmpty() ? "" : ", prefixes: " + sym.prefixes));
                 } else {
                     System.out.println("\n!-!-!-!- COMPILATION CONTEXT RESOLVED SYMBOL " + node + " = NULL -!-!-!-!\n");
                 }

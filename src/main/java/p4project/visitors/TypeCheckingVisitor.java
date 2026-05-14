@@ -2,6 +2,9 @@ package p4project.visitors;
 
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
+
+import java.util.Arrays;
+
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import p4project.context.*;
@@ -30,17 +33,20 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     public String visitAssignment(OurGrammarParser.AssignmentContext context) {
         String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
-        
-        if (symbol == null) {
-            throw new RuntimeException("Variable '" + id + "' not declared.");
-        }
 
         String declaredType = symbol.type.name.toLowerCase();
-
+        
         if (context.assVar() != null) {
             String exprType = visit(context.assVar().expr());
             if (!declaredType.equals(exprType)) {
-                throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
+                throw new RuntimeException("Type Error: Cannot assign '" + exprType + " to '" + declaredType + "'");
+            } else if (symbol.arrType != null) {
+                /* System.out.println("arrType: " + symbol.arrType);
+                System.out.println("context: " + context.getText() + "\n");
+                System.out.println("Symbol id: " + symbol.ID);
+                System.out.println("\n\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! \n\n\n"); */
+                int[] arr = arrayValidator.validate(context.assVar().expr().getText(), symbol.arrType);
+
             }
             return declaredType;
         } else if (context.assFunc() != null) {
@@ -63,8 +69,11 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         }
         Symbol symbol = this.ctx.symbolTable.resolve(id);
         
-        if (symbol == null) {
-            throw new RuntimeException("Variable '" + id + "' not declared.");
+        if (symbol.arrType != null) {
+            if (context.expr().getText().chars().filter(ch -> ch == '{').count() > 0) {
+                System.out.println("GOOOOOOD SHIT?: " + context.getText());
+                int[] arr = arrayValidator.validate(context.expr().getText(), symbol.arrType);
+            }
         }
 
         String declaredType = symbol.type.name.toLowerCase();
@@ -80,6 +89,20 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
         }
         return declaredType;
+    }
+
+    @Override 
+    public String visitArrayLiteral(OurGrammarParser.ArrayLiteralContext context) {
+        String type = "";
+        for (int i = 0; i < context.getChildCount(); i++) {
+            if (type == "") {
+                type = visit(context.expr(i));
+            } else if (type != visit(context.expr(i))) {
+                throw new RuntimeException("Array literal element types are mismatched. Context: " + context.getText());
+            }
+        }
+
+        return type;
     }
 
     @Override
@@ -103,9 +126,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         for (TerminalNode idNode : context.ID()) {
             String id = idNode.getText();
             Symbol symbol = this.ctx.symbolTable.resolve(id);
-            if (symbol == null) {
-                throw new RuntimeException("Variable '" + id + "' not declared.");
-            }
+            
             String declaredType = symbol.type.name.toLowerCase();
             if (!declaredType.equals("thread")) {
                 throw new RuntimeException("Type Error: Cannot await non-thread variable '" + id + "'");

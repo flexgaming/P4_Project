@@ -105,7 +105,13 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         } 
         else if (context.assVar() != null) {
             String exprCode = visit(context.assVar().expr());
-            return indent() + type + " " + id + " = " + exprCode + ";\n";
+            String arrayPrefix = symbol.type.toString().toLowerCase();
+            if (symbol.arrType != null) {
+                for (int i : symbol.arrType.dimSize) {
+                    arrayPrefix += "[]";
+                }
+            }
+            return indent() + arrayPrefix + " " + id + " = " + "new " + arrayPrefix + exprCode + ";\n";
         } 
         else {
             return "";
@@ -136,7 +142,10 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             }
 
             if (bracketType.equals("[")) { // Handle array resizing with the new size of the array.
-                return indent() + id + " = new " + symbol.type.toString() + afterEquals + ";\n";
+                return "";
+                // We do not reassign this value, because it is already defined, because the value is of the same scope
+                // and we reassign the size of each dimension in RefLinkingVisitor.
+                //return indent() + id + " = new " + symbol.type.toString() + afterEquals + ";\n";
 
             } else if (bracketType.equals("{")) { // Handle array resizing with actual input.
                 String brackets = "";

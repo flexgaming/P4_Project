@@ -45,6 +45,24 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
             if (!(symbol instanceof p4project.context.FunctionSymbol)) {
                 throw new RuntimeException("'" + id + "' assigned a function but is not declared as a function.");
             }
+        } else if (symbol.arrType != null) {
+            
+            String contextStr = context.getText();
+            int equalsIndex = contextStr.indexOf('=');
+            String afterEquals = contextStr.substring(equalsIndex + 1, contextStr.length());
+
+            if (afterEquals.contains("{")) {
+                
+
+                System.out.println("id: " + symbol.ID);
+                System.out.println("arrType: " + symbol.arrType);
+                int[] correctDimSize = arrayValidator.validate(afterEquals);
+
+                for (int i = 0; i < symbol.arrType.dimensions; i++) {
+                    symbol.arrType.dimSize[i] = correctDimSize[i];
+                }
+                System.out.println("REFLINKING DIM: " + java.util.Arrays.toString(symbol.arrType.dimSize));
+            }
         }
 
         this.ctx.resolvedSymbols.put(context.ID(), symbol);
@@ -98,12 +116,17 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
                 // set the specific array element to the variable.
 
 
-            } /// ER KOMMET HERTIL
+            } // Reassign the size of each dimension.
             if (afterEquals.contains("{") || afterEquals.contains("[")) {
                 // set either the size of the array or to the defined array literal.
                 System.out.println("Old value from arr: " + java.util.Arrays.toString(dimensions));
                 if (afterEquals.contains("{")) {
-                    arrayValidator.inferDimensions(afterEquals, symbol);
+
+                    int[] correctDimSize = arrayValidator.validate(afterEquals, symbol.arrType);
+
+                    for (int i = 0; i < symbol.arrType.dimensions; i++) {
+                        symbol.arrType.dimSize[i] = correctDimSize[i];
+                    }
                 } else if (afterEquals.contains("[")) {
                     // If the right-hand side is an array size, we re-assign the size of the array.
                     for (int dim : dimensions) {
@@ -121,9 +144,10 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
                         }
                         afterEquals = afterEquals.substring(afterEquals.indexOf(']') + 1);
                     }
-                    symbol.arrType.dimSize = newSize;
-                    System.out.println("Dimcount: " + dimCount + ", New value from arr: " + java.util.Arrays.toString(symbol.arrType.dimSize));
+                    symbol.arrType.dimSize = newSize.clone();
+                    System.out.println("Dimcount: " + dimCount + ", New value from arr '" + symbol.ID + "': " + java.util.Arrays.toString(symbol.arrType.dimSize));
                 }
+
             }
         }
 
