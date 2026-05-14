@@ -187,11 +187,6 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitRead(OurGrammarParser.ReadContext context) {
-        return visitChildren(context);
-    }
-
-    @Override
     public Void visitBlock(OurGrammarParser.BlockContext context) {
         this.ctx.symbolTable.restoreScope(context);
         visitChildren(context);
@@ -265,16 +260,6 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
         visitChildren(context);
         this.ctx.symbolTable.popScope();
         return null;
-    }
-
-    @Override
-    public Void visitBreakStatement(OurGrammarParser.BreakStatementContext context) {
-        return visitChildren(context);
-    }
-
-    @Override
-    public Void visitContinueStatement(OurGrammarParser.ContinueStatementContext context) {
-        return visitChildren(context);
     }
 }
 

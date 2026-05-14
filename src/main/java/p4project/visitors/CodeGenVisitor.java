@@ -105,7 +105,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         } 
         else if (context.assVar() != null) {
             String exprCode = visit(context.assVar().expr());
-            String arrayPrefix = symbol.type.toString().toLowerCase();
+            String arrayPrefix = symbol.type.name.toLowerCase();
             if (symbol.arrType != null) {
                 for (int i : symbol.arrType.dimSize) {
                     arrayPrefix += "[]";
@@ -145,14 +145,14 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 return "";
                 // We do not reassign this value, because it is already defined, because the value is of the same scope
                 // and we reassign the size of each dimension in RefLinkingVisitor.
-                //return indent() + id + " = new " + symbol.type.toString() + afterEquals + ";\n";
+                //return indent() + id + " = new " + symbol.type.name + afterEquals + ";\n";
 
             } else if (bracketType.equals("{")) { // Handle array resizing with actual input.
                 String brackets = "";
                 for (int i = 0; i < symbol.arrType.dimensions; i++) {
                     brackets += "[]";
                 }
-                return indent() + id + " = new " + symbol.type.toString() + brackets + visit(context.expr()) + ";\n";
+                return indent() + id + " = new " + symbol.type.name + brackets + visit(context.expr()) + ";\n";
 
             } else if (this.ctx.symbolTable.resolve(context.expr().getText()).arrType != null) { 
                 return indent() + context.ID().getText() + " = " + visit(context.expr()) + ".clone();\n";
@@ -173,7 +173,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             for (int i = 0; i < symbol.arrType.dimensions; i++) {
                 brackets += "[]";
             }
-            return indent() + symbol.type.toString() + brackets + " " + id + " = new " + symbol.arrType.toString() + ";\n";
+            return indent() + symbol.type.name + brackets + " " + id + " = new " + symbol.arrType.toString() + ";\n";
         }
         String type = context.typeRef().TYPE().getText();
         switch(type) {

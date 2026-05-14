@@ -75,7 +75,7 @@ forStatement
     ;
 
 forVar
-    : PREFIX? typeRef ID (assVar | assFunc)
+    : PREFIX? typeRef ID assVar
     | reassignment
     | ID
     ;

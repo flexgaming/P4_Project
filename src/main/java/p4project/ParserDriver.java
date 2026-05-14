@@ -13,14 +13,6 @@ import p4project.visitors.TypeCheckingVisitor;
 import p4project.visitors.FtableGenVisitor;
 import p4project.visitors.MutexVisitor;
 
-// TODO - add arrayLiteral
-// TODO - add arrayIndex
-// TODO - floats have to have f in java. DONE
-// TODO - initialize every variable to be 0 or null. DONE
-// TODO - mutex show m-1 instead of starting with 0. DONE
-// TODO - make functions be generated outside main. DONE
-// TODO - enable nested critical sections. DONE
-// TODO - add mutex to function calls. DONE
 
 public class ParserDriver {
     public static void main(String[] args) {
@@ -43,7 +35,7 @@ void main() {
     int wow = 69;
     int[][] l;
     l = [3][10];
-    int[][] m = {{1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1}};
+    int[][] m = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
     l = m;
     l[1][2] = 1222;
     //l = {{2}, {2}};
@@ -101,7 +93,7 @@ void main() {
             ctx.resolvedSymbols.forEach((node, sym) -> {
                 if(node != null) {
                     System.out.println(node.getText() + " -> " + sym + 
-                    " (type: " + sym.type.name + ")" + ((sym.arrType == null) ? "" : "dimSize: " + 
+                    " (type: " + sym.type.name + ")" + ((sym.arrType == null) ? "" : " dimSize: " + 
                     java.util.Arrays.toString(sym.arrType.dimSize)) + 
                     (sym.prefixes.isEmpty() ? "" : ", prefixes: " + sym.prefixes));
                 } else {

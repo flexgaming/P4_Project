@@ -186,11 +186,29 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         String declaredType = symbol.type.name.toLowerCase();
         // TODO - Ensure forvar is not void or thread, as those types cannot be used as loop variables.
         if (context.assVar() != null) {
+            if (context.ID() != null) {
+                if (this.ctx.symbolTable.resolve(id).type == TypeSymbol.THREAD || 
+                    this.ctx.symbolTable.resolve(id).type == TypeSymbol.VOID) {
+                    throw new RuntimeException("Cannot use void or thread, as for loop variable.");
+                }
+            }
             String exprType = visit(context.assVar().expr());
             if (!declaredType.equals(exprType)) {
                 throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
             }
             return declaredType;
+        } else if (context.reassignment().ID() != null) {
+            if (this.ctx.symbolTable.resolve(context.reassignment().ID().getText()).type == TypeSymbol.THREAD || 
+                this.ctx.symbolTable.resolve(context.reassignment().ID().getText()).type == TypeSymbol.VOID) {
+                throw new RuntimeException("Cannot use void or thread, as for loop variable.");
+            } 
+            return visitChildren(context);
+        } else if (context.ID() != null) {
+            if (this.ctx.symbolTable.resolve(id).type == TypeSymbol.THREAD || 
+                this.ctx.symbolTable.resolve(id).type == TypeSymbol.VOID) {
+                throw new RuntimeException("Cannot use void or thread, as for loop variable.");
+            }
+            return this.ctx.symbolTable.resolve(id).type.name.toLowerCase();
         }
         throw new RuntimeException("Type Error: Invalid for-loop variable declaration");
     }
