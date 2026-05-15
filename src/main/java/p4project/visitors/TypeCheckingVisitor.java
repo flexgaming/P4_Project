@@ -4,41 +4,47 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
-import p4project.context.CompilationContext;
-import p4project.context.Symbol;
+
+import java.util.Arrays;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
+
+import p4project.context.*;
 
 /*
     Phase 1: Symbol assignments and declarations
     Phase 2: Reference linking
     -> Phase 3: Type checking
     Phase 4: vtable and ftable generation
-    Phase 5: Java Code Gen
+    Phase 5: Mutex and deep nested critical section checking
+    Phase 6: Java Code Gen
 */
 
 public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     private final CompilationContext ctx;
+    private final ArrayValidator arrayValidator;
     private int loopDepth = 0;
 
     public TypeCheckingVisitor(CompilationContext ctx) {
         this.ctx = ctx;
+        this.arrayValidator = new ArrayValidator();
     }
 
     @Override
     public String visitAssignment(OurGrammarParser.AssignmentContext context) {
         String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
-        
-        if (symbol == null) {
-            throw new RuntimeException("Variable '" + id + "' not declared.");
-        }
 
         String declaredType = symbol.type.name.toLowerCase();
-
+        
         if (context.assVar() != null) {
             String exprType = visit(context.assVar().expr());
             if (!declaredType.equals(exprType)) {
-                throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
+                throw new RuntimeException("Type Error: Cannot assign '" + exprType + " to '" + declaredType + "'");
+            } else if (symbol.arrType != null) {
+                int[] arr = arrayValidator.validate(context.assVar().expr().getText(), symbol.arrType);
+
             }
             return declaredType;
         } else if (context.assFunc() != null) {
@@ -53,20 +59,63 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitReassignment(OurGrammarParser.ReassignmentContext context) {
-        String id = context.ID().getText();
+        String id = "";
+        if (context.ID() == null) {
+            id = context.arrayIndex().ID().getText();
+        } else {
+            id = context.ID().getText();
+        }
         Symbol symbol = this.ctx.symbolTable.resolve(id);
         
-        if (symbol == null) {
-            throw new RuntimeException("Variable '" + id + "' not declared.");
+        if (symbol.arrType != null) {
+            if (context.expr().getText().chars().filter(ch -> ch == '{').count() > 0) {
+                int[] arr = arrayValidator.validate(context.expr().getText(), symbol.arrType);
+            }
         }
 
         String declaredType = symbol.type.name.toLowerCase();
         String exprType = visit(context.expr());
+        Symbol contextSymbol = this.ctx.symbolTable.resolve(context.expr().getText());
+        if (contextSymbol != null && symbol.arrType == null && contextSymbol.arrType != null) {
+            throw new RuntimeException("Type Error: Cannot assign array value '"
+            + contextSymbol.ID + "' to non-array variable '" + id + "'");
+        } else if (contextSymbol != null && symbol.arrType != null && contextSymbol.arrType == null) {
+            throw new RuntimeException("Type Error: Cannot assign value '"
+            + contextSymbol.ID +"' to array variable '" + id + "'");
+        } else if (contextSymbol != null && symbol.arrType != null && contextSymbol.arrType != null) {
+            if (!Arrays.equals(symbol.arrType.dimSize, contextSymbol.arrType.dimSize)) {
+                throw new RuntimeException("Array dimension size mismatch: '" + symbol.ID + "' " + symbol.arrType + " = '" + contextSymbol.ID + "' " + contextSymbol.arrType);
+            }
 
-        if (!declaredType.equals(exprType)) {
+        } else if (!declaredType.equals(exprType)) {
             throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
         }
         return declaredType;
+    }
+
+    @Override 
+    public String visitCriticalSection(OurGrammarParser.CriticalSectionContext context) {
+        for (TerminalNode id : context.ID()) {
+            Symbol symbol = this.ctx.resolvedSymbols.get(id);
+            if (symbol != null && !symbol.isShared()) {
+                throw new RuntimeException("'" + id.getText() + "' must be declared 'shared' to be used in a critical section");
+            } 
+        }
+        return visitChildren(context);
+    }
+
+    @Override 
+    public String visitArrayLiteral(OurGrammarParser.ArrayLiteralContext context) {
+        String type = "";
+        for (int i = 0; i < context.getChildCount(); i++) {
+            if (type == "") {
+                type = visit(context.expr(i));
+            } else if (type != visit(context.expr(i))) {
+                throw new RuntimeException("Array literal element types are mismatched. Context: " + context.getText());
+            }
+        }
+
+        return type;
     }
 
     @Override
@@ -90,9 +139,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         for (TerminalNode idNode : context.ID()) {
             String id = idNode.getText();
             Symbol symbol = this.ctx.symbolTable.resolve(id);
-            if (symbol == null) {
-                throw new RuntimeException("Variable '" + id + "' not declared.");
-            }
+            
             String declaredType = symbol.type.name.toLowerCase();
             if (!declaredType.equals("thread")) {
                 throw new RuntimeException("Type Error: Cannot await non-thread variable '" + id + "'");
@@ -150,13 +197,31 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         }
 
         String declaredType = symbol.type.name.toLowerCase();
-
+        // TODO - Ensure forvar is not void or thread, as those types cannot be used as loop variables.
         if (context.assVar() != null) {
+            if (context.ID() != null) {
+                if (this.ctx.symbolTable.resolve(id).type == TypeSymbol.THREAD || 
+                    this.ctx.symbolTable.resolve(id).type == TypeSymbol.VOID) {
+                    throw new RuntimeException("Cannot use void or thread, as for loop variable.");
+                }
+            }
             String exprType = visit(context.assVar().expr());
             if (!declaredType.equals(exprType)) {
                 throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
             }
             return declaredType;
+        } else if (context.reassignment().ID() != null) {
+            if (this.ctx.symbolTable.resolve(context.reassignment().ID().getText()).type == TypeSymbol.THREAD || 
+                this.ctx.symbolTable.resolve(context.reassignment().ID().getText()).type == TypeSymbol.VOID) {
+                throw new RuntimeException("Cannot use void or thread, as for loop variable.");
+            } 
+            return visitChildren(context);
+        } else if (context.ID() != null) {
+            if (this.ctx.symbolTable.resolve(id).type == TypeSymbol.THREAD || 
+                this.ctx.symbolTable.resolve(id).type == TypeSymbol.VOID) {
+                throw new RuntimeException("Cannot use void or thread, as for loop variable.");
+            }
+            return this.ctx.symbolTable.resolve(id).type.name.toLowerCase();
         }
         throw new RuntimeException("Type Error: Invalid for-loop variable declaration");
     }
@@ -360,7 +425,10 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             Symbol symbol = this.ctx.resolvedSymbols.get(ai.ID());
             if (symbol == null) {
                 throw new RuntimeException("Variable '" + ai.ID().getText() + "' not declared.");
+            } else if (symbol.arrType == null) {
+                throw new RuntimeException("Type Error: '" + ai.ID().getText() + "' is not an array.");
             }
+
             return symbol.type.name.toLowerCase();
         }
 

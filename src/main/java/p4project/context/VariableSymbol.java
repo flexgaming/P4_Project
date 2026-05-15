@@ -6,4 +6,8 @@ public class VariableSymbol extends Symbol {
     public VariableSymbol(String name, TypeSymbol type) {
         super(name, type);
     }
+    public VariableSymbol(String name, TypeSymbol type, int[] dimensions) {
+        super(name, type, dimensions);
+        this.isThread = false;
+    }
 }

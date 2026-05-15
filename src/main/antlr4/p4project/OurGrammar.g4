@@ -16,15 +16,14 @@ statement
     ;
 
 statementPrime
-    : arrayIndex '=' expr
-    | reassignment
+    : reassignment
     | declaration 
     | awaitStatement 
     | continueStatement 
     | breakStatement 
     | returnStatement 
     | printStatement
-    | functionCall
+    | expr
     ;
 
 assignment
@@ -41,6 +40,7 @@ assFunc
 
 reassignment
     : ID '=' expr
+    | arrayIndex '=' expr
     ;
 
 declaration
@@ -75,7 +75,7 @@ forStatement
     ;
 
 forVar
-    : PREFIX? typeRef ID (assVar | assFunc)
+    : PREFIX? typeRef ID assVar
     | reassignment
     | ID
     ;
@@ -143,11 +143,12 @@ power
     ;
 
 arrayLiteral
-    : ('[' expr (',' expr)* ']')+
+    : ('{' expr (',' expr)* '}')+
+    | ('[' expr ']')+
     ;
 
 arrayIndex
-    : ID '[' expr ']' ('[' expr ']')*
+    : ID ('[' expr ']')+
     ;
 
 factor
