@@ -459,7 +459,6 @@ class UnitTest {
         OurGrammarParser.FactorContext factorCtx = parseFactor("cast(int) 2.718");
         ctx.symbolTable.pushScope(factorCtx);
 
-        // TODO - extract the correct data to a json file or similar
         new AssDecVisitor(ctx).visitFactor(factorCtx);
         new RefLinkingVisitor(ctx).visitFactor(factorCtx);
         new TypeCheckingVisitor(ctx).visitFactor(factorCtx);

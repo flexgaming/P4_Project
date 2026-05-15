@@ -7,8 +7,6 @@ import p4project.OurGrammarParser;
 
 import java.util.Arrays;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import p4project.context.*;
 
 /*
@@ -32,6 +30,23 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     }
 
     @Override
+    public String visitDeclaration(OurGrammarParser.DeclarationContext context) {
+        String id = context.ID().getText();
+        Symbol symbol = this.ctx.symbolTable.resolve(id);
+
+        if (symbol.arrType != null && context.typeRef().ID() != null) {
+            for (int i = 0; i < context.typeRef().ID().size(); i++) {
+                String typeName = this.ctx.symbolTable.resolve(context.typeRef().ID(i).getText()).type.toString();
+                if (!(typeName.equals("int") || typeName.equals(""))) {
+                    throw new RuntimeException("Type Error: Array dimensions must be of type int, but got " + typeName);
+                }
+            }
+            
+        }
+        return visitChildren(context);
+    }
+
+    @Override
     public String visitAssignment(OurGrammarParser.AssignmentContext context) {
         String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
@@ -44,7 +59,6 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
                 throw new RuntimeException("Type Error: Cannot assign '" + exprType + " to '" + declaredType + "'");
             } else if (symbol.arrType != null) {
                 int[] arr = arrayValidator.validate(context.assVar().expr().getText(), symbol.arrType);
-
             }
             return declaredType;
         } else if (context.assFunc() != null) {

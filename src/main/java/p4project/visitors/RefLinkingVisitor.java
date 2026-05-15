@@ -50,7 +50,7 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
                 int[] correctDimSize = arrayValidator.validate(afterEquals);
 
                 for (int i = 0; i < symbol.arrType.dimensions; i++) {
-                    symbol.arrType.dimSize[i] = correctDimSize[i];
+                    symbol.arrType.dimSize[i] = String.valueOf(correctDimSize[i]);
                 }
             }
         }
@@ -73,7 +73,7 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
             throw new RuntimeException("Variable '" + id + "' not declared.");
         } 
         statement: if (symbol.arrType != null) {
-            int[] dimensions = symbol.arrType.dimSize;
+            String[] dimensions = symbol.arrType.dimSize;
             int dimCount = dimensions.length;
             String contextStr = context.getText();
             int equalsIndex = contextStr.indexOf('=');
@@ -93,11 +93,15 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
                 // If a string like "test[1][2] = 5" is given, we only extract "[1][2]".
                 beforeEquals = beforeEquals.substring(contextStr.indexOf('['), equalsIndex);
                 for (int i = 0; i < dimCount && beforeEquals.contains("["); i++) {
-                    int currentDimIndex = Integer.parseInt(beforeEquals.substring(1, beforeEquals.indexOf(']')));
-                    if (!(currentDimIndex <= dimensions[i])) {
-                        throw new RuntimeException("Array index out of bounds for dimension " + i + ": " + currentDimIndex + " >= " + dimensions[i]);
+                    int sqBracket1 = beforeEquals.indexOf('[');
+                    int sqBracket2 = beforeEquals.indexOf(']');
+                    String currentDimIndex = beforeEquals.substring(sqBracket1 + 1, sqBracket2).trim();
+                    if (currentDimIndex.matches("\\d+") && dimensions[i] != null && dimensions[i].matches("\\d+")) {
+                        if (!(Integer.parseInt(currentDimIndex) < Integer.parseInt(dimensions[i]))) {
+                            throw new RuntimeException("Array index out of bounds for dimension " + i + ": " + currentDimIndex + " >= " + dimensions[i]);
+                        }
                     }
-                    beforeEquals = beforeEquals.substring(beforeEquals.indexOf(']') + 1);
+                    beforeEquals = beforeEquals.substring(sqBracket2 + 1);
                 }
                 if (afterEquals.contains("{") || afterEquals.contains("[")) {
                     throw new RuntimeException("Right-hand side of array reassignment must not contain braces or brackets.");
@@ -113,22 +117,26 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
                     int[] correctDimSize = arrayValidator.validate(afterEquals, symbol.arrType);
 
                     for (int i = 0; i < symbol.arrType.dimensions; i++) {
-                        symbol.arrType.dimSize[i] = correctDimSize[i];
+                        symbol.arrType.dimSize[i] = String.valueOf(correctDimSize[i]);
                     }
                 } else if (afterEquals.contains("[")) {
                     // If the right-hand side is an array size, we re-assign the size of the array.
-                    for (int dim : dimensions) {
-                        if (dim != 0) {
+                    for (String dim : dimensions) {
+                        if (dim != null && !dim.equals("0") && !dim.trim().isEmpty()) {
                             throw new RuntimeException("Cannot reassign size of an array that already has a defined size. Current size: " + java.util.Arrays.toString(dimensions));
                         }
                     }
-                    int[] newSize = new int[dimCount];
+                    String[] newSize = new String[dimCount];
                     for (int i = 0; i < dimCount && afterEquals.contains("["); i++) {
-                        newSize[i] = Integer.parseInt(afterEquals.substring(1, afterEquals.indexOf(']')));
-                        if (newSize[i] <= 0) {
-                            throw new RuntimeException("Array size must be greater than 0 for dimension " + i + ": Size " + newSize[i]);
+                        int sqBracket1 = afterEquals.indexOf('[');
+                        int sqBracket2 = afterEquals.indexOf(']');
+                        newSize[i] = afterEquals.substring(sqBracket1 + 1, sqBracket2).trim();
+                        if (newSize[i].matches("\\d+")) {
+                            if (Integer.parseInt(newSize[i]) <= 0) {
+                                throw new RuntimeException("Array size must be greater than 0 for dimension " + i + ": Size " + newSize[i]);
+                            }
                         }
-                        afterEquals = afterEquals.substring(afterEquals.indexOf(']') + 1);
+                        afterEquals = afterEquals.substring(sqBracket2 + 1);
                     }
                     symbol.arrType.dimSize = newSize.clone();
                 }

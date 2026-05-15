@@ -85,7 +85,7 @@ public class FtableGenVisitor extends OurGrammarBaseVisitor<Void> {
 
     @Override
     public Void visitWhileStatement(OurGrammarParser.WhileStatementContext context) {
-        this.ctx.symbolTable.pushScope(context);
+        this.ctx.symbolTable.restoreScope(context);
         visitChildren(context);
         this.ctx.symbolTable.popScope();
         return null;

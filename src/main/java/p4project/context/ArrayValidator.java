@@ -63,9 +63,15 @@ public class ArrayValidator {
                 } else if (arrLiteral[currentDepth - 1] != dimensionSize[currentDepth - 1]) {
                     throw new RuntimeException("Uneven array construction." + input);
                 }
-                if (!(dimensionSize[currentDepth - 1] == base.dimSize[currentDepth - 1])) {
-                    throw new RuntimeException("Dimension " + currentDepth + " expects " + base.dimSize[currentDepth - 1] + " elements but got " + dimensionSize[currentDepth - 1]);
+                
+                String expectedStr = base.dimSize[currentDepth - 1];
+                if (expectedStr != null && expectedStr.matches("\\d+")) {
+                    int expected = Integer.parseInt(expectedStr);
+                    if (dimensionSize[currentDepth - 1] != expected) {
+                        throw new RuntimeException("Dimension " + currentDepth + " expects " + expected + " elements but got " + dimensionSize[currentDepth - 1]);
+                    }
                 }
+
                 dimensionSize[currentDepth - 1] = 1;
                 currentDepth--;
             }
@@ -74,7 +80,21 @@ public class ArrayValidator {
         if (depth != 0) {
             throw new RuntimeException("You have an uneven amount of curly brackets in context: " + input);
         }
-        if (!Arrays.equals(arrLiteral, base.dimSize)) {
+        String[] arrLiteralStr = new String[arrLiteral.length];
+        for (int i = 0; i < arrLiteral.length; i++) {
+            arrLiteralStr[i] = String.valueOf(arrLiteral[i]);
+        }
+        
+        // We only compare known numeric defined sizes. If base size is a variable, we can't strictly compare.
+        boolean match = true;
+        for(int i = 0; i < arrLiteralStr.length; i++) {
+            if (base.dimSize[i] != null && base.dimSize[i].matches("\\d+") && !arrLiteralStr[i].equals(base.dimSize[i])){
+                match = false;
+                break;
+            }
+        }
+
+        if (!match) {
             throw new RuntimeException("Array dimensions size '"+ java.util.Arrays.toString(arrLiteral) + "' does not match the variable'" + java.util.Arrays.toString(base.dimSize) + "'.");
         }
 

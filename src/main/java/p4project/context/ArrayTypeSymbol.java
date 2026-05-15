@@ -7,10 +7,10 @@ package p4project.context;
 public class ArrayTypeSymbol extends TypeSymbol {
     public final TypeSymbol elementType;
     public int dimensions = 0; // int[][] → 2
-    public int[] dimSize; //int[10][20] → dimSize[10,20]
+    public String[] dimSize; //int[10][20] → dimSize[10,20]
 
     //Constructor taking a TypeSymbol as input and the dimensions.
-    public ArrayTypeSymbol(TypeSymbol elementType, int[] dimensions) {
+    public ArrayTypeSymbol(TypeSymbol elementType, String[] dimensions) {
         super(elementType.type, elementType.name + "[]");
         this.elementType = elementType;
         this.dimSize = dimensions;

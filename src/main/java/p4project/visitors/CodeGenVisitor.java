@@ -58,16 +58,14 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         return result.toString();
     }
 
-    /* @Override
-    public String visitFLOAT(OurGrammarParser.FLOATContext context) {
-        return context.FLOAT().getText() + "f"; // Append 'f' to indicate a float literal in Java
-    } */
-
-
     @Override
     public String visitStatement(OurGrammarParser.StatementContext context) {
         if (context.statementPrime() != null) {
-            return visit(context.statementPrime());
+            String primeCode = visit(context.statementPrime());
+            if (context.statementPrime().expr() != null) {
+                return indent() + primeCode + ";\n";
+            }
+            return primeCode;
         }
         return visitChildren(context);
     }
@@ -101,14 +99,14 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             String blockCode = visit(context.assFunc().block());
             inFuncAssignment = false;
             if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
-            return indent() + type + " " + id + params + blockCode + "\n";
+            return indent() + "public static " + type + " " + id + params + blockCode + "\n";
         } 
         else if (context.assVar() != null) {
             String exprCode = visit(context.assVar().expr());
             if (this.ctx.symbolTable.resolve(id).arrType != null) {
                 String arrayPrefix = "" + symbol.type.name.toLowerCase();
                 if (symbol.arrType != null) {
-                    for (int i : symbol.arrType.dimSize) {
+                    for (String i : symbol.arrType.dimSize) {
                         arrayPrefix += "[]";
                     }
                 }
@@ -552,7 +550,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         String left = visit(context.factor());
         if (context.power() != null) {
             String right = visit(context.power());
-            return "Math.pow(" + left + ", " + right + ")";
+            return "(float)Math.pow(" + left + ", " + right + ")";
         }
         return left;
     }
@@ -679,13 +677,17 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             mutexList = new ArrayList<>(mutexLocalList); 
             
             // Acquire locks in the current critical section using a spinlock approach with a exponentially increasing sleep time to reduce CPU contention.
+            boolean firstLine = true;
             for (int index : mutexLocalList) { 
-                sb.append(indent() + "for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) Thread.sleep((long) i);\n");
+                if (!firstLine) sb.append(indent());
+                sb.append("for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) Thread.sleep((long) i);\n");
+                firstLine = false;
             }
-            sb.append(indent() + "try {\n");
+            if (!firstLine) sb.append(indent());
+            sb.append("try {\n");
 
             //Construct the function call as usual here.
-            sb.append(indent() + "    " + context.ID().getText());
+            sb.append(indent()).append("    ").append(context.ID().getText());
             sb.append("(");
             if (context.expr() != null && !context.expr().isEmpty()) {
                 for (int i = 0; i < context.expr().size(); i++) {
@@ -693,20 +695,18 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                     if (i < context.expr().size() - 1) sb.append(", ");
                 }
             }
-            sb.append(");\n");
+            sb.append(")\n");
             
-            sb.append(indent() + "} finally {\n");
+            sb.append(indent()).append("} finally {\n");
             for (int index : unlockableMutexes) {
-                sb.append(indent() + "    " + "m" + index + ".unlock();\n");
+                sb.append(indent()).append("    m").append(index).append(".unlock();\n");
             }
             mutexList.removeAll(unlockableMutexes); // Remove the unlocked mutexes from the global mutexList to reflect that they are no longer aquired.
-            sb.append(indent() + "}\n");
+            sb.append(indent()).append("}");
 
-            
-            
             return sb.toString();
         }
-        sb.append(indent() + context.ID().getText());
+        sb.append(context.ID().getText());
         sb.append("(");
         if (context.expr() != null && !context.expr().isEmpty()) {
             for (int i = 0; i < context.expr().size(); i++) {
@@ -714,7 +714,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 if (i < context.expr().size() - 1) sb.append(", ");
             }
         }
-        sb.append(");\n");
+        sb.append(")");
         return sb.toString();
     }
 

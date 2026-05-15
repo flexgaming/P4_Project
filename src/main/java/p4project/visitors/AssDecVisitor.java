@@ -60,18 +60,14 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
         VariableSymbol symbol;
         
         if (dims > 0) {
-            int[] dimensions = new int[dims];
-            Arrays.fill(dimensions, -1);
+            String[] dimensions = new String[dims];
+            Arrays.fill(dimensions, null);
             for (int i = 0; i < dims; i++) {
                 if (contexStr.contains("[")) { // Get the size of the dimension from the brackets after the variable name if it is defined.
-                    if (contexStr.matches(".*[1-9].*")) {
-                        int sqBracket1 = contexStr.indexOf("[");
-                        int sqBracket2 = contexStr.indexOf("]");
-                        dimensions[i] = Integer.parseInt(contexStr.substring(sqBracket1 + 1, sqBracket2));
-                        contexStr = contexStr.substring(contexStr.indexOf("]") + 1); // Move to the next dimension by removing the processed part.
-                    } else {
-                        dimensions[i] = 0;
-                    }
+                    int sqBracket1 = contexStr.indexOf("[");
+                    int sqBracket2 = contexStr.indexOf("]");
+                    dimensions[i] = contexStr.substring(sqBracket1 + 1, sqBracket2);
+                    contexStr = contexStr.substring(contexStr.indexOf("]") + 1); // Move to the next dimension by removing the processed part.
                 } 
             }
             symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr), dimensions);
@@ -92,6 +88,49 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
     @Override
     public Void visitBlock(OurGrammarParser.BlockContext context) {
         this.ctx.symbolTable.pushScope(context);
+        
+        if (context.getParent() instanceof OurGrammarParser.AssFuncContext) {
+            OurGrammarParser.AssFuncContext assFunc = (OurGrammarParser.AssFuncContext) context.getParent();
+            OurGrammarParser.AssignmentContext assign = (OurGrammarParser.AssignmentContext) assFunc.getParent();
+            String id = assign.ID().getText();
+            
+            if (assFunc.typeRef() != null) {
+                var paramTypes = assFunc.typeRef();
+                var paramNames = assFunc.ID();
+                
+                for (int i = 0; i < paramNames.size(); i++) {
+                    if (paramNames.get(i).getText().equals(id)) continue;
+                    
+                    String paramName = paramNames.get(i).getText();
+                    String paramTypeStr = paramTypes.get(i).TYPE().getText();
+                    
+                    VariableSymbol param;
+                    String typeContextStr = paramTypes.get(i).getText();
+                    int dims = (int) typeContextStr.chars().filter(ch -> ch == '[').count();
+                    
+                    if (dims > 0) {
+                        String[] dimensions = new String[dims];
+                        Arrays.fill(dimensions, null);
+                        for (int j = 0; j < dims; j++) {
+                            if (typeContextStr.contains("[")) {
+                                int sqBracket1 = typeContextStr.indexOf("[");
+                                int sqBracket2 = typeContextStr.indexOf("]");
+                                dimensions[j] = typeContextStr.substring(sqBracket1 + 1, sqBracket2);
+                                typeContextStr = typeContextStr.substring(typeContextStr.indexOf("]") + 1);
+                            }
+                        }
+                        param = new VariableSymbol(paramName, TypeSymbol.fromString(paramTypeStr), dimensions);
+                    } else {
+                        param = new VariableSymbol(paramName, TypeSymbol.fromString(paramTypeStr));
+                    }
+
+                    if (!this.ctx.symbolTable.define(param)) {
+                        throw new RuntimeException("Duplicate parameter name: '" + paramName + "'");
+                    }
+                }
+            }
+        }
+        
         Void result = visitChildren(context);
         this.ctx.symbolTable.popScope();
         return result;
@@ -130,20 +169,22 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
             VariableSymbol symbol;
 
             if (dims > 0) {
-                int[] dimensions = new int[dims];
-                Arrays.fill(dimensions, -1);
+                String[] dimensions = new String[dims];
+                Arrays.fill(dimensions, null);
                 for (int i = 0; i < dims; i++) {
                     if (beforeEquals.contains("[")) { // Get the size of the dimension from the brackets after the variable name if it is defined.
-                        if (beforeEquals.matches(".*[1-9].*")) {
-                            int sqBracket1 = contexStr.indexOf("[");
-                            int sqBracket2 = contexStr.indexOf("]");
-                            dimensions[i] = Integer.parseInt(beforeEquals.substring(sqBracket1 + 1, sqBracket2));
-                            beforeEquals = beforeEquals.substring(beforeEquals.indexOf("]") + 1); // Move to the next dimension by removing the processed part.
+                        int sqBracket1 = beforeEquals.indexOf("[");
+                        int sqBracket2 = beforeEquals.indexOf("]");
+                        // Extract whatever is inside the brackets, it can be a number or a variable name
+                        String insideBrackets = beforeEquals.substring(sqBracket1 + 1, sqBracket2).trim();
+                        if (!insideBrackets.isEmpty()) {
+                            dimensions[i] = insideBrackets;
                         }
+                        beforeEquals = beforeEquals.substring(sqBracket2 + 1); // Move to the next dimension by removing the processed part.
                     } 
-                    if (dimensions[i] == -1) { // If the size of the dimension is not defined in the brackets, get it from the number of elements in the initialization list.
+                    if (dimensions[i] == null) { // If the size of the dimension is not defined in the brackets, get it from the number of elements in the initialization list.
                         int commaNum = (int) afterEquals.substring(afterEquals.indexOf("{"), afterEquals.indexOf("}")).chars().filter(ch -> ch == ',').count();
-                        dimensions[i] = commaNum + 1; // Number of commas + 1 gives the number of elements in that dimension
+                        dimensions[i] = String.valueOf(commaNum + 1); // Number of commas + 1 gives the number of elements in that dimension
                         afterEquals = afterEquals.substring(afterEquals.indexOf("}") + 1); // Move to the next dimension by cutting off the part of the string we've already processed
                     }
                 }
@@ -183,24 +224,6 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
             FunctionSymbol f = new FunctionSymbol(id, TypeSymbol.fromString(typeStr));
             f.prefixes.addAll(prefixes);
             
-            if (context.assFunc().typeRef() != null) {
-                var paramTypes = context.assFunc().typeRef();
-                var paramNames = context.assFunc().ID();
-                
-                for (int i = 0; i < paramNames.size(); i++) {
-                    // Skip the function name itself if it's included
-                    if (i == 0 && paramNames.get(i).getText().equals(id)) continue;
-                    
-                    String paramName = paramNames.get(i).getText();
-                    String paramTypeStr = paramTypes.get(i).TYPE().getText();
-                    
-                    VariableSymbol param = new VariableSymbol(paramName, TypeSymbol.fromString(paramTypeStr));
-                    if (!this.ctx.symbolTable.define(param)) {
-                        throw new RuntimeException("Duplicate parameter name: '" + paramName + "'");
-                    }
-                }
-            }
-            
             if (!this.ctx.symbolTable.define(f)) {
                 throw new RuntimeException("Duplicate function declaration: '" + id + "'");
             }
@@ -221,19 +244,20 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
 
             // Get the correct number of dimensions for array declarations by counting the brackets after the equals sign, not in the type reference
             if (dims > 0) {
-                int[] dimensions = new int[dims];
-                Arrays.fill(dimensions, -1);
+                String[] dimensions = new String[dims];
+                Arrays.fill(dimensions, null);
                 for (int i = 0; i < dims; i++) {
                     if (beforeEquals.contains("[")) { // Get the size of the dimension from the brackets after the variable name if it is defined.
-                        if (beforeEquals.matches(".*[1-9].*")) {
-                            int sqBracket1 = contexStr.indexOf("[");
-                            int sqBracket2 = contexStr.indexOf("]");
-                            dimensions[i] = Integer.parseInt(beforeEquals.substring(sqBracket1 + 1, sqBracket2));
-                            beforeEquals = beforeEquals.substring(beforeEquals.indexOf("]") + 1); // Move to the next dimension by removing the processed part.
+                        int sqBracket1 = beforeEquals.indexOf("[");
+                        int sqBracket2 = beforeEquals.indexOf("]");
+                        String insideBrackets = beforeEquals.substring(sqBracket1 + 1, sqBracket2).trim();
+                        if (!insideBrackets.isEmpty()) {
+                            dimensions[i] = insideBrackets;
                         }
+                        beforeEquals = beforeEquals.substring(sqBracket2 + 1); // Move to the next dimension by removing the processed part.
                     } 
-                    if (dimensions[i] == -1) { // If the size of the dimension is not defined in the brackets, initialize to 0.
-                        dimensions[i] = 0;
+                    if (dimensions[i] == null) { // If the size of the dimension is not defined in the brackets, initialize to 0.
+                        dimensions[i] = "0";
                     } 
                 }
                 symbol = new VariableSymbol(id, TypeSymbol.fromString(typeStr), dimensions);

@@ -20,7 +20,7 @@ public class Symbol {
         this.type = new TypeSymbol(type.type, type.name);
     }
 
-    public Symbol(String name, TypeSymbol type, int[] dimensions) {
+    public Symbol(String name, TypeSymbol type, String[] dimensions) {
         this.ID = name;
         this.arrType = new ArrayTypeSymbol(type, dimensions);
         this.type = new TypeSymbol(type.type, type.name);
