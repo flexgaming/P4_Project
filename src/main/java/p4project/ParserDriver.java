@@ -47,18 +47,20 @@ void main() {
     l[1][2] = 1222;
     // l = {{2}, {2}};
     // int[][] n = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
-    int[wow][wow][wow][wow][wow][wow] bah;
+    int[wow] bah;
     shared int y = 2;
     shared float z = 3.0;
-
-    critical(x, z) {
-        critical(x, y, z) {
-            print("In critical section, x = ", x, " y = ", y, " z = ", z); 
-            x = x + 1; 
-            y = y ^ 1; 
-            z = z + 1.0; 
-        } 
-    }
+    if (x > 0) {
+        critical(x, z) {
+            critical(x, y, z) {
+                print("In critical section, x = ", x, " y = ", y, " z = ", z); 
+                x = x + 1; 
+                y = cast(int) (cast(float) y ^ 1.0); 
+                z = z + 1.0; 
+            } 
+        }
+    } 
+    
 
     criticalFunc(z);
 

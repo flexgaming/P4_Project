@@ -378,7 +378,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             sb.append(indent() + "ExecutorService executor = Executors.newCachedThreadPool();\n");
 
             for (String shared : ctx.sharedVariables) {
-                sb.append(indent() +"Lock " + "m" + ctx.sharedVariables.indexOf(shared) + " = new ReentrantLock();\n");
+                sb.append(indent() +"Lock " + "m" + ctx.sharedVariables.indexOf(shared) + " = new ReentrantLock(); // Shared variable: " + shared + "\n");
             }
 
             inMain = false;
@@ -421,8 +421,14 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             mutexList = new ArrayList<>(mutexLocalList); 
             
             // Acquire locks in the current critical section using a spinlock approach with a exponentially increasing sleep time to reduce CPU contention.
-            for (int index : mutexLocalList) { 
-                sb.append(indent() + "for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) Thread.sleep((long) i);\n");
+            for (int index : mutexLocalList) {
+                sb.append(indent() + "for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) {\n")
+                .append(indent() + "    try {\n")
+                .append(indent() + "        Thread.sleep((long) i)\n")
+                .append(indent() + "    } catch (InterruptedException e) {\n")
+                .append(indent() + "        Thread.currentThread().interrupt();\n")
+                .append(indent() + "    }\n")
+                .append(indent() + "}\n");
             }
             sb.append(indent() + "try {\n");
             for (OurGrammarParser.StatementContext stmt : context.statement()) {
@@ -678,9 +684,14 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             
             // Acquire locks in the current critical section using a spinlock approach with a exponentially increasing sleep time to reduce CPU contention.
             boolean firstLine = true;
-            for (int index : mutexLocalList) { 
-                if (!firstLine) sb.append(indent());
-                sb.append("for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) Thread.sleep((long) i);\n");
+            for (int index : mutexLocalList) {
+                sb.append("for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) {\n")
+                .append(indent() + "    try {\n")
+                .append(indent() + "        Thread.sleep((long) i)\n")
+                .append(indent() + "    } catch (InterruptedException e) {\n")
+                .append(indent() + "        Thread.currentThread().interrupt();\n")
+                .append(indent() + "    }\n")
+                .append(indent() + "}\n");
                 firstLine = false;
             }
             if (!firstLine) sb.append(indent());
@@ -695,7 +706,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                     if (i < context.expr().size() - 1) sb.append(", ");
                 }
             }
-            sb.append(")\n");
+            sb.append(");\n");
             
             sb.append(indent()).append("} finally {\n");
             for (int index : unlockableMutexes) {
