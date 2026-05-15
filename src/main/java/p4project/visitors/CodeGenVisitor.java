@@ -424,7 +424,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             for (int index : mutexLocalList) {
                 sb.append(indent() + "for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) {\n")
                 .append(indent() + "    try {\n")
-                .append(indent() + "        Thread.sleep((long) i)\n")
+                .append(indent() + "        Thread.sleep((long) i);\n")
                 .append(indent() + "    } catch (InterruptedException e) {\n")
                 .append(indent() + "        Thread.currentThread().interrupt();\n")
                 .append(indent() + "    }\n")
@@ -687,7 +687,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             for (int index : mutexLocalList) {
                 sb.append("for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) {\n")
                 .append(indent() + "    try {\n")
-                .append(indent() + "        Thread.sleep((long) i)\n")
+                .append(indent() + "        Thread.sleep((long) i);\n")
                 .append(indent() + "    } catch (InterruptedException e) {\n")
                 .append(indent() + "        Thread.currentThread().interrupt();\n")
                 .append(indent() + "    }\n")

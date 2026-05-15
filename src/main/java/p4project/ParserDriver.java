@@ -59,7 +59,7 @@ void main() {
                 z = z + 1.0; 
             } 
         }
-    } 
+    }
     
 
     criticalFunc(z);
