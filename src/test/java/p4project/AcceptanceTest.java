@@ -20,10 +20,12 @@ class AcceptanceTest {
         .replaceAll("//.*", "")
         .replaceAll("\\{\\s+\\}", "{}")
         .replaceAll("\\s+", " ")
+        .replaceAll("\\{\\s+", "{")
+        .replaceAll("\\s+\\}", "}")
         .trim();
     }
 
-    // Requirement 1: Create, maintain, and terminate threads
+    // Requirement 1: Create multiple threads
     @Test
     void testRequirement1() {
         String input = """
@@ -95,7 +97,6 @@ class AcceptanceTest {
             }
             """;
 
-        // 1. Full pipeline (your existing helper)
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
@@ -115,6 +116,7 @@ class AcceptanceTest {
         assertTrue(normalized.contains("if (5 <= 4) {}"));
     }
 
+    // 
     @Test
     void requirement8() {
         String input = """
@@ -126,6 +128,7 @@ class AcceptanceTest {
                 while (5 < 10) {break;}
                 int x;
                 int y = 5;
+                y = 10;
                 print("Hello, World!");
                 x = read(int);
                 """;
@@ -142,6 +145,7 @@ class AcceptanceTest {
         assertTrue(normalized.contains("while (5 < 10) {break;}"));
         assertTrue(normalized.contains("int x;"));
         assertTrue(normalized.contains("int y = 5;"));
+        assertTrue(normalized.contains("y = 10;"));
         assertTrue(normalized.contains("System.out.print(\"Hello, World!\");"));
         assertTrue(normalized.contains("x = scanner.nextInt();"));
     }
