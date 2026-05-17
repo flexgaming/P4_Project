@@ -112,7 +112,12 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 }
                 return indent() + arrayPrefix + " " + id + " = " + "new " + arrayPrefix + exprCode + ";\n";
             }
-            else return indent() + type + " " + id + " = " + exprCode + ";\n";
+            else {
+                if (this.ctx.symbolTable.getDepth() == 0) { // Global variable, make it static
+                    type = "static " + type;
+                }
+                return indent() + type + " " + id + " = " + exprCode + ";\n";
+            }
         } 
         else {
             return "";

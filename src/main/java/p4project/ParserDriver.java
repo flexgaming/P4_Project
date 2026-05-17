@@ -19,54 +19,26 @@ import p4project.visitors.MutexVisitor;
 public class ParserDriver {
     public static void main(String[] args) {
         String input = """
-int func() {
-    return 42;
+int func1(int a, float b) {
+    return a + cast(int) b;
 }
-void criticalFunc(shared float a) {
-    critical(a) {
-        print("In criticalFunc, a = ", a);
-        a = a + 1.0;
-    }
+float func2(float c) {
+    print(q, "\\n");
+    return c + 1.5;
 }
-void main() { 
-    shared int x; 
-    x = read(int); 
-    thread t1 => { 
-        print("In thread, x = ", x); 
-    }
-    thread t2 => { 
-        print("In thread, x = ", x); 
-    }
-    awaitAll(t1, t2);
-    x = 1;
-    int wow = 69;
-    int[][] l;
-    l = [3][10];
-    int[][] m = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
-    l = m;
-    l[1][2] = 1222;
-    // l = {{2}, {2}};
-    // int[][] n = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
-    int[wow] bah;
-    shared int y = 2;
-    shared float z = 3.0;
-    if (x > 0) {
-        critical(x, z) {
-            critical(x, y, z) {
-                print("In critical section, x = ", x, " y = ", y, " z = ", z); 
-                x = x + 1; 
-                y = cast(int) (cast(float) y ^ 1.0); 
-                z = z + 1.0; 
-            } 
+int q = 10;
+void main() {
+    int x = func1(5, 3.2);
+    float y = func2(2.5);
+    print(x, "\\n");
+    print(y, "\\n");
+    thread t1 {
+        critical {
+            q = q + 1;
         }
     }
-    
-
-    criticalFunc(z);
-
-    func();
 }
-        """;;
+        """;
 
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);
