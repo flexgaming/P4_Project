@@ -1,11 +1,7 @@
 package p4project;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,9 +70,33 @@ class AcceptanceTest {
         assertTrue(normalized.contains("CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {});"));
     }
 
-    // Requirement 2: 
+    // Requirement 2: An input in ParaLang file gets transpiled to Java file
+    @Test
+    void testTranspileFile() throws IOException {
+        Path in = Path.of("src", "test", "resources", "test-inputs", "transpile_input.txt");
+        // Read ParaLang input file
+        String input = Files.readString(in, StandardCharsets.UTF_8);
 
-    // Requirement 5: Data Types: char, int, float, bool
+        // Run full pipeline in-test to produce Java code
+        String javaCode = ParserDriver.runFullPipeline(input);
+
+        // Write output into test-outputs/<basename>.java
+        String base = in.getFileName().toString();
+        int idx = base.lastIndexOf('.');
+        if (idx > 0) base = base.substring(0, idx);
+        Path out = Path.of("test-outputs", base + ".java");
+        if (out.getParent() != null) Files.createDirectories(out.getParent());
+        Files.writeString(out, javaCode, StandardCharsets.UTF_8);
+
+        // Assertions
+        assertTrue(Files.exists(out), "Expected transpiled file to exist: " + out.toAbsolutePath());
+        String normalized = normalize(javaCode);
+        System.out.println("=== Transpiled Java Path: " + out.toAbsolutePath() + " ===");
+        System.out.println(javaCode);
+        assertTrue(normalized.contains("System.out.print(\"Hello, World!\");"));
+    }
+
+    // Requirement 5: Data Types: char, int, float, bool, string
     @Test
     void testRequirement5() {
         String input = """
@@ -81,6 +105,7 @@ class AcceptanceTest {
                 int i = 42;
                 float f = 3.14;
                 bool b = true;
+                string s = "Hello";
             }
             """;
 
@@ -92,15 +117,16 @@ class AcceptanceTest {
         assertTrue(normalized.contains("char c = 'a';"));
         assertTrue(normalized.contains("int i = 42;"));
         assertTrue(normalized.contains("float f = 3.14f;"));
-        assertTrue(normalized.contains("bool b = true;"));
+        assertTrue(normalized.contains("Boolean b = true;"));
+        assertTrue(normalized.contains("String s = \"Hello\";"));
     }
-    // Arrays
+    // Requirement 6: Arrays
     @Test
     void testRequirement6() {
         System.out.println("=== Running Acceptance Test: requirement 6 ===");
     }
 
-    // Operators: +, -, *, /, %, ^, ==, !=, ||, <, >, &&, >=, <=
+    // Requirement 7: Operators: +, -, *, /, %, ^, ==, !=, ||, <, >, &&, >=, <=
     @Test
     void requirement7() {
         String input = """
@@ -141,7 +167,7 @@ class AcceptanceTest {
         assertTrue(normalized.contains("if (5 <= 4) {}"));
     }
 
-    // 
+    // Requirement 8: Control flow: if-else, for loops, while loops, variable declarations, assignments, and reassignments, print statements, read statements
     @Test
     void requirement8() {
         String input = """
@@ -156,7 +182,8 @@ class AcceptanceTest {
                 y = 10;
                 print("Hello, World!");
                 x = read(int);
-                """;
+            }
+            """;
 
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
@@ -175,16 +202,21 @@ class AcceptanceTest {
         assertTrue(normalized.contains("x = scanner.nextInt();"));
     }
 
+    // Requirement 9: A method for handling critical sections
 
     // Requirement 10: Functionality to prevent deadlocks
 
-    // Requirement 11: Reassignments
+    // Requirement 11: input and output via console
     @Test
     void requirement11() {
         String input = """
             void main() {
-                int x = 5;
-                x = 10;
+                print("Enter your name:");
+                string name = read(string);
+                print("Hello", name + "!");
+
+                print("Age?: ");
+                int age = read(int);
             }
             """;
 
@@ -193,13 +225,14 @@ class AcceptanceTest {
 
         System.out.println(javaCode);
         System.out.println(normalized);
-        assertTrue(normalized.contains("int x = 5;"));
-        assertTrue(normalized.contains("x = 10;"));
+        assertTrue(normalized.contains("System.out.print(\"Enter your name:\");"));
+        assertTrue(normalized.contains("String name = scanner.nextLine();"));
+        assertTrue(normalized.contains("System.out.print(\"Hello\" + name + \"!\");")); 
     }
 
     // Requirement 12: Wait function
     @Test
-    void requirement12() {
+    void requirement12a() {
         String input = """
                 void main() {
 
@@ -213,13 +246,13 @@ class AcceptanceTest {
 
         System.out.println(javaCode);
         System.out.println(normalized);
-        assertTrue(normalized.contains("CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> { System.out.print(\"in t1\"); });"));
-        assertTrue(normalized.contains("CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> { System.out.print(\"in t2\"); });"));
+        assertTrue(normalized.contains("CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {System.out.print(\"in t1\");});"));
+        assertTrue(normalized.contains("CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {System.out.print(\"in t2\");});"));
         assertTrue(normalized.contains("CompletableFuture.allOf(t1, t2).get();"));
     }
 
     @Test
-    void requirement12a() {
+    void requirement12b() {
         String input = """
                 void main() {
                 thread t1 => { print("in t1")}
@@ -232,22 +265,47 @@ class AcceptanceTest {
 
         System.out.println(javaCode);
         System.out.println(normalized);
-        assertTrue(normalized.contains("CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> { System.out.print(\"in t1\"); });"));
-        assertTrue(normalized.contains("CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> { System.out.print(\"in t2\"); });"));
+        assertTrue(normalized.contains("CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {System.out.print(\"in t1\");});"));
+        assertTrue(normalized.contains("CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {System.out.print(\"in t2\");});"));
         assertTrue(normalized.contains("CompletableFuture.anyOf(t1, t2).get();"));
     }
     
     // Requirement 13: Data type: Thread
 
-    // Requirement 14: Parallel Implementation avoiding deadlocks and race conditions
-
-    // Requirement 15: Strings
+    // Requirement 14: Explicit casting between data types
     @Test
-    void requirement15() {
+    void requirement14() {
         String input = """
             void main() {
-                string status = "good";
-            }
+                int srcInt = 32;
+                float srcFloat = 1.0;
+                bool srcBool = true;
+                char srcChar = 'a';
+
+                // Int to other types
+                float intToFloat = cast(float) srcInt;
+                bool intToBool = cast(bool) srcInt;
+                string intToString = cast(string) srcInt;
+
+                // Float to other types
+                int floatToInt = cast(int) srcFloat;
+                bool floatToBool = cast(bool) srcFloat;
+                string floatToString = cast(string) srcFloat;
+
+                // Bool to other types
+                int boolToInt = cast(int) srcBool;
+                float boolToFloat = cast(float) srcBool;
+                string boolToString = cast(string) srcBool;
+
+                // Char to string
+                string charToString = cast(string) srcChar;
+
+                bool funcToBool = cast(bool) myFunc();
+
+                int myFunc() {
+                    return 0;
+                }
+            }                
             """;
 
         String javaCode = ParserDriver.runFullPipeline(input);
@@ -255,15 +313,26 @@ class AcceptanceTest {
 
         System.out.println(javaCode);
         System.out.println(normalized);
-        assertTrue(normalized.contains("string status = \"good\";"));
+        assertTrue(normalized.contains("float intToFloat = (float) srcInt;"));
+        assertTrue(normalized.contains("Boolean intToBool = (srcInt == 0) ? false : true;"));
+        assertTrue(normalized.contains("String intToString = String.valueOf(srcInt);"));
+        assertTrue(normalized.contains("int floatToInt = (int) srcFloat;"));
+        assertTrue(normalized.contains("Boolean floatToBool = (srcFloat == 0.0f) ? false : true;"));
+        assertTrue(normalized.contains("String floatToString = String.valueOf(srcFloat);"));
+        assertTrue(normalized.contains("int boolToInt = srcBool ? 1 : 0;"));
+        assertTrue(normalized.contains("float boolToFloat = srcBool ? 1.0f : 0.0f;"));
+        assertTrue(normalized.contains("String boolToString = String.valueOf(srcBool);"));
+        assertTrue(normalized.contains("String charToString = String.valueOf(srcChar);"));
     }
+
+    // Requirement 15: Parallel Implementation avoiding deadlocks and race conditions
 
     // Requirement 18: Shared variables gets wrapped in mutex
     @Test
     void requirement18() {
         String input = """
             void main() {
-                shared int counter = 0;
+                shared int counter = 2;
             }
             """;
 
@@ -272,7 +341,7 @@ class AcceptanceTest {
 
         System.out.println(javaCode);
         System.out.println(normalized);
-        assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
+        assertTrue(normalized.contains("Lock m0 = new ReentrantLock();\n"));
         
     }
 
