@@ -670,9 +670,6 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 case "String" -> {
                     return targetType + ".valueOf(" + expr + ")";
                 }
-                case "char" -> {
-                    return "(char) " + expr;
-                }
                 case "int" -> {
                     if ("bool".equals(sourceType)) {
                         return expr + " ? 1 : 0";
