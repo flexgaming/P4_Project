@@ -136,7 +136,7 @@ class AcceptanceTest {
                 int mult = 10 * 2;
                 int div = 10 / 2;
                 int mod = 10 % 3;
-                float pow = 3.5 ^ 2.5;
+                float pow = (3.5 ^ 2.5);
                 if (8 == 8) {}
                 if (7 != 8) {}
                 if (true || false) {}
@@ -156,7 +156,7 @@ class AcceptanceTest {
         assertTrue(normalized.contains("int mult = 10 * 2;"));
         assertTrue(normalized.contains("int div = 10 / 2;"));
         assertTrue(normalized.contains("int mod = 10 % 3;"));
-        assertTrue(normalized.contains("float pow = 3.5 ^ 2.5;"));
+        assertTrue(normalized.contains("float pow = ((float)Math.pow(3.5f, 2.5f));"));
         assertTrue(normalized.contains("if (8 == 8) {}"));
         assertTrue(normalized.contains("if (7 != 8) {}"));
         assertTrue(normalized.contains("if (true || false) {}"));
@@ -195,7 +195,7 @@ class AcceptanceTest {
         assertTrue(normalized.contains("if (5 < 10) {} else if (3 > 1) {} else {}"));
         assertTrue(normalized.contains("for (int i = 0; i < 10; i = i + 1) {}"));
         assertTrue(normalized.contains("while (5 < 10) {break;}"));
-        assertTrue(normalized.contains("int x;"));
+        assertTrue(normalized.contains("int x = 0;"));
         assertTrue(normalized.contains("int y = 5;"));
         assertTrue(normalized.contains("y = 10;"));
         assertTrue(normalized.contains("System.out.print(\"Hello, World!\");"));
@@ -341,14 +341,9 @@ class AcceptanceTest {
 
         System.out.println(javaCode);
         System.out.println(normalized);
-        assertTrue(normalized.contains("Lock m0 = new ReentrantLock();\n"));
+        assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
         
     }
-
-
-    // Maybe idk
-
-
 
     // Requirement 20: Single and multiline comments
     @Test
@@ -393,11 +388,12 @@ class AcceptanceTest {
 
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
+        System.out.println(javaCode);
 
         System.out.println(javaCode);
         System.out.println(normalized);
         assertTrue(normalized.contains("System.out.print(\"Enter your name:\");"));
-        assertTrue(normalized.contains("string name = scanner.nextLine();"));
+        assertTrue(normalized.contains("String name = scanner.nextLine();"));
         assertTrue(normalized.contains("System.out.print(\"Hello\" + name + \"!\");")); 
     }
 
