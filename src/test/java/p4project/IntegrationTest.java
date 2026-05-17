@@ -46,6 +46,7 @@ class IntegrationTest {
             String outputPath = OUTPUT_DIR + "lexer_parser_" + testFileName;
             Files.writeString(Paths.get(outputPath), output);
             
+            System.out.println(output);
             System.out.println(testFileName + " - Lexer+Parser pipeline SUCCESS");
 
         } catch (RuntimeException e) {
@@ -84,47 +85,6 @@ class IntegrationTest {
             } catch (IOException ignored) {}
         } catch (Exception e) {
             fail("Parser + Semantic integration failed unexpectedly: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Full pipeline integration test (big bang): Lexer + Parser + Semantic Analysis + Code Generation.
-     */
-    @ParameterizedTest(name = "Full Pipeline Integration: {0}")
-    @MethodSource("provideTestInputs")
-    void testFullPipelineIntegration(String testFileName) throws IOException {
-        String inputPath = INPUT_DIR + testFileName;
-        String input = Files.readString(Paths.get(inputPath));
-
-        String baseName = testFileName.replace(".txt", "");
-        String outputPath = OUTPUT_DIR + baseName + "_actual.txt";
-        String expectedPath = EXPECTED_DIR + baseName + "_expected.txt";
-
-        System.out.println("=== Running Full Pipeline for: " + testFileName + " ===");
-
-        try {
-            String actualOutput = ParserDriver.runFullPipeline(input);
-
-            Files.writeString(Paths.get(outputPath), actualOutput);
-
-            String expected = Files.readString(Paths.get(expectedPath))
-                    .trim().replace("\r\n", "\n");
-            actualOutput = actualOutput.trim().replace("\r\n", "\n");
-
-            if (actualOutput.equals(expected)) {
-                System.out.println(testFileName + " - Full pipeline SUCCESS");
-            } else {
-                System.out.println(testFileName + " - Mismatch. Check " + outputPath);
-                System.out.println("Expected length: " + expected.length() + ", Actual: " + actualOutput.length());
-                assertEquals(expected, actualOutput,
-                        testFileName + " full pipeline output did not match expected");
-            }
-
-        } catch (RuntimeException e) {
-            System.out.println("Runtime error in full pipeline: " + e.getMessage());
-            Files.writeString(Paths.get(outputPath), "ERROR: " + e.toString());
-        } catch (Exception e) {
-            fail("Unexpected exception in full pipeline for " + testFileName + ": " + e.getMessage());
         }
     }
 

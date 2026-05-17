@@ -37,10 +37,14 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     private static final String INDENT = "    ";
     
     private String indent() {
+        int depth = Math.max(0, ctx.symbolTable.getDepth());
+        // When the driver inserts its own `main` wrapper we treat the program-level
+        // statements as being inside that method (one extra logical scope level).
+        // If the user defines `main` themselves, generate members at class scope (depth 0).
         if (!ctx.ftable.containsKey("main")) {
-            return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth()+2)); // compensate for the extra indent level of the generated main method
+            return INDENT.repeat(Math.max(0, depth + 1));
         }
-        return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth()+1)); // Ensure non-negative repeat count
+        return INDENT.repeat(Math.max(0, depth + 1));
         
     }
     
@@ -103,6 +107,14 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         } 
         else if (context.assVar() != null) {
             String exprCode = visit(context.assVar().expr());
+            System.out.println("Debug: " + this.ctx.symbolTable.getDepth());
+            
+            String prefix = "";
+            if (this.ctx.symbolTable.getDepth() == 0) {
+                prefix = "static ";
+            }
+            
+
             if (this.ctx.symbolTable.resolve(id).arrType != null) {
                 String arrayPrefix = "" + symbol.type.name.toLowerCase();
                 if (symbol.arrType != null) {
@@ -113,12 +125,9 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 return indent() + arrayPrefix + " " + id + " = " + "new " + arrayPrefix + exprCode + ";\n";
             }
             else {
-                if (this.ctx.symbolTable.getDepth() == 0) { // Global variable, make it static
-                    type = "static " + type;
-                }
-                return indent() + type + " " + id + " = " + exprCode + ";\n";
+                return indent() + prefix + type + " " + id + " = " + exprCode + ";\n";
             }
-        } 
+        }
         else {
             return "";
         }

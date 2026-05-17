@@ -1,13 +1,38 @@
 package p4project;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class AcceptanceTest {
     private ParserDriver driver;
+
+    private static final String TEST_DIR = "src/test/resources/";
+    private static final String INPUT_DIR = TEST_DIR + "test-inputs/";
+    private static final String EXPECTED_DIR = TEST_DIR + "expected/";
+    private static final String OUTPUT_DIR = TEST_DIR + "test-outputs/";
+
+    @BeforeAll
+    static void initAll() throws IOException {
+        Files.createDirectories(Paths.get(OUTPUT_DIR));
+        System.out.println("Acceptance test setup complete. Output directory ready.");
+    }
 
     @BeforeEach
     void setUp() {
@@ -305,5 +330,57 @@ class AcceptanceTest {
         assertTrue(normalized.contains("System.out.print(\"Enter your name:\");"));
         assertTrue(normalized.contains("string name = scanner.nextLine();"));
         assertTrue(normalized.contains("System.out.print(\"Hello\" + name + \"!\");")); 
+    }
+
+    /**
+     * Full pipeline integration test (big bang): Lexer + Parser + Semantic Analysis + Code Generation.
+     */
+    @ParameterizedTest(name = "Full Pipeline Integration: {0}")
+    @MethodSource("provideTestInputs")
+    void testFullPipelineIntegration(String testFileName) throws IOException {
+        String inputPath = INPUT_DIR + testFileName;
+        String input = Files.readString(Paths.get(inputPath));
+
+        String baseName = testFileName.replace(".txt", "");
+        String outputPath = OUTPUT_DIR + baseName + "_actual.txt";
+        String expectedPath = EXPECTED_DIR + baseName + "_expected.txt";
+
+        System.out.println("=== Running Full Pipeline for: " + testFileName + " ===");
+
+        try {
+            String actualOutput = ParserDriver.runFullPipeline(input);
+
+            Files.writeString(Paths.get(outputPath), actualOutput);
+
+            String expected = Files.readString(Paths.get(expectedPath))
+                    .trim().replace("\r\n", "\n");
+            actualOutput = actualOutput.trim().replace("\r\n", "\n");
+
+            if (actualOutput.equals(expected)) {
+                System.out.println(testFileName + " - Full pipeline SUCCESS");
+            } else {
+                System.out.println(testFileName + " - Mismatch. Check " + outputPath);
+                System.out.println("Expected length: " + expected.length() + ", Actual: " + actualOutput.length());
+                assertEquals(expected, actualOutput,
+                        testFileName + " full pipeline output did not match expected");
+            }
+
+        } catch (RuntimeException e) {
+            System.out.println("Runtime error in full pipeline: " + e.getMessage());
+            Files.writeString(Paths.get(outputPath), "ERROR: " + e.toString());
+        } catch (Exception e) {
+            fail("Unexpected exception in full pipeline for " + testFileName + ": " + e.getMessage());
+        }
+    }
+
+    private static Stream<Arguments> provideTestInputs() throws IOException {
+        List<Arguments> args = new ArrayList<>();
+        try (Stream<Path> paths = Files.walk(Paths.get(INPUT_DIR))) {
+            paths.filter(Files::isRegularFile)
+                 .filter(p -> p.toString().endsWith(".txt"))
+                 .sorted()
+                 .forEach(p -> args.add(Arguments.of(p.getFileName().toString())));
+        }
+        return args.stream();
     }
 }

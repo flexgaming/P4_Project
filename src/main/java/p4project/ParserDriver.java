@@ -19,23 +19,14 @@ import p4project.visitors.MutexVisitor;
 public class ParserDriver {
     public static void main(String[] args) {
         String input = """
-int func1(int a, float b) {
-    return a + cast(int) b;
-}
-float func2(float c) {
-    print(q, "\\n");
-    return c + 1.5;
-}
-int q = 10;
-void main() {
-    int x = func1(5, 3.2);
-    float y = func2(2.5);
-    print(x, "\\n");
-    print(y, "\\n");
-    thread t1 {
-        critical {
-            q = q + 1;
-        }
+int x = 1;
+int y = 2;
+while(true) {
+    if (x > 10) {
+        print("X is larger than 10!");
+        break;
+    } else {
+        x = x + 1;
     }
 }
         """;
@@ -118,7 +109,11 @@ void main() {
                     javaCode.append("        Lock " + "m" + ctx.sharedVariables.indexOf(shared) + " = new ReentrantLock();\n");
                 }
                 
+                // Temporarily push a scope to represent the generated `main` method
+                // so that the code generator sees the correct scope depth (main body = 1).
+                ctx.symbolTable.pushScope(tree);
                 javaCode.append(codeGenVisitor.visit(tree));
+                ctx.symbolTable.popScope();
                 javaCode.append("        executor.shutdown();\n");
                 javaCode.append("        scanner.close();\n");
                 javaCode.append("    }\n");
@@ -229,14 +224,21 @@ void main() {
             FtableGenVisitor ftableGenVisitor = new FtableGenVisitor(ctx);
             ftableGenVisitor.visit(tree);
 
-            // Phase 5: Java Code Gen
+            // Phase 5: Mutex analysis
+            MutexVisitor mutexVisitor = new MutexVisitor(ctx);
+            mutexVisitor.visit(tree);
+
+            // Phase 6: Java Code Gen
             CodeGenVisitor codeGenVisitor = new CodeGenVisitor(ctx);
             StringBuilder javaCode = new StringBuilder();
             javaCode.append("import java.util.Scanner;\n");
             javaCode.append("import java.util.concurrent.*;\n");
-            javaCode.append("import java.util.concurrent.atomic.*;\n");
-            javaCode.append("import java.util.concurrent.CompletableFuture;\n\n");
-
+            javaCode.append("import java.util.concurrent.locks.*;\n");
+            javaCode.append("import java.util.concurrent.CompletableFuture;\n");
+            javaCode.append("import java.lang.Thread;\n");
+            javaCode.append("import java.util.Arrays;\n");
+            javaCode.append("import java.lang.Math;\n\n");
+            javaCode.append("public class Main {\n");
             if (!ctx.ftable.containsKey("main")) {
                 javaCode.append("    public static void main(String[] args) {\n");
                 javaCode.append("        Scanner scanner = new Scanner(System.in);\n");
@@ -246,13 +248,18 @@ void main() {
                     javaCode.append("        Lock " + "m" + ctx.sharedVariables.indexOf(shared) + " = new ReentrantLock();\n");
                 }
                 
+                // Temporarily push a scope to represent the generated `main` method
+                // so that the code generator sees the correct scope depth (main body = 1).
+                ctx.symbolTable.pushScope(tree);
                 javaCode.append(codeGenVisitor.visit(tree));
+                ctx.symbolTable.popScope();
                 javaCode.append("        executor.shutdown();\n");
                 javaCode.append("        scanner.close();\n");
                 javaCode.append("    }\n");
             } else {
                 javaCode.append(codeGenVisitor.visit(tree));
             }
+            javaCode.append("}\n");
 
             return javaCode.toString();
 
