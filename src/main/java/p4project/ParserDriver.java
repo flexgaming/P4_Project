@@ -19,15 +19,49 @@ import p4project.visitors.MutexVisitor;
 public class ParserDriver {
     public static void main(String[] args) {
         String input = """
-int x = 1;
-int y = 2;
-while(true) {
-    if (x > 10) {
-        print("X is larger than 10!");
-        break;
-    } else {
-        x = x + 1;
+int func1(int a, float b) {
+    return a + cast(int) b;
+}
+float func2(float c) {
+    print("q in func2: ", q, "\\n");
+    return c + 1.5;
+}
+int q = 10;
+void main() {
+    int x = func1(5, 3.2);
+    float y = func2(2.5);
+    print("x after func1: ", x, "\\n");
+    print("y after func2: ", y, "\\n");
+    thread t1 => {
+        critical(q) {
+            q = q + 1;
+        }
     }
+    awaitAll(t1);
+    print("q after threads: ", q, "\\n");
+    int wow = 3;
+    int[wow][wow] arr1;
+    arr1 = {{1,2,3},{1,2,3},{1,2,3}};
+    for (int i = 0; i < wow; i = i + 1) {
+        for (int j = 0; j < wow; j = j + 1) {
+            if (j == 1 && i == 1) {
+                continue;
+            }
+            print("arr1[i][j]: ", arr1[i][j], "\\n");
+        }
+    }
+    float k = 1.1;
+    int condition = 0;
+    int counter = 0;
+    while (condition < 681472) {
+        k = k * 2.0;
+        counter = counter + 1;
+        condition = cast(int) k % 5;
+        print("k after iteration ", counter, ": ", k, "\\n");
+    }
+    print("\\nPlease enter an integer value: \\n");
+    int userInput = read(int);
+    print("bigger than 10: ", (userInput > 10), "\\n");
 }
         """;
 

@@ -1,0 +1,8 @@
+int wow = 2;
+int[wow][wow] arr1;
+arr1 = {{1,2},{1,2}};
+for (int i = 0; i < wow; i = i + 1) {
+    for (int j = 0; j < wow; j = j + 1) {
+        print(arr1[i][j]);
+    }
+}

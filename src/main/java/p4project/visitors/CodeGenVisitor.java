@@ -9,6 +9,7 @@ import p4project.context.Symbol;
 import java.util.List;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,6 +47,20 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         }
         return INDENT.repeat(Math.max(0, depth + 1));
         
+    }
+
+    // Return true if the given parser context is the "reassignment" child
+    // of an enclosing for-statement (i.e. it's the for-loop update expression).
+    private boolean isInForHeader(ParserRuleContext node) {
+        ParserRuleContext p = node.getParent();
+        while (p != null) {
+            if (p instanceof OurGrammarParser.ForStatementContext) {
+                OurGrammarParser.ForStatementContext forCtx = (OurGrammarParser.ForStatementContext) p;
+                if (forCtx.reassignment() == node) return true;
+            }
+            p = p.getParent();
+        }
+        return false;
     }
     
     @Override
@@ -107,13 +122,11 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         } 
         else if (context.assVar() != null) {
             String exprCode = visit(context.assVar().expr());
-            System.out.println("Debug: " + this.ctx.symbolTable.getDepth());
             
             String prefix = "";
-            if (this.ctx.symbolTable.getDepth() == 0) {
+            if (this.ctx.symbolTable.getDepth() == 0) { // Global scope variables should be static in Java.
                 prefix = "static ";
             }
-            
 
             if (this.ctx.symbolTable.resolve(id).arrType != null) {
                 String arrayPrefix = "" + symbol.type.name.toLowerCase();
@@ -143,7 +156,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             id = context.ID().getText();
         }
         Symbol symbol = this.ctx.symbolTable.resolve(id);
-        if (this.ctx.symbolTable.getNodeScope().getText().contains("for")) {
+        if (isInForHeader(context)) {
             return id + " = " + visit(context.expr());
 
         } else if (symbol.arrType != null) {
@@ -160,7 +173,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 return "";
                 // We do not reassign this value, because it is already defined, because the value is of the same scope
                 // and we reassign the size of each dimension in RefLinkingVisitor.
-                //return indent() + id + " = new " + symbol.type.name + afterEquals + ";\n";
+                // return indent() + id + " = new " + symbol.type.name + afterEquals + ";\n";
 
             } else if (bracketType.equals("{")) { // Handle array resizing with actual input.
                 String brackets = "";
@@ -436,9 +449,9 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             
             // Acquire locks in the current critical section using a spinlock approach with a exponentially increasing sleep time to reduce CPU contention.
             for (int index : mutexLocalList) {
-                sb.append(indent() + "for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) {\n")
+                sb.append(indent() + "for (double indexer = 100; !m" + index + ".tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {\n")
                 .append(indent() + "    try {\n")
-                .append(indent() + "        Thread.sleep((long) i);\n")
+                .append(indent() + "        Thread.sleep((long) indexer);\n")
                 .append(indent() + "    } catch (InterruptedException e) {\n")
                 .append(indent() + "        Thread.currentThread().interrupt();\n")
                 .append(indent() + "    }\n")
