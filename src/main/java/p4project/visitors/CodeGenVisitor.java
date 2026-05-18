@@ -1,5 +1,11 @@
 package p4project.visitors;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
@@ -62,7 +68,15 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         }
         return false;
     }
-    
+
+    private String javaType(String type) {
+        return switch (type) {
+            case "bool" -> "Boolean";
+            case "string" -> "String";
+            default -> type;
+        };
+    }
+
     @Override
     public String visitProgram(OurGrammarParser.ProgramContext context) {
         StringBuilder result = new StringBuilder();
@@ -96,7 +110,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitAssignment(OurGrammarParser.AssignmentContext context) {
-        String type = context.typeRef().TYPE().getText();
+        String type = javaType(context.typeRef().TYPE().getText());
         String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
         if (symbol.arrType != null) {
@@ -210,9 +224,9 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             case "float":
                 return indent() + type + " " + id + " = 0f;\n";
             case "bool":
-                return indent() + type + " " + id + " = NULL;\n";
+                return indent() + javaType(type) + " " + id + " = NULL;\n";
             case "string":
-                return indent() + type + " " + id + " = " + " " +  ";\n";
+                return indent() + javaType(type) + " " + id + " = " + " " +  ";\n";
             case "char":
                 return indent() + type + " " + id + " = '\\u0000';\n"; // default char value
             default:
@@ -252,7 +266,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
         if (context.typeRef() != null && !context.typeRef().isEmpty()) {
             for (int i = 0; i < context.typeRef().size(); i++) {
-                String paramType = context.typeRef(i).TYPE().getText();
+                String paramType = javaType(context.typeRef(i).TYPE().getText());
                 String paramName = context.ID(i).getText();
 
                 sb.append(paramType).append(" ").append(paramName);
@@ -362,7 +376,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitForVar(OurGrammarParser.ForVarContext context) {
-        String type = context.typeRef().TYPE().getText();
+        String type = javaType(context.typeRef().TYPE().getText());
         String id = context.ID().getText();
 
         if (context.assVar() != null) {
@@ -652,9 +666,44 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         }
         if (context.castExpression() != null) {
             OurGrammarParser.CastExpressionContext castCtx = context.castExpression();
-            String targetType = castCtx.TYPE().getText().toLowerCase();
+            String targetType = javaType(castCtx.TYPE().getText().toLowerCase());
+            String sourceType = null;
+            if (castCtx.expr().equal().comp().additive().mult().power().factor().functionCall() != null) {
+                sourceType = this.ctx.resolvedSymbols.get(
+                    castCtx.expr().equal().comp().additive().mult().power().factor().functionCall().ID()
+                ).type.name.toLowerCase();
+            } else if (castCtx.expr().equal().comp().additive().mult().power().factor().ID() != null) {
+                sourceType = this.ctx.resolvedSymbols.get(
+                    castCtx.expr().equal().comp().additive().mult().power().factor().ID()
+                ).type.name.toLowerCase();
+            }
             String expr = visit(castCtx.expr());
-            return "(" + targetType + ") " + expr;
+            switch (targetType) {
+                case "Boolean" -> {
+                    if ("int".equals(sourceType)) {
+                        return "(" + expr + " == 0) ? false : true";
+                    }
+                    if ("float".equals(sourceType)) {
+                        return "(" + expr + " == 0.0f) ? false : true";
+                    }
+                }
+                case "String" -> {
+                    return targetType + ".valueOf(" + expr + ")";
+                }
+                case "int" -> {
+                    if ("bool".equals(sourceType)) {
+                        return expr + " ? 1 : 0";
+                    }
+                    return "(int) " + expr;
+                }
+                case "float" -> {
+                    if ("bool".equals(sourceType)) {
+                        return expr + " ? 1.0f : 0.0f";
+                    }
+                    return "(float) " + expr;
+                }
+                default -> throw new RuntimeException("Unsupported target type in cast: " + targetType);
+            }
         }
         if (context.expr() != null) {
             // parenthesised expression
