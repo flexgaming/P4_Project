@@ -10,9 +10,12 @@ import java.util.Arrays;
 public class ArrayValidator {
     public int[] validate(String input) {
         
-        // Get the number of dimensions. Example -> {{},{},{}} | Amount of '{' in "{{}," is 2.
-        int firstComma = input.indexOf(",");
-        int dimensions = (int) input.substring(0, firstComma).chars().filter(ch -> ch == '{').count();
+        // Get the number of dimensions. Example -> {{},{},{}} | Amount of '{' in "{{}" is 2.
+        int firstCloseBracket = input.indexOf("}");
+        if (firstCloseBracket == -1) { // No closing bracket found, which means the input is not valid.
+            throw new RuntimeException("You have an uneven amount of curly brackets in context: " + input);
+        }
+        int dimensions = (int) input.substring(0, firstCloseBracket).chars().filter(ch -> ch == '{').count();
 
         int[] arrLiteral = new int[dimensions]; // Used to uphold each dimension's rightful size, based on the first input.
         int[] dimensionSize = new int[dimensions]; // Used to store the current dimension's size, and is used to compare with arrLiteral.
@@ -65,7 +68,6 @@ public class ArrayValidator {
                 currentDepth++;
             } else if (c == ',') dimensionSize[currentDepth - 1]++;
             else if (c == '}') {
-                
                 String expectedStr = base.dimSize[currentDepth - 1]; // Expected size of the dimension 'currentDepth - 1'.
                 if (expectedStr != null && expectedStr.matches("\\d+")) { // Check if string only consist of digits 0-9.
                     int expected = Integer.parseInt(expectedStr);

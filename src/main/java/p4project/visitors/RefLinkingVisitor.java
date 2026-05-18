@@ -81,13 +81,10 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
             // If the string does not contain any brackets before the equals sign, 
             // we can treat it as a normal array reassignment and link it to the symbol without further checks.
             if (!contextStr.contains("[")) {
-                /* if (this.ctx.symbolTable.resolve(context.expr().ID().getText()).arrType == null) {
-                    throw new RuntimeException("Variable '" + context.expr().ID().getText() + "' not declared.");
-                } */
                 break statement; // Jumps out of the if statement.
             }
-            String afterEquals = contextStr.substring(equalsIndex + 1, contextStr.length());
             String beforeEquals = contextStr.substring(0, equalsIndex);
+            String afterEquals = contextStr.substring(equalsIndex + 1, contextStr.length());
             
             if (beforeEquals.contains("[")) {
                 // If a string like "test[1][2] = 5" is given, we only extract "[1][2]".
@@ -95,9 +92,9 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
                 for (int i = 0; i < dimCount && beforeEquals.contains("["); i++) {
                     int sqBracket1 = beforeEquals.indexOf('[');
                     int sqBracket2 = beforeEquals.indexOf(']');
-                    String currentDimIndex = beforeEquals.substring(sqBracket1 + 1, sqBracket2).trim();
+                    String currentDimIndex = beforeEquals.substring(sqBracket1 + 1, sqBracket2);
                     if (currentDimIndex.matches("\\d+") && dimensions[i] != null && dimensions[i].matches("\\d+")) {
-                        if (!(Integer.parseInt(currentDimIndex) < Integer.parseInt(dimensions[i]))) {
+                        if (!(Integer.parseInt(currentDimIndex) <= Integer.parseInt(dimensions[i]))) {
                             throw new RuntimeException("Array index out of bounds for dimension " + i + ": " + currentDimIndex + " >= " + dimensions[i]);
                         }
                     }
@@ -105,9 +102,7 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
                 }
                 if (afterEquals.contains("{") || afterEquals.contains("[")) {
                     throw new RuntimeException("Right-hand side of array reassignment must not contain braces or brackets.");
-                } 
-                // set the specific array element to the variable.
-
+                }
 
             } // Reassign the size of each dimension.
             if (afterEquals.contains("{") || afterEquals.contains("[")) {
@@ -116,7 +111,7 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
 
                     int[] correctDimSize = arrayValidator.validate(afterEquals, symbol.arrType);
 
-                    for (int i = 0; i < symbol.arrType.dimensions; i++) {
+                    for (int i = 0; i < dimCount; i++) {
                         symbol.arrType.dimSize[i] = String.valueOf(correctDimSize[i]);
                     }
                 } else if (afterEquals.contains("[")) {

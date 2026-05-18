@@ -153,21 +153,27 @@ public class AssDecVisitor extends OurGrammarBaseVisitor<Void> {
                 throw new RuntimeException("Variable cannot be both 'const' and 'shared'.");
             }
         }
-
-        String id = context.ID().getText();
-        String typeStr = context.typeRef().TYPE().getText();
-        String contexStr = context.getText();
-
-        int eqIndex = contexStr.indexOf("=");
-        String beforeEquals = contexStr.substring(0, eqIndex);
-        String afterEquals = contexStr.substring(eqIndex + 1);
         
-        int dims = (int) afterEquals.chars().filter(ch -> ch == '{').count(); // Get the number of dimensions.
         // Function declaration with parameters
         if (context.assVar() != null) {
+            String id = context.ID().getText();
+            String typeStr = context.typeRef().TYPE().getText();
+            String contextStr = context.getText();
+
+            int eqIndex = contextStr.indexOf("=");
+            String beforeEquals = contextStr.substring(0, eqIndex);
+            String afterEquals = contextStr.substring(eqIndex + 1);
+        
+            // Get the number of dimensions. Example -> {{},{},{}} | Amount of '{' in "{{}" is 2.
+            int firstCloseBracket = contextStr.indexOf("}");
+            
+            int dims = 0;
+
+            if (!(firstCloseBracket == -1)) { // No closing bracket found, which means the input is not valid.
+                dims = (int) contextStr.substring(0, firstCloseBracket).chars().filter(ch -> ch == '{').count();
+            }
 
             VariableSymbol symbol;
-
             if (dims > 0) {
                 String[] dimensions = new String[dims];
                 Arrays.fill(dimensions, null);

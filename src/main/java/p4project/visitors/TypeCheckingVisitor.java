@@ -83,6 +83,8 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         
         if (symbol.arrType != null) {
             if (context.expr().getText().chars().filter(ch -> ch == '{').count() > 0) {
+                System.out.println("maybe here");
+                System.out.println(context.getText());
                 int[] arr = arrayValidator.validate(context.expr().getText(), symbol.arrType);
             }
         }
@@ -116,20 +118,6 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             } 
         }
         return visitChildren(context);
-    }
-
-    @Override 
-    public String visitArrayLiteral(OurGrammarParser.ArrayLiteralContext context) {
-        String type = "";
-        for (int i = 0; i < context.getChildCount(); i++) {
-            if (type == "") {
-                type = visit(context.expr(i));
-            } else if (type != visit(context.expr(i))) {
-                throw new RuntimeException("Array literal element types are mismatched. Context: " + context.getText());
-            }
-        }
-
-        return type;
     }
 
     @Override
