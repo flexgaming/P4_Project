@@ -1,0 +1,24 @@
+import java.util.Scanner;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.*;
+import java.util.concurrent.CompletableFuture;
+import java.lang.Thread;
+import java.util.Arrays;
+import java.lang.Math;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        ExecutorService executor = Executors.newCachedThreadPool();
+        int wow = 2;
+        int[][] arr1 = new int[wow][wow];
+        arr1 = new int[][]{{1, 2}, {1, 2}};
+        for (int i = 0; i < wow; i = i + 1) {
+            for (int j = 0; j < wow; j = j + 1) {
+                System.out.print(arr1[i][j]);
+            }
+        }
+        executor.shutdown();
+        scanner.close();
+    }
+}

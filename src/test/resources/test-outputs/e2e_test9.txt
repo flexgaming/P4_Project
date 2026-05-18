@@ -1,18 +1,18 @@
 import java.util.Scanner;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
-import java.util.concurrent.CompletableFuture<T>;
+import java.util.concurrent.locks.*;
+import java.util.concurrent.CompletableFuture;
+import java.lang.Thread;
+import java.util.Arrays;
+import java.lang.Math;
 
-float square(float x) {
-    return x * x;
-}
 public class Main {
+    static int global = 11;
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ExecutorService executor = Executors.newCachedThreadPool();
-        float x = 5.0;
-        x = square(x);
-        System.out.print(x);
+        global = global % 2;
+        System.out.print(global);
         executor.shutdown();
         scanner.close();
     }

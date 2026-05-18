@@ -496,7 +496,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             String targetType = castCtx.TYPE().getText().toLowerCase();
             String exprType = visit(castCtx.expr());
             // Cannot cast to char as they could be the source to a lot of casting problems.
-            if (!targetType.matches("int|float|bool|string") || !exprType.matches("int|float|bool|string")) {
+            if (!targetType.matches("int|float|bool|string") || !exprType.matches("int|float|bool|string|char")) {
                 throw new RuntimeException("Type Error: Invalid cast from " + exprType + " to " + targetType);
             }
             switch (targetType) {

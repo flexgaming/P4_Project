@@ -1,0 +1,15 @@
+Assignment and Declaration completed successfully.
+Symbol Table: 
+Node: intglobal=11;voidmain(){global=global%2;print(global);}<EOF>
+Node: {global=global%2;print(global);}
+
+Reference Linking completed successfully.
+Resolved Symbols: 
+{global=p4project.context.VariableSymbol, main=p4project.context.FunctionSymbol, global=p4project.context.VariableSymbol, global=p4project.context.VariableSymbol, global=p4project.context.VariableSymbol}
+
+Type Checking completed successfully.
+Node: global -> Symbol: global, Type: int
+Node: main -> Symbol: main, Type: void
+Node: global -> Symbol: global, Type: int
+Node: global -> Symbol: global, Type: int
+Node: global -> Symbol: global, Type: int

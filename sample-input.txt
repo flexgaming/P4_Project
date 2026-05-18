@@ -1,114 +1,49 @@
-// First code example
-{
-	float rand(float low, float high, int decimal) {
-		// generate a random number between low and high with 2 decimal numbers
-	}
-
-	int rand(int low, int high) {
-		// generate a random number between low and high with 2 decimal numbers
-	}
-
-	void shuffle(int[] x) {
-		// pass array by reference and shuffle positions
-	}
-
-	float seq_sum(float[] arr, int low, int high){
-		float result;
-		for (int i = low; i <= high; i = i + 1) {
-			result = result + arr[i];
-		}
-		return result;
-	}
-
-	void parallel_sum(float[] arr, int low, int high, shared float result){
-		if(high - low <= threshold){
-			critical(result){
-				result = result + seq_sum(arr, low, high);
-				return; // terminates the thread
-			}
-		}
-		
-		int mid = (low + high) / 2;
-		
-		thread t1 => {
-			parallel_sum(arr, low, mid, result);
-		}
-		thread t2 => {
-			parallel_sum(arr, mid+1, high, result);
-		}
-		
-		awaitAll(t1, t2);
-		
-		return;
-	}
-
-	void main(){
-		int arrLength = 10000;
-		int threshold = 256;
-		int castTest = 2515;
-		float castResult = cast(float) castTest;
-
-
-
-		thread sum => {
-			float[arrLength] arr;
-			for (int i = 0; i < arrLength; i = i + 1){
-				arr[i] = randfloat(0.0,500.0,2);
-			}
-			shared float totalsum = 0.0;
-
-			parallel_sum(arr, 0, arrLength-1, totalsum);
-			print(totalsum);
-		}
-
-		thread merge => {
-			shared int[arrLength] arr1;
-			for (int i = 0; i < arrLength; i = i + 1){
-				arr1[i] = rand(0,500);
-			}
-			shuffle(arr1);
-
-			parallel_merge_sort(arr1, 0, arrLength-1);
-			print(arr1);
-		}
-		
-		awaitAll(sum, merge);
-	}
-
-
-
-
-// Second code example
-
-
-	void seq_merge_sort(int[] arr, int low, int high){
-		// standard sequential merge sort
-	}
-
-	void merge(int[] arr, int low, int mid, int high){
-		// standard merge algorithm
-	}
-
-	void parallel_merge_sort(int[] arr, int low, int high){
-		if((high - low) <= threshold)
-		{
-			seq_merge_sort(arr, low, high);
-			return; // Terminates the current thread
-		}
-		
-		int mid = (low + high) / 2;
-		
-		// new_thread is either 0 or 1 depending on if it's running or not
-		thread t1 => {
-			parallel_merge_sort(arr, low, mid);
-		} 
-		thread t2 => {
-			parallel_merge_sort(arr, mid+1, high);
-		}
-		// wait until both b1 and b2 is true -> finished sorting
-		awaitAll(t1, t2);
-		
-		merge(arr, low, mid, high);
-		return; // Terminates the current thread
-	}
+int func1(int a, float b) {
+    return a + cast(int) b;
+}
+float func2(float c) {
+    print("q in func2: ", q, "\\n");
+    return c + 1.5;
+}
+int q = 10;
+void main() {
+    int x = func1(5, 3.2);
+    float y = func2(2.5);
+    print("x after func1: ", x, "\\n");
+    print("y after func2: ", y, "\\n");
+    thread t1 => {
+        critical(q) {
+            q = q + 1;
+        }
+    }
+    thread t2 => {
+        critical(q) {
+            q = q - 1;
+        }
+    }
+    awaitAll(t1, t2);
+    print("q after threads: ", q, "\\n");
+    int wow = 3;
+    int[wow][wow] arr1;
+    arr1 = {{1,2,3},{1,2,3},{1,2,3}};
+    for (int i = 0; i < wow; i = i + 1) {
+        for (int j = 0; j < wow; j = j + 1) {
+            if (j == 1 && i == 1) {
+                continue;
+            }
+            print("arr1[i][j]: ", arr1[i][j], "\\n");
+        }
+    }
+    float k = 1.1;
+    int condition = 0;
+    int counter = 0;
+    while (condition < 681472) {
+        k = k * 2.0;
+        counter = counter + 1;
+        condition = cast(int) k;
+        print("k after iteration ", counter, ": ", k, "\\n");
+    }
+    print("\\nPlease enter an integer value: \\n");
+    int userInput = read(int);
+    print("bigger than 10: ", (userInput > 10), "\\n");
 }

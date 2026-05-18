@@ -1,0 +1,5 @@
+int global = 11;
+void main() {
+    global = global % 2;
+    print(global);
+}

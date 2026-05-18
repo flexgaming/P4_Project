@@ -1,7 +1,10 @@
 package p4project;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -17,56 +20,8 @@ import p4project.visitors.TypeCheckingVisitor;
 import p4project.visitors.MutexVisitor;
 
 public class ParserDriver {
-    public static void main(String[] args) {
-        String input = """
-int func() {
-    return 42;
-}
-void criticalFunc(shared float a) {
-    critical(a) {
-        print("In criticalFunc, a = ", a);
-        a = a + 1.0;
-    }
-}
-void main() { 
-    shared int x; 
-    x = read(int); 
-    thread t1 => { 
-        print("In thread, x = ", x); 
-    }
-    thread t2 => { 
-        print("In thread, x = ", x); 
-    }
-    awaitAll(t1, t2);
-    x = 1;
-    int wow = 69;
-    int[][] l;
-    l = [3][10];
-    int[][] m = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
-    l = m;
-    l[1][2] = 1222;
-    // l = {{2}, {2}};
-    // int[][] n = {{1,1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,1,1}};
-    int[wow] bah;
-    shared int y = 2;
-    shared float z = 3.0;
-    if (x > 0) {
-        critical(x, z) {
-            critical(x, y, z) {
-                print("In critical section, x = ", x, " y = ", y, " z = ", z); 
-                x = x + 1; 
-                y = cast(int) (cast(float) y ^ 1.0); 
-                z = z + 1.0; 
-            } 
-        }
-    }
-    
-
-    criticalFunc(z);
-
-    func();
-}
-        """;;
+    public static void main(String[] args) throws Exception {
+        String input = Files.readString(Paths.get("C:\\Users\\ulrik\\Documents\\GitHub\\P4_Project\\sample-input.txt"));
 
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);
@@ -146,7 +101,11 @@ void main() {
                     javaCode.append("        Lock " + "m" + ctx.sharedVariables.indexOf(shared) + " = new ReentrantLock();\n");
                 }
                 
+                // Temporarily push a scope to represent the generated `main` method
+                // so that the code generator sees the correct scope depth (main body = 1).
+                ctx.symbolTable.pushScope(tree);
                 javaCode.append(codeGenVisitor.visit(tree));
+                ctx.symbolTable.popScope();
                 javaCode.append("        executor.shutdown();\n");
                 javaCode.append("        scanner.close();\n");
                 javaCode.append("    }\n");
@@ -156,6 +115,7 @@ void main() {
             javaCode.append("}\n");
             System.out.println("--- Generated Java Code Phase 6---\n");
             System.out.println(javaCode);
+            Files.writeString(Paths.get("C:\\Users\\ulrik\\Documents\\GitHub\\P4_Project\\javaOutput.txt"), javaCode);
 
     }
 
@@ -190,6 +150,7 @@ void main() {
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         OurGrammarParser parser = new OurGrammarParser(tokens);
+        StringBuilder output = new StringBuilder();
 
         parser.removeErrorListeners();
         parser.addErrorListener(new org.antlr.v4.runtime.BaseErrorListener() {
@@ -216,7 +177,20 @@ void main() {
         TypeCheckingVisitor typeCheckingVisitor = new TypeCheckingVisitor(ctx);
         typeCheckingVisitor.visit(tree);
 
-        return "success";
+        output.append("Assignment and Declaration completed successfully.");
+        output.append("\nSymbol Table: \n" + ctx.symbolTable.getText());
+        output.append("\nReference Linking completed successfully.");
+        output.append("\nResolved Symbols: \n" + ctx.resolvedSymbols.toString().replaceAll("@[0-9a-fA-F]+", ""));
+        output.append("\n\nType Checking completed successfully.");
+        ctx.resolvedSymbols.forEach((node, sym) -> {
+            if (sym != null) {
+                output.append("\nNode: " + node.getText() + " -> Symbol: " + sym.ID + ", Type: " + sym.type.name);
+            } else {
+                output.append("\nNode: " + node.getText() + " -> Symbol: null");
+            }
+        });
+
+        return output.toString();
     }
 
     /**
@@ -257,14 +231,21 @@ void main() {
             FtableGenVisitor ftableGenVisitor = new FtableGenVisitor(ctx);
             ftableGenVisitor.visit(tree);
 
-            // Phase 5: Java Code Gen
+            // Phase 5: Mutex analysis
+            MutexVisitor mutexVisitor = new MutexVisitor(ctx);
+            mutexVisitor.visit(tree);
+
+            // Phase 6: Java Code Gen
             CodeGenVisitor codeGenVisitor = new CodeGenVisitor(ctx);
             StringBuilder javaCode = new StringBuilder();
             javaCode.append("import java.util.Scanner;\n");
             javaCode.append("import java.util.concurrent.*;\n");
-            javaCode.append("import java.util.concurrent.atomic.*;\n");
-            javaCode.append("import java.util.concurrent.CompletableFuture;\n\n");
-
+            javaCode.append("import java.util.concurrent.locks.*;\n");
+            javaCode.append("import java.util.concurrent.CompletableFuture;\n");
+            javaCode.append("import java.lang.Thread;\n");
+            javaCode.append("import java.util.Arrays;\n");
+            javaCode.append("import java.lang.Math;\n\n");
+            javaCode.append("public class Main {\n");
             if (!ctx.ftable.containsKey("main")) {
                 javaCode.append("    public static void main(String[] args) {\n");
                 javaCode.append("        Scanner scanner = new Scanner(System.in);\n");
@@ -274,13 +255,18 @@ void main() {
                     javaCode.append("        Lock " + "m" + ctx.sharedVariables.indexOf(shared) + " = new ReentrantLock();\n");
                 }
                 
+                // Temporarily push a scope to represent the generated `main` method
+                // so that the code generator sees the correct scope depth (main body = 1).
+                ctx.symbolTable.pushScope(tree);
                 javaCode.append(codeGenVisitor.visit(tree));
+                ctx.symbolTable.popScope();
                 javaCode.append("        executor.shutdown();\n");
                 javaCode.append("        scanner.close();\n");
                 javaCode.append("    }\n");
             } else {
                 javaCode.append(codeGenVisitor.visit(tree));
             }
+            javaCode.append("}\n");
 
             return javaCode.toString();
 

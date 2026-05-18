@@ -1,5 +1,11 @@
 package p4project.visitors;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 import p4project.context.CompilationContext;
@@ -9,6 +15,7 @@ import p4project.context.Symbol;
 import java.util.List;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,13 +44,39 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     private static final String INDENT = "    ";
     
     private String indent() {
+        int depth = Math.max(0, ctx.symbolTable.getDepth());
+        // When the driver inserts its own `main` wrapper we treat the program-level
+        // statements as being inside that method (one extra logical scope level).
+        // If the user defines `main` themselves, generate members at class scope (depth 0).
         if (!ctx.ftable.containsKey("main")) {
-            return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth()+2)); // compensate for the extra indent level of the generated main method
+            return INDENT.repeat(Math.max(0, depth + 1));
         }
-        return INDENT.repeat(Math.max(0, ctx.symbolTable.getDepth()+1)); // Ensure non-negative repeat count
+        return INDENT.repeat(Math.max(0, depth + 1));
         
     }
-    
+
+    // Return true if the given parser context is the "reassignment" child
+    // of an enclosing for-statement (i.e. it's the for-loop update expression).
+    private boolean isInForHeader(ParserRuleContext node) {
+        ParserRuleContext p = node.getParent();
+        while (p != null) {
+            if (p instanceof OurGrammarParser.ForStatementContext) {
+                OurGrammarParser.ForStatementContext forCtx = (OurGrammarParser.ForStatementContext) p;
+                if (forCtx.reassignment() == node) return true;
+            }
+            p = p.getParent();
+        }
+        return false;
+    }
+
+    private String javaType(String type) {
+        return switch (type) {
+            case "bool" -> "Boolean";
+            case "string" -> "String";
+            default -> type;
+        };
+    }
+
     @Override
     public String visitProgram(OurGrammarParser.ProgramContext context) {
         StringBuilder result = new StringBuilder();
@@ -77,7 +110,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitAssignment(OurGrammarParser.AssignmentContext context) {
-        String type = context.typeRef().TYPE().getText();
+        String type = javaType(context.typeRef().TYPE().getText());
         String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
         if (symbol.arrType != null) {
@@ -85,7 +118,6 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         }
 
         if (context.assFunc() != null) {
-            inFuncAssignment = true;
             // Check if this is the main function to set the inMain flag.
             if (id.equals("main")) {
                 inMain = true;
@@ -93,6 +125,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
                 return indent() + "public static void main(String[] args) " + blockCode + "\n";
             }
+            inFuncAssignment = true;
 
             // Function definition
             String params = visit(context.assFunc());
@@ -103,6 +136,12 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         } 
         else if (context.assVar() != null) {
             String exprCode = visit(context.assVar().expr());
+            
+            String prefix = "";
+            if (this.ctx.symbolTable.getDepth() == 0) { // Global scope variables should be static in Java.
+                prefix = "static ";
+            }
+
             if (this.ctx.symbolTable.resolve(id).arrType != null) {
                 String arrayPrefix = "" + symbol.type.name.toLowerCase();
                 if (symbol.arrType != null) {
@@ -112,8 +151,10 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 }
                 return indent() + arrayPrefix + " " + id + " = " + "new " + arrayPrefix + exprCode + ";\n";
             }
-            else return indent() + type + " " + id + " = " + exprCode + ";\n";
-        } 
+            else {
+                return indent() + prefix + type + " " + id + " = " + exprCode + ";\n";
+            }
+        }
         else {
             return "";
         }
@@ -129,7 +170,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             id = context.ID().getText();
         }
         Symbol symbol = this.ctx.symbolTable.resolve(id);
-        if (this.ctx.symbolTable.getNodeScope().getText().contains("for")) {
+        if (isInForHeader(context)) {
             return id + " = " + visit(context.expr());
 
         } else if (symbol.arrType != null) {
@@ -146,7 +187,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 return "";
                 // We do not reassign this value, because it is already defined, because the value is of the same scope
                 // and we reassign the size of each dimension in RefLinkingVisitor.
-                //return indent() + id + " = new " + symbol.type.name + afterEquals + ";\n";
+                // return indent() + id + " = new " + symbol.type.name + afterEquals + ";\n";
 
             } else if (bracketType.equals("{")) { // Handle array resizing with actual input.
                 String brackets = "";
@@ -183,9 +224,9 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             case "float":
                 return indent() + type + " " + id + " = 0f;\n";
             case "bool":
-                return indent() + type + " " + id + " = NULL;\n";
+                return indent() + javaType(type) + " " + id + " = NULL;\n";
             case "string":
-                return indent() + type + " " + id + " = " + " " +  ";\n";
+                return indent() + javaType(type) + " " + id + " = " + " " +  ";\n";
             case "char":
                 return indent() + type + " " + id + " = '\\u0000';\n"; // default char value
             default:
@@ -225,7 +266,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
         if (context.typeRef() != null && !context.typeRef().isEmpty()) {
             for (int i = 0; i < context.typeRef().size(); i++) {
-                String paramType = context.typeRef(i).TYPE().getText();
+                String paramType = javaType(context.typeRef(i).TYPE().getText());
                 String paramName = context.ID(i).getText();
 
                 sb.append(paramType).append(" ").append(paramName);
@@ -335,7 +376,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
 
     @Override
     public String visitForVar(OurGrammarParser.ForVarContext context) {
-        String type = context.typeRef().TYPE().getText();
+        String type = javaType(context.typeRef().TYPE().getText());
         String id = context.ID().getText();
 
         if (context.assVar() != null) {
@@ -422,9 +463,9 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             
             // Acquire locks in the current critical section using a spinlock approach with a exponentially increasing sleep time to reduce CPU contention.
             for (int index : mutexLocalList) {
-                sb.append(indent() + "for (double i = 100; !m" + index + ".tryLock(); i = i*1.2-((i*1.2)%1)) {\n")
+                sb.append(indent() + "for (double indexer = 100; !m" + index + ".tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {\n")
                 .append(indent() + "    try {\n")
-                .append(indent() + "        Thread.sleep((long) i);\n")
+                .append(indent() + "        Thread.sleep((long) indexer);\n")
                 .append(indent() + "    } catch (InterruptedException e) {\n")
                 .append(indent() + "        Thread.currentThread().interrupt();\n")
                 .append(indent() + "    }\n")
@@ -625,9 +666,44 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         }
         if (context.castExpression() != null) {
             OurGrammarParser.CastExpressionContext castCtx = context.castExpression();
-            String targetType = castCtx.TYPE().getText().toLowerCase();
+            String targetType = javaType(castCtx.TYPE().getText().toLowerCase());
+            String sourceType = null;
+            if (castCtx.expr().equal().comp().additive().mult().power().factor().functionCall() != null) {
+                sourceType = this.ctx.resolvedSymbols.get(
+                    castCtx.expr().equal().comp().additive().mult().power().factor().functionCall().ID()
+                ).type.name.toLowerCase();
+            } else if (castCtx.expr().equal().comp().additive().mult().power().factor().ID() != null) {
+                sourceType = this.ctx.resolvedSymbols.get(
+                    castCtx.expr().equal().comp().additive().mult().power().factor().ID()
+                ).type.name.toLowerCase();
+            }
             String expr = visit(castCtx.expr());
-            return "(" + targetType + ") " + expr;
+            switch (targetType) {
+                case "Boolean" -> {
+                    if ("int".equals(sourceType)) {
+                        return "(" + expr + " == 0) ? false : true";
+                    }
+                    if ("float".equals(sourceType)) {
+                        return "(" + expr + " == 0.0f) ? false : true";
+                    }
+                }
+                case "String" -> {
+                    return targetType + ".valueOf(" + expr + ")";
+                }
+                case "int" -> {
+                    if ("bool".equals(sourceType)) {
+                        return expr + " ? 1 : 0";
+                    }
+                    return "(int) " + expr;
+                }
+                case "float" -> {
+                    if ("bool".equals(sourceType)) {
+                        return expr + " ? 1.0f : 0.0f";
+                    }
+                    return "(float) " + expr;
+                }
+                default -> throw new RuntimeException("Unsupported target type in cast: " + targetType);
+            }
         }
         if (context.expr() != null) {
             // parenthesised expression
