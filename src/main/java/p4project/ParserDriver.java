@@ -21,7 +21,7 @@ import p4project.visitors.MutexVisitor;
 
 public class ParserDriver {
     public static void main(String[] args) throws Exception {
-        String input = Files.readString(Paths.get("C:\\Users\\ulrik\\Documents\\GitHub\\P4_Project\\sample-input.txt"));
+        String input = Files.readString(Paths.get("..\\P4_Project\\sample-input.txt"));
 
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);
@@ -115,7 +115,7 @@ public class ParserDriver {
             javaCode.append("}\n");
             System.out.println("--- Generated Java Code Phase 6---\n");
             System.out.println(javaCode);
-            Files.writeString(Paths.get("C:\\Users\\ulrik\\Documents\\GitHub\\P4_Project\\javaOutput.txt"), javaCode);
+            Files.writeString(Paths.get("..\\P4_Project\\javaOutput.txt"), javaCode);
 
     }
 

@@ -72,8 +72,6 @@ public class ArrayValidator {
                     if (dimensionSize[currentDepth - 1] != expected) { // Throw error if current dimension size is not the same as expected.
                         throw new RuntimeException("Dimension " + currentDepth + " expects " + expected + " elements but got " + dimensionSize[currentDepth - 1]);
                     }
-                } else if (!expectedStr.matches("\\d+")) { // Throw error if the excepted input is anything other than digits.
-                    throw new RuntimeException("Integer input '" + expectedStr + "' in '" + java.util.Arrays.toString(base.dimSize) + "' is wrong.");
                 }
                 
                 if (arrLiteral[currentDepth - 1] == -1) { // Has the dimension size been set? If not set the size.
