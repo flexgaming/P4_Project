@@ -1,0 +1,16 @@
+Assignment and Declaration completed successfully.
+Symbol Table: 
+Node: sharedintx;threadt1=>{critical(x){x=x+1;}}awaitAll(t1);print(x);<EOF>
+Node: {critical(x){x=x+1;}}
+Node: {x=x+1;}
+
+Reference Linking completed successfully.
+Resolved Symbols: 
+{t1=p4project.context.VariableSymbol, x=p4project.context.VariableSymbol, x=p4project.context.VariableSymbol, t1=p4project.context.VariableSymbol, x=p4project.context.VariableSymbol}
+
+Type Checking completed successfully.
+Node: t1 -> Symbol: t1, Type: thread
+Node: x -> Symbol: x, Type: int
+Node: x -> Symbol: x, Type: int
+Node: t1 -> Symbol: t1, Type: thread
+Node: x -> Symbol: x, Type: int

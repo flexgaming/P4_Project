@@ -407,8 +407,8 @@ class AcceptanceTest {
         String input = Files.readString(Paths.get(inputPath));
 
         String baseName = testFileName.replace(".txt", "");
-        String outputPath = OUTPUT_DIR + baseName + "_actual.txt";
-        String expectedPath = EXPECTED_DIR + baseName + "_expected.txt";
+        String outputPath = OUTPUT_DIR + "e2e_" + baseName + ".txt";
+        String expectedPath = EXPECTED_DIR + baseName + "_e2e.txt";
 
         System.out.println("=== Running Full Pipeline for: " + testFileName + " ===");
 

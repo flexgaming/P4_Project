@@ -1,8 +1,14 @@
 package p4project.context;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.Token;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * A class for handling all declared symbols and their scope.
@@ -65,5 +71,28 @@ public class SymbolTable {
     //Look to see if a function exists in the local scope, for duplicate detection
     public Symbol resolveLocal(String name){
         return currentScope.resolveLocal(name);
+    }
+
+    // For testing: Get a string representation of the symbol table.
+    public String getText() {
+        StringBuilder sb = new StringBuilder();
+        List<ParseTree> nodes = new ArrayList<>(nodeScopes.keySet());
+        // Sort deterministically by source position when available, fallback to text hash.
+        nodes.sort(Comparator.comparingInt(node -> {
+            if (node instanceof ParserRuleContext) {
+                Token t = ((ParserRuleContext) node).getStart();
+                return (t != null) ? t.getStartIndex() : Integer.MAX_VALUE;
+            } else if (node instanceof TerminalNode) {
+                Token t = ((TerminalNode) node).getSymbol();
+                return (t != null) ? t.getStartIndex() : Integer.MAX_VALUE;
+            } else {
+                return node.getText().hashCode();
+            }
+        }));
+
+        for (ParseTree node : nodes) {
+            sb.append("Node: ").append(node.getText()).append("\n");
+        }
+        return sb.toString();
     }
 }

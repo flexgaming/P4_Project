@@ -22,7 +22,7 @@ class IntegrationTest {
     @BeforeAll
     static void setup() throws IOException {
         Files.createDirectories(Paths.get(OUTPUT_DIR));
-        System.out.println("Integration test setup complete. Output directory ready.");
+        System.out.println("Integration test setup complete. Output directory ready.\\n");
     }
 
     /**
@@ -46,8 +46,17 @@ class IntegrationTest {
             String outputPath = OUTPUT_DIR + "lexer_parser_" + testFileName;
             Files.writeString(Paths.get(outputPath), output);
             
-            System.out.println(output);
-            System.out.println(testFileName + " - Lexer+Parser pipeline SUCCESS");
+            // If an expected file exists, compare the actual output to expected output
+            String expectedPath = EXPECTED_DIR + "lexer_parser_" + testFileName;
+            if (Files.exists(Paths.get(expectedPath))) {
+                String expected = Files.readString(Paths.get(expectedPath)).replace("\r\n", "\n").trim();
+                String actual = output.replace("\r\n", "\n").trim();
+                assertEquals(expected, actual, "Lexer+Parser output differed from expected for " + testFileName);
+            } else {
+                System.out.println("No expected file found for " + testFileName + " (checked: " + expectedPath + ")");
+            }
+
+            System.out.println(testFileName + " - Lexer + Parser pipeline SUCCESS - matched expected output");
 
         } catch (RuntimeException e) {
             System.out.println(testFileName + " - Runtime error caught during lexer/parser integration (expected for some tests): " + e.getMessage());
@@ -75,8 +84,15 @@ class IntegrationTest {
                     "Expected successful semantic processing or clear error reporting");
 
             Files.writeString(Paths.get(outputPath), output);
+
+            // compare to expected output if it exists
+            String expectedPath = EXPECTED_DIR + "parser_semantic_" + testFileName;
+            if (Files.exists(Paths.get(expectedPath))) {
+                String expected = Files.readString(Paths.get(expectedPath)).trim();
+                assertEquals(expected, output.trim(), "Failure! Semantic analysis output did not match expected results");
+            }
             
-            System.out.println(testFileName + " - Parser+Semantic pipeline SUCCESS");
+            System.out.println(testFileName + " - Parser + Semantic pipeline SUCCESS - matched expected output");
 
         } catch (RuntimeException e) {
             System.out.println(testFileName + " - Semantic error caught: " + e.getMessage());
@@ -103,6 +119,6 @@ class IntegrationTest {
 
     @Test
     void runAllIntegrationTests() {
-        System.out.println("Running all integration tests via parameterized methods...");
+        System.out.println("\nRunning all integration tests via parameterized methods...");
     }
 }

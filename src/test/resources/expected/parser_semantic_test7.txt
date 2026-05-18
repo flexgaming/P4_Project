@@ -1,0 +1,26 @@
+Assignment and Declaration completed successfully.
+Symbol Table: 
+Node: intwow=2;int[wow][wow]arr1;arr1={{1,2},{1,2}};for(inti=0;i<wow;i=i+1){for(intj=0;j<wow;j=j+1){print(arr1[i][j]);}}<EOF>
+Node: for(inti=0;i<wow;i=i+1){for(intj=0;j<wow;j=j+1){print(arr1[i][j]);}}
+Node: {for(intj=0;j<wow;j=j+1){print(arr1[i][j]);}}
+Node: for(intj=0;j<wow;j=j+1){print(arr1[i][j]);}
+Node: {print(arr1[i][j]);}
+
+Reference Linking completed successfully.
+Resolved Symbols: 
+{wow=p4project.context.VariableSymbol, arr1=p4project.context.VariableSymbol, i=p4project.context.VariableSymbol, wow=p4project.context.VariableSymbol, i=p4project.context.VariableSymbol, i=p4project.context.VariableSymbol, j=p4project.context.VariableSymbol, wow=p4project.context.VariableSymbol, j=p4project.context.VariableSymbol, j=p4project.context.VariableSymbol, arr1=p4project.context.VariableSymbol, i=p4project.context.VariableSymbol, j=p4project.context.VariableSymbol}
+
+Type Checking completed successfully.
+Node: wow -> Symbol: wow, Type: int
+Node: arr1 -> Symbol: arr1, Type: int
+Node: i -> Symbol: i, Type: int
+Node: wow -> Symbol: wow, Type: int
+Node: i -> Symbol: i, Type: int
+Node: i -> Symbol: i, Type: int
+Node: j -> Symbol: j, Type: int
+Node: wow -> Symbol: wow, Type: int
+Node: j -> Symbol: j, Type: int
+Node: j -> Symbol: j, Type: int
+Node: arr1 -> Symbol: arr1, Type: int
+Node: i -> Symbol: i, Type: int
+Node: j -> Symbol: j, Type: int
