@@ -118,7 +118,6 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         }
 
         if (context.assFunc() != null) {
-            inFuncAssignment = true;
             // Check if this is the main function to set the inMain flag.
             if (id.equals("main")) {
                 inMain = true;
@@ -126,6 +125,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 if (blockCode.startsWith(indent())) blockCode = blockCode.substring(indent().length());
                 return indent() + "public static void main(String[] args) " + blockCode + "\n";
             }
+            inFuncAssignment = true;
 
             // Function definition
             String params = visit(context.assFunc());

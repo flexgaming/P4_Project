@@ -37,7 +37,12 @@ void main() {
             q = q + 1;
         }
     }
-    awaitAll(t1);
+    thread t2 => {
+        critical(q) {
+            q = q - 1;
+        }
+    }
+    awaitAll(t1, t2);
     print("q after threads: ", q, "\\n");
     int wow = 3;
     int[wow][wow] arr1;
@@ -56,7 +61,7 @@ void main() {
     while (condition < 681472) {
         k = k * 2.0;
         counter = counter + 1;
-        condition = cast(int) k % 5;
+        condition = cast(int) k;
         print("k after iteration ", counter, ": ", k, "\\n");
     }
     print("\\nPlease enter an integer value: \\n");

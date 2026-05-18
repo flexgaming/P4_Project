@@ -1,0 +1,8 @@
+shared int x;
+thread t1 => {
+    critical(x) {
+        x = x + 1;
+    }
+}
+awaitAll(t1);
+print(x);
