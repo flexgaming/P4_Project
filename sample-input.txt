@@ -2,29 +2,27 @@ int func1(int a, float b) {
     return a + cast(int) b;
 }
 float func2(float c) {
-    print("q in func2: ", q, "\\n");
+    print("q in func2: ", q, "\n");
     return c + 1.5;
 }
-
 shared int q = 10;
 void main() {
     int x = func1(5, 3.2);
     float y = func2(2.5);
-    print("x after func1: ", x, "\\n");
-    print("y after func2: ", y, "\\n");
-    shared int p = 5;
+    print("x after func1: ", x, "\n");
+    print("y after func2: ", y, "\n");
     thread t1 => {
-        critical(p) {
-            p = p + 1;
+        critical(q) {
+            q = q + 1;
         }
     }
     thread t2 => {
-        critical(p) {
-            p = p - 1;
+        critical(q) {
+            q = q - 1;
         }
     }
     awaitAll(t1, t2);
-    print("p after threads: ", p, "\\n");
+    print("q after threads: ", q, "\n");
     int wow = 3;
     int[wow][wow] arr1;
     arr1 = {{1,2,3},{1,2,3},{1,2,3}};
@@ -33,10 +31,10 @@ void main() {
             if (j == 1 && i == 1) {
                 continue;
             }
-            print("arr1[i][j]: ", arr1[i][j], "\\n");
+            print("arr1[i][j]: ", arr1[i][j], "\n");
         }
     }
-    string[] hello = {"Hello World"};
+    string[] hello = {"Hello World\n"};
     print(hello[0]);
     float k = 1.1;
     int condition = 0;
@@ -45,9 +43,9 @@ void main() {
         k = k * 2.0;
         counter = counter + 1;
         condition = cast(int) k;
-        print("k after iteration ", counter, ": ", k, "\\n");
+        print("k after iteration ", counter, ": ", k, "\n");
     }
-    print("\\nPlease enter an integer value: \\n");
+    print("\nPlease enter an integer value: \n");
     int userInput = read(int);
-    print("bigger than 10: ", (userInput > 10), "\\n");
+    print("bigger than 10: ", (userInput > 10), "\n");
 }

@@ -11,7 +11,7 @@ public class Main {
         return a + (int) b;
     }
     public static float func2(float c) {
-        System.out.print("q in func2: " + q + "\\n");
+        System.out.print("q in func2: " + q + "\n");
         return c + 1.5f;
     }
     static int q = 10;
@@ -19,15 +19,13 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         ExecutorService executor = Executors.newCachedThreadPool();
         Lock m0 = new ReentrantLock(); // Shared variable: q
-        Lock m1 = new ReentrantLock(); // Shared variable: p
         int x = func1(5, 3.2f);
         float y = func2(2.5f);
-        System.out.print("x after func1: " + x + "\\n");
-        System.out.print("y after func2: " + y + "\\n");
-        int p = 5;
+        System.out.print("x after func1: " + x + "\n");
+        System.out.print("y after func2: " + y + "\n");
         CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {
             {
-                for (double indexer = 100; !m1.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
                     try {
                         Thread.sleep((long) indexer);
                     } catch (InterruptedException e) {
@@ -35,15 +33,15 @@ public class Main {
                     }
                 }
                 try {
-                    p = p + 1;
+                    q = q + 1;
                 } finally {
-                    m1.unlock();
+                    m0.unlock();
                 }
             }
         });
         CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {
             {
-                for (double indexer = 100; !m1.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
                     try {
                         Thread.sleep((long) indexer);
                     } catch (InterruptedException e) {
@@ -51,9 +49,9 @@ public class Main {
                     }
                 }
                 try {
-                    p = p - 1;
+                    q = q - 1;
                 } finally {
-                    m1.unlock();
+                    m0.unlock();
                 }
             }
         });
@@ -62,7 +60,7 @@ public class Main {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-        System.out.print("p after threads: " + p + "\\n");
+        System.out.print("q after threads: " + q + "\n");
         int wow = 3;
         int[][] arr1 = new int[wow][wow];
         arr1 = new int[][]{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
@@ -71,10 +69,10 @@ public class Main {
                 if (j == 1 && i == 1) {
                     continue;
                 }
-                System.out.print("arr1[i][j]: " + arr1[i][j] + "\\n");
+                System.out.print("arr1[i][j]: " + arr1[i][j] + "\n");
             }
         }
-        String[] hello = new String[]{"Hello World"};
+        String[] hello = new String[]{"Hello World\n"};
         System.out.print(hello[0]);
         float k = 1.1f;
         int condition = 0;
@@ -83,11 +81,11 @@ public class Main {
             k = k * 2.0f;
             counter = counter + 1;
             condition = (int) k;
-            System.out.print("k after iteration " + counter + ": " + k + "\\n");
+            System.out.print("k after iteration " + counter + ": " + k + "\n");
         }
-        System.out.print("\\nPlease enter an integer value: \\n");
+        System.out.print("\nPlease enter an integer value: \n");
         int userInput = scanner.nextInt();
-        System.out.print("bigger than 10: " + (userInput > 10) + "\\n");
+        System.out.print("bigger than 10: " + (userInput > 10) + "\n");
         executor.shutdown();
         scanner.close();
     }
