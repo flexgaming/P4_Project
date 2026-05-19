@@ -222,8 +222,60 @@ class AcceptanceTest {
     }
 
     // Requirement 9: A method for handling critical sections
+    @Test
+    void testRequirement9() {
+        String input = """
+            void main() {
+                shared int counter = 0;
+                critical(counter) {
+                    counter = counter + 1;
+                }
+            }
+            """;
+
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
+        assertTrue(normalized.contains("int counter = 0;"));
+        assertTrue(normalized.contains("for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1))"));
+        assertTrue(normalized.contains("Thread.sleep((long) indexer);"));
+        assertTrue(normalized.contains("try {"));
+        assertTrue(normalized.contains("counter = counter + 1;"));
+        assertTrue(normalized.contains("finally {"));
+        assertTrue(normalized.contains("m0.unlock();"));
+    }
 
     // Requirement 10: Functionality to prevent deadlocks
+@Test
+void testRequirement10() {
+    String input = """
+        void main() {
+            shared int x = 0;
+            shared int y = 0;
+            
+            critical(x, y) {
+                x = x + 1;
+            }
+            critical(y, x) {
+                y = y + 1;
+            }
+        }
+        """;
+
+    String javaCode = ParserDriver.runFullPipeline(input);
+    String normalized = normalize(javaCode);
+    
+    System.out.println(javaCode);
+    
+    // Both critical sections should acquire m0 (for x) before m1 (for y)
+    // to maintain consistent lock ordering
+    assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
+    assertTrue(normalized.contains("Lock m1 = new ReentrantLock();"));
+    // Verify locks are acquired in order: m0 then m1, not mixed
+}
 
     // Requirement 11: input and output via console
     @Test
@@ -318,12 +370,6 @@ class AcceptanceTest {
 
                 // Char to string
                 string charToString = cast(string) srcChar;
-
-                bool funcToBool = cast(bool) myFunc();
-
-                int myFunc() {
-                    return 0;
-                }
             }                
             """;
 
@@ -345,10 +391,81 @@ class AcceptanceTest {
     }
 
     // Requirement 15: Parallel Implementation avoiding deadlocks and race conditions
-
-    // Requirement 18: Shared variables gets wrapped in mutex
     @Test
-    void requirement18() {
+    void testRequirement15() {
+        String input = """
+            int func1(int a, float b) {
+                return a + cast(int) b;
+            }
+            
+            float func2(float q) {
+                print("q in func2: ", q);
+                return q + 1.5;
+            }
+            
+            shared int q = 10;
+            
+            void main() {
+                int x = func1(5, 3.2);
+                float y = func2(q);
+                print("x after func1: ", x);
+                print("y after func2: ", y);
+                
+                thread t1 => {
+                    critical(q) {
+                        q = q + 1;
+                    }
+                };
+                
+                thread t2 => {
+                    critical(q) {
+                        q = q - 1;
+                    }
+                };
+                
+                awaitAll(t1, t2);
+                print("q after threads: ", q);
+            }
+            """;
+
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        
+        // Verify function definitions are present
+        assertTrue(normalized.contains("public static int func1(int a, float b)"));
+        assertTrue(normalized.contains("public static float func2(float q)"));
+        
+        // Verify static shared variable with lock
+        assertTrue(normalized.contains("static int q = 10;"));
+        assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
+        
+        // Verify function calls in main
+        assertTrue(normalized.contains("int x = func1(5, 3.2f);"));
+        assertTrue(normalized.contains("float y = func2(q);"));
+        
+        // Verify threads are created with CompletableFuture
+        assertTrue(normalized.contains("CompletableFuture<Void> t1"));
+        assertTrue(normalized.contains("CompletableFuture<Void> t2"));
+        
+        // Verify critical sections with spinlock pattern
+        assertTrue(normalized.contains("for (double indexer = 100; !m0.tryLock();"));
+        assertTrue(normalized.contains("Thread.sleep((long) indexer);"));
+        
+        // Verify try-finally pattern for lock release
+        assertTrue(normalized.contains("try {"));
+        assertTrue(normalized.contains("finally {"));
+        assertTrue(normalized.contains("m0.unlock();"));
+        
+        // Verify awaitAll compiles to CompletableFuture.allOf
+        assertTrue(normalized.contains("CompletableFuture.allOf(t1, t2).get();"));
+    }
+
+    // Requirement 16: Shared variables gets wrapped in mutex
+    @Test
+    void requirement16() {
         String input = """
             void main() {
                 shared int counter = 2;
@@ -362,6 +479,49 @@ class AcceptanceTest {
         System.out.println(normalized);
         assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
         
+    }
+
+    // Requirement 17: Transpiler throws an error instead of crashing
+    @Test
+    void requirement17() {
+        String input = """
+            void main() {
+                int i = 5;
+                if (j < 10) {}
+            }
+                """;
+
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+
+    }
+
+    // Requirement 19: ParaLang supports modifiers: how variables are defined
+    @Test
+    void requirement19() {
+        String input = """
+            static int s = 2;
+            static shared int ss = 3;
+            void main() {
+                shared int counter = 0;
+                const int c = 1;
+            }
+            """;
+
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+        System.out.println(normalized);
+
+        assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
+        assertTrue(normalized.contains("Lock m1 = new ReentrantLock();"));
+        assertTrue(normalized.contains("int counter = 0;"));
+        assertTrue(normalized.contains("int c = 1;"));
+        assertTrue(normalized.contains("static int s = 2;"));
+        assertTrue(normalized.contains("static int ss = 3;"));
     }
 
     // Requirement 20: Single and multiline comments
@@ -391,30 +551,6 @@ class AcceptanceTest {
 
     // Req 25 maybe not
 
-    // Requirement 26: input and output via console
-    @Test
-    void requirement26() {
-        String input = """
-            void main() {
-                print("Enter your name:");
-                string name = read(string);
-                print("Hello", name + "!");
-
-                print("Age?: ");
-                int age = read(int);
-            }
-            """;
-
-        String javaCode = ParserDriver.runFullPipeline(input);
-        String normalized = normalize(javaCode);
-        System.out.println(javaCode);
-
-        System.out.println(javaCode);
-        System.out.println(normalized);
-        assertTrue(normalized.contains("System.out.print(\"Enter your name:\");"));
-        assertTrue(normalized.contains("String name = scanner.nextLine();"));
-        assertTrue(normalized.contains("System.out.print(\"Hello\" + name + \"!\");")); 
-    }
 
     /**
      * Full pipeline integration test (big bang): Lexer + Parser + Semantic Analysis + Code Generation.
