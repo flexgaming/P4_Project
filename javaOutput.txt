@@ -18,13 +18,16 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ExecutorService executor = Executors.newCachedThreadPool();
+        Lock m0 = new ReentrantLock(); // Shared variable: q
+        Lock m1 = new ReentrantLock(); // Shared variable: p
         int x = func1(5, 3.2f);
         float y = func2(2.5f);
         System.out.print("x after func1: " + x + "\\n");
         System.out.print("y after func2: " + y + "\\n");
+        int p = 5;
         CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {
             {
-                for (double indexer = 100; !m-1.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                for (double indexer = 100; !m1.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
                     try {
                         Thread.sleep((long) indexer);
                     } catch (InterruptedException e) {
@@ -32,15 +35,15 @@ public class Main {
                     }
                 }
                 try {
-                    q = q + 1;
+                    p = p + 1;
                 } finally {
-                    m-1.unlock();
+                    m1.unlock();
                 }
             }
         });
         CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {
             {
-                for (double indexer = 100; !m-1.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                for (double indexer = 100; !m1.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
                     try {
                         Thread.sleep((long) indexer);
                     } catch (InterruptedException e) {
@@ -48,9 +51,9 @@ public class Main {
                     }
                 }
                 try {
-                    q = q - 1;
+                    p = p - 1;
                 } finally {
-                    m-1.unlock();
+                    m1.unlock();
                 }
             }
         });
@@ -59,7 +62,7 @@ public class Main {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-        System.out.print("q after threads: " + q + "\\n");
+        System.out.print("p after threads: " + p + "\\n");
         int wow = 3;
         int[][] arr1 = new int[wow][wow];
         arr1 = new int[][]{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};

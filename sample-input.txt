@@ -5,24 +5,26 @@ float func2(float c) {
     print("q in func2: ", q, "\\n");
     return c + 1.5;
 }
-int q = 10;
+
+shared int q = 10;
 void main() {
     int x = func1(5, 3.2);
     float y = func2(2.5);
     print("x after func1: ", x, "\\n");
     print("y after func2: ", y, "\\n");
+    shared int p = 5;
     thread t1 => {
-        critical(q) {
-            q = q + 1;
+        critical(p) {
+            p = p + 1;
         }
     }
     thread t2 => {
-        critical(q) {
-            q = q - 1;
+        critical(p) {
+            p = p - 1;
         }
     }
     awaitAll(t1, t2);
-    print("q after threads: ", q, "\\n");
+    print("p after threads: ", p, "\\n");
     int wow = 3;
     int[wow][wow] arr1;
     arr1 = {{1,2,3},{1,2,3},{1,2,3}};
