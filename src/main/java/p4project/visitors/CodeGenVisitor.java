@@ -142,12 +142,12 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             }
 
             if (symbol.arrType != null) {
-                String arrayPrefix = prefix + " " + javaType(symbol.type.name.toLowerCase());
+                String arrayPrefix =  javaType(symbol.type.name.toLowerCase());
                 for (String i : symbol.arrType.dimSize) {
                     arrayPrefix += "[]";
                 }
                 
-                return indent() + arrayPrefix + " " + id + " = " + "new " + arrayPrefix + exprCode + ";\n";
+                return indent() + prefix + arrayPrefix + " " + id + " = " + "new " + arrayPrefix + exprCode + ";\n";
             }
             else {
                 return indent() + prefix + type + " " + id + " = " + exprCode + ";\n";
