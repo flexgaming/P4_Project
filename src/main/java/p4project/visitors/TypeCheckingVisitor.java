@@ -83,8 +83,6 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         
         if (symbol.arrType != null) {
             if (context.expr().getText().chars().filter(ch -> ch == '{').count() > 0) {
-                System.out.println("maybe here");
-                System.out.println(context.getText());
                 int[] arr = arrayValidator.validate(context.expr().getText(), symbol.arrType);
             }
         }

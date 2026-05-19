@@ -34,6 +34,8 @@ void main() {
             print("arr1[i][j]: ", arr1[i][j], "\\n");
         }
     }
+    string[] hello = {"Hello World"};
+    print(hello[0]);
     float k = 1.1;
     int condition = 0;
     int counter = 0;

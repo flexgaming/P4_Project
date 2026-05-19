@@ -143,7 +143,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             }
 
             if (this.ctx.symbolTable.resolve(id).arrType != null) {
-                String arrayPrefix = "" + symbol.type.name.toLowerCase();
+                String arrayPrefix = javaType(symbol.type.name.toLowerCase());
                 if (symbol.arrType != null) {
                     for (String i : symbol.arrType.dimSize) {
                         arrayPrefix += "[]";
