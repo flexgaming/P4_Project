@@ -140,8 +140,6 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             if (this.ctx.symbolTable.getDepth() == 0) { // Global scope variables should be static in Java.
                 prefix = "static ";
             }
-            System.out.println("Context: " + context.getText());
-            System.out.println("Depth: " + this.ctx.symbolTable.getDepth());
 
             if (this.ctx.symbolTable.resolve(id).arrType != null) {
                 String arrayPrefix = prefix + " " + javaType(symbol.type.name.toLowerCase());
