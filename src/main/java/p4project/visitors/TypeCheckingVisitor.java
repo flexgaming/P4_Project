@@ -122,7 +122,14 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             }
 
         } else if (!declaredType.equals(exprType)) {
-            throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
+            boolean override = false;
+            
+            if (symbol.arrType != null) { // If an array is being reassigned with a specific size. Then override exception.
+                if (context.expr().toString().contains("[")) override = true; // Example -> float[] x; x = [5] | override is true in this case.
+            }
+            if (!override) {
+                throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
+            }
         }
         return declaredType;
     }

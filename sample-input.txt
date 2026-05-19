@@ -1,6 +1,9 @@
 int func1(int a, float b) {
     return a + cast(int) b;
 }
+float[] p;
+p = [5];
+p[1] = 2.;
 float func2(float c) {
     print("q in func2: ", q, "\n");
     return c + 1.5;

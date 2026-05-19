@@ -10,6 +10,8 @@ public class Main {
     public static int func1(int a, float b) {
         return a + (int) b;
     }
+    float[] p = new float[5];
+    p[1] = 2;
     public static float func2(float c) {
         System.out.print("q in func2: " + q + "\n");
         return c + 1.5f;
@@ -72,7 +74,7 @@ public class Main {
                 System.out.print("arr1[i][j]: " + arr1[i][j] + "\n");
             }
         }
-        String[] hello = new String[]{"Hello World\n"};
+         String[] hello = new  String[]{"Hello World\n"};
         System.out.print(hello[0]);
         float k = 1.1f;
         int condition = 0;
