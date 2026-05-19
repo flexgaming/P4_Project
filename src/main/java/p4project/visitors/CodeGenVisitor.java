@@ -48,11 +48,10 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         // When the driver inserts its own `main` wrapper we treat the program-level
         // statements as being inside that method (one extra logical scope level).
         // If the user defines `main` themselves, generate members at class scope (depth 0).
-        if (!ctx.ftable.containsKey("main")) {
+        /* if (!ctx.ftable.containsKey("main")) {
             return INDENT.repeat(Math.max(0, depth + 1));
-        }
+        } */
         return INDENT.repeat(Math.max(0, depth + 1));
-        
     }
 
     // Return true if the given parser context is the "reassignment" child
