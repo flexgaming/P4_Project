@@ -141,13 +141,12 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 prefix = "static ";
             }
 
-            if (this.ctx.symbolTable.resolve(id).arrType != null) {
+            if (symbol.arrType != null) {
                 String arrayPrefix = prefix + " " + javaType(symbol.type.name.toLowerCase());
-                if (symbol.arrType != null) {
-                    for (String i : symbol.arrType.dimSize) {
-                        arrayPrefix += "[]";
-                    }
+                for (String i : symbol.arrType.dimSize) {
+                    arrayPrefix += "[]";
                 }
+                
                 return indent() + arrayPrefix + " " + id + " = " + "new " + arrayPrefix + exprCode + ";\n";
             }
             else {
