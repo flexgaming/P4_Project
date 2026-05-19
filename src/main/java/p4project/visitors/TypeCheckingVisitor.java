@@ -6,6 +6,8 @@ import p4project.OurGrammarBaseVisitor;
 import p4project.OurGrammarParser;
 
 import java.util.Arrays;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import p4project.context.*;
 
@@ -23,6 +25,18 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     private final CompilationContext ctx;
     private final ArrayValidator arrayValidator;
     private int loopDepth = 0;
+    private final Deque<FuncCtx> funcStack = new ArrayDeque<>();
+
+    private static class FuncCtx {
+        public final String name;
+        public final String returnType;
+        public boolean hasReturn;
+        public FuncCtx(String name, String returnType) {
+            this.name = name;
+            this.returnType = returnType;
+            this.hasReturn = false;
+        }
+    }
 
     public TypeCheckingVisitor(CompilationContext ctx) {
         this.ctx = ctx;
@@ -62,9 +76,15 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             }
             return declaredType;
         } else if (context.assFunc() != null) {
-            // Visit function body to type-check its statements
+            // Enter function context to type-check its statements and returns
+            FuncCtx fctx = new FuncCtx(id, declaredType);
+            funcStack.push(fctx);
             if (context.assFunc().block() != null) {
                 visit(context.assFunc().block());
+            }
+            funcStack.pop();
+            if (!fctx.hasReturn && !fctx.returnType.equals("void")) {
+                throw new RuntimeException("Type Error: Function '" + id + "' must have a return statement returning " + fctx.returnType);
             }
             return declaredType;
         }
@@ -254,6 +274,30 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             throw new RuntimeException("Syntax Error: 'continue' statement not within a loop");
         }
         return null;
+    }
+
+    @Override
+    public String visitReturnStatement(OurGrammarParser.ReturnStatementContext context) {
+        if (funcStack.isEmpty()) {
+            throw new RuntimeException("Syntax Error: 'return' statement not within a function");
+        }
+        FuncCtx cur = funcStack.peek();
+        if (context.expr() == null) {
+            // return without expression
+            if (!cur.returnType.equals("void")) {
+                throw new RuntimeException("Type Error: Function '" + cur.name + "' must return a value of type " + cur.returnType);
+            }
+        } else {
+            String exprType = visit(context.expr());
+            if (cur.returnType.equals("void")) {
+                throw new RuntimeException("Type Error: Void function '" + cur.name + "' cannot return a value");
+            }
+            if (!cur.returnType.equals(exprType)) {
+                throw new RuntimeException("Type Error: Return type mismatch in function '" + cur.name + "': expected " + cur.returnType + " but got " + exprType);
+            }
+        }
+        cur.hasReturn = true;
+        return cur.returnType;
     }
 
     @Override
