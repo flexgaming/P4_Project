@@ -72,7 +72,7 @@ class AcceptanceTest {
 
     // Requirement 2: An input in ParaLang file gets transpiled to Java file
     @Test
-    void testTranspileFile() throws IOException {
+    void testRequirement2() throws IOException {
         Path in = Path.of("src", "test", "resources", "test-inputs", "transpile_input.txt");
         // Read ParaLang input file
         String input = Files.readString(in, StandardCharsets.UTF_8);
@@ -123,7 +123,26 @@ class AcceptanceTest {
     // Requirement 6: Arrays
     @Test
     void testRequirement6() {
-        System.out.println("=== Running Acceptance Test: requirement 6 ===");
+        String input = """
+            void main() {
+                int[] numbers = {1, 2, 3};
+                float[] decimals = {1.0, 2.5};
+                bool[] flags = {true, false};
+                char[] letters = {'a', 'b', 'c'};
+                string[] words = {"hello", "world"};
+            }
+            """;
+
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+
+        System.out.println(javaCode);
+        System.out.println(normalized);
+        assertTrue(normalized.contains("int[] numbers = new int[]{1, 2, 3};"));
+        assertTrue(normalized.contains("float[] decimals = new float[]{1.0f, 2.5f};"));
+        assertTrue(normalized.contains("Boolean[] flags = new Boolean[]{true, false};"));
+        assertTrue(normalized.contains("char[] letters = new char[]{'a', 'b', 'c'};"));
+        assertTrue(normalized.contains("String[] words = new String[]{\"hello\", \"world\"};"));
     }
 
     // Requirement 7: Operators: +, -, *, /, %, ^, ==, !=, ||, <, >, &&, >=, <=
