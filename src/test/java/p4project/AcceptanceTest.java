@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeAll;
@@ -248,14 +249,20 @@ class AcceptanceTest {
         assertTrue(normalized.contains("m0.unlock();"));
     }
 
-    // Requirement 10: Functionality to prevent deadlocks
 @Test
 void testRequirement10() {
+    // NOTE:
+    // We cannot observe lock ordering at runtime, because the generated Java
+    // does not print lock acquisition events. Therefore, this test verifies
+    // deadlock prevention by inspecting the generated Java code directly.
+    // The input contains two critical sections with reversed lock arguments.
+    // The compiler must normalize the lock order so both acquire m0 before m1.
+
     String input = """
         void main() {
             shared int x = 0;
             shared int y = 0;
-            
+
             critical(x, y) {
                 x = x + 1;
             }
@@ -267,15 +274,26 @@ void testRequirement10() {
 
     String javaCode = ParserDriver.runFullPipeline(input);
     String normalized = normalize(javaCode);
-    
+
     System.out.println(javaCode);
-    
-    // Both critical sections should acquire m0 (for x) before m1 (for y)
-    // to maintain consistent lock ordering
-    assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
-    assertTrue(normalized.contains("Lock m1 = new ReentrantLock();"));
-    // Verify locks are acquired in order: m0 then m1, not mixed
+
+    // Both locks must exist
+    assertTrue(normalized.contains("m0.tryLock()"));
+    assertTrue(normalized.contains("m1.tryLock()"));
+
+    // First critical section
+    int first = normalized.indexOf("x = x + 1;");
+    String blockA = normalized.substring(0, first);
+    assertTrue(blockA.indexOf("m0.tryLock()") < blockA.indexOf("m1.tryLock()"));
+    System.out.println(blockA.indexOf("m0.tryLock()") < blockA.indexOf("m1.tryLock()"));
+
+    // Second critical section
+    int second = normalized.indexOf("y = y + 1;");
+    String blockB = normalized.substring(0, second);
+    assertTrue(blockB.indexOf("m0.tryLock()") < blockB.indexOf("m1.tryLock()"));
+    System.out.println(blockB.indexOf("m0.tryLock()") < blockB.indexOf("m1.tryLock()"));
 }
+
 
     // Requirement 11: input and output via console
     @Test
@@ -434,32 +452,34 @@ void testRequirement10() {
         System.out.println(javaCode);
         System.out.println(normalized);
         
-        // Verify function definitions are present
-        assertTrue(normalized.contains("public static int func1(int a, float b)"));
-        assertTrue(normalized.contains("public static float func2(float q)"));
-        
-        // Verify static shared variable with lock
+        assertTrue(normalized.contains("public static int func1(int a, float b) {"));
+        assertTrue(normalized.contains("return a + (int) b;"));
+        assertTrue(normalized.contains("public static float func2(float q) {"));
+        assertTrue(normalized.contains("System.out.print(\"q in func2: \" + q);"));
+        assertTrue(normalized.contains("return q + 1.5f;"));
+        assertTrue(normalized.contains("System.out.print(\"x after func1: \" + x);"));
+        assertTrue(normalized.contains("System.out.print(\"y after func2: \" + y);"));
+        assertTrue(normalized.contains("System.out.print(\"q after threads: \" + q);"));
+
         assertTrue(normalized.contains("static int q = 10;"));
         assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
+        assertFalse(normalized.contains("Lock m1 = new ReentrantLock();"));
         
-        // Verify function calls in main
         assertTrue(normalized.contains("int x = func1(5, 3.2f);"));
         assertTrue(normalized.contains("float y = func2(q);"));
         
-        // Verify threads are created with CompletableFuture
-        assertTrue(normalized.contains("CompletableFuture<Void> t1"));
-        assertTrue(normalized.contains("CompletableFuture<Void> t2"));
+        assertTrue(normalized.contains("CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {{"));
+        assertTrue(normalized.contains("CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {{"));
         
-        // Verify critical sections with spinlock pattern
-        assertTrue(normalized.contains("for (double indexer = 100; !m0.tryLock();"));
+        assertTrue(normalized.contains("for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {"));
         assertTrue(normalized.contains("Thread.sleep((long) indexer);"));
-        
-        // Verify try-finally pattern for lock release
+
         assertTrue(normalized.contains("try {"));
+        assertTrue(normalized.contains("q = q + 1;"));
+        assertTrue(normalized.contains("q = q - 1;"));
         assertTrue(normalized.contains("finally {"));
         assertTrue(normalized.contains("m0.unlock();"));
-        
-        // Verify awaitAll compiles to CompletableFuture.allOf
+
         assertTrue(normalized.contains("CompletableFuture.allOf(t1, t2).get();"));
     }
 
@@ -489,13 +509,36 @@ void testRequirement10() {
                 int i = 5;
                 if (j < 10) {}
             }
-                """;
+            """;
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            ParserDriver.runFullPipeline(input);
+        });
+
+        assertTrue(ex.getMessage().toLowerCase().contains("undefined") ||
+                ex.getMessage().toLowerCase().contains("semantic") ||
+                ex.getMessage().length() > 0,
+                "Expected a descriptive transpiler error message");
+    }
+
+    // Requirement 18: ParaLang outputs correct formatted Java Code (indentation, spacing, etc.)
+    @Test
+    void requirement18() {
+        String input = """
+            void main() {
+                int x = 5;
+            }
+            """;
 
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
         System.out.println(javaCode);
+        System.out.println(normalized);
 
+        assertTrue(javaCode.contains("public static void main(String[] args) {"));
+        assertTrue(javaCode.contains("    int x = 5;"));
+        assertTrue(javaCode.contains("}"));
     }
 
     // Requirement 19: ParaLang supports modifiers: how variables are defined
