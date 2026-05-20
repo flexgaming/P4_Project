@@ -170,7 +170,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         Symbol symbol = this.ctx.symbolTable.resolve(id);
         if (isInForHeader(context)) {
             return id + " = " + visit(context.expr());
-
+            
         } else if (symbol.arrType != null) {
             int equals = context.getText().indexOf('=');
             String beforeEquals = context.getText().substring(0, equals);
@@ -208,27 +208,33 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
     public String visitDeclaration(OurGrammarParser.DeclarationContext context) {
         String id = context.ID().getText();
         Symbol symbol = this.ctx.symbolTable.resolve(id);
+
+        String prefix = "";
+        if (this.ctx.symbolTable.getDepth() == 0) { // Global scope variables should be static in Java.
+            prefix = "static ";
+        }
+
         if (symbol.arrType != null) {
             String brackets = "";
             for (int i = 0; i < symbol.arrType.dimensions; i++) {
                 brackets += "[]";
             }
-            return indent() + symbol.type.name + brackets + " " + id + " = new " + symbol.arrType.toString() + ";\n";
+            return indent() + prefix + symbol.type.name + brackets + " " + id + " = new " + symbol.arrType.toString() + ";\n";
         }
         String type = context.typeRef().TYPE().getText();
         switch(type) {
             case "int":
-                return indent() + type + " " + id + " = 0;\n";
+                return indent() + prefix + type + " " + id + " = 0;\n";
             case "float":
-                return indent() + type + " " + id + " = 0f;\n";
+                return indent() + prefix + type + " " + id + " = 0f;\n";
             case "bool":
-                return indent() + javaType(type) + " " + id + " = NULL;\n";
+                return indent() + prefix + javaType(type) + " " + id + " = NULL;\n";
             case "string":
-                return indent() + javaType(type) + " " + id + " = " + " " +  ";\n";
+                return indent() + prefix + javaType(type) + " " + id + " = " + " " +  ";\n";
             case "char":
-                return indent() + type + " " + id + " = '\\u0000';\n"; // default char value
+                return indent() + prefix + type + " " + id + " = '\\u0000';\n"; // default char value
             default:
-                return indent() + type + " " + id + ";\n";
+                return indent() + prefix + type + " " + id + ";\n";
         }
     }
 

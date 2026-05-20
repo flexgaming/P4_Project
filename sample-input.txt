@@ -1,11 +1,12 @@
 int func1(int a, float b) {
     return a + cast(int) b;
 }
+float b;
 float[] p;
 p = [5];
-p[1] = 2.;
 float func2(float c) {
     print("q in func2: ", q, "\n");
+    p[1] = 2.;
     return c + 1.5;
 }
 shared int q = 10;
