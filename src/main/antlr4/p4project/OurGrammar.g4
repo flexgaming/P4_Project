@@ -174,12 +174,12 @@ functionCall
 
 NEGATIVE : '-';
 INT : [0-9]+ ;
-FLOAT : [0-9]+ ('.' [0-9]+)? ;
+FLOAT : [0-9]+ '.' [0-9]* ;
 BOOL : 'true' | 'false' ;
 CHAR : '\'' . '\'' ;
 STRING : '"' .*? '"' ;
 THREAD : BOOL ;
-PREFIX : 'shared' 'const'? 'static'? | 'shared'? 'const' 'static'? | 'shared'? 'const'? 'static' ;
+PREFIX : 'shared' 'static'? | 'const' 'static'? | ('shared' | 'const')? 'static' ;
 TYPE : 'int' | 'float' | 'bool' | 'char' | 'string' | 'void' | 'thread' ;
 ID : [a-zA-Z_][a-zA-Z0-9_]* ;
 
