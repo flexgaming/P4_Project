@@ -10,10 +10,11 @@ public class Main {
     public static int func1(int a, float b) {
         return a + (int) b;
     }
-    float[] p = new float[5];
-    p[1] = 2.f;
+    static float b = 0f;
+    static float[] p = new float[5];
     public static float func2(float c) {
         System.out.print("q in func2: " + q + "\n");
+        p[1] = 2.f;
         return c + 1.5f;
     }
     static int q = 10;
