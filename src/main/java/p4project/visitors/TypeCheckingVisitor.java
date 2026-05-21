@@ -101,13 +101,18 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
     @Override
     public String visitReassignment(OurGrammarParser.ReassignmentContext context) {
         String id = "";
+        boolean isArrayIndex = (context.arrayIndex() != null);
         if (context.ID() == null) {
             id = context.arrayIndex().ID().getText();
         } else {
             id = context.ID().getText();
         }
         Symbol symbol = this.ctx.symbolTable.resolve(id);
-        
+
+        if (symbol == null) {
+            throw new RuntimeException("Variable '" + id + "' not declared.");
+        }
+
         if (symbol.arrType != null) {
             if (context.expr().getText().chars().filter(ch -> ch == '{').count() > 0) {
                 int[] arr = arrayValidator.validate(context.expr().getText(), symbol.arrType);
@@ -116,13 +121,28 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
         String declaredType = symbol.type.name.toLowerCase();
         String exprType = visit(context.expr());
+
+        // If assigning to an array element (arr[index] = expr)
+        if (isArrayIndex) {
+            // RHS must not be an array (can't assign whole array to an element)
+            Symbol rhsSymbol = this.ctx.symbolTable.resolve(context.expr().getText());
+            if (rhsSymbol != null && rhsSymbol.arrType != null) {
+                throw new RuntimeException("Type Error: Cannot assign array '" + rhsSymbol.ID + "' to element of array '" + id + "'");
+            }
+            if (!declaredType.equals(exprType)) {
+                throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType + " (array element)");
+            }
+            return declaredType;
+        }
+
+        // Assignment to a variable (possibly whole-array assignment)
         Symbol contextSymbol = this.ctx.symbolTable.resolve(context.expr().getText());
         if (contextSymbol != null && symbol.arrType == null && contextSymbol.arrType != null) {
             throw new RuntimeException("Type Error: Cannot assign array value '"
             + contextSymbol.ID + "' to non-array variable '" + id + "'");
         } else if (contextSymbol != null && symbol.arrType != null && contextSymbol.arrType == null) {
             throw new RuntimeException("Type Error: Cannot assign value '"
-            + contextSymbol.ID +"' to array variable '" + id + "'");
+            + contextSymbol.ID + "' to array variable '" + id + "'");
         } else if (contextSymbol != null && symbol.arrType != null && contextSymbol.arrType != null) {
             if (!Arrays.equals(symbol.arrType.dimSize, contextSymbol.arrType.dimSize)) {
                 throw new RuntimeException("Array dimension size mismatch: '" + symbol.ID + "' " + symbol.arrType + " = '" + contextSymbol.ID + "' " + contextSymbol.arrType);
@@ -130,7 +150,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
 
         } else if (!declaredType.equals(exprType)) {
             boolean override = false;
-            
+
             if (symbol.arrType != null) { // If an array is being reassigned with a specific size. Then override exception.
                 if (context.expr().getText().contains("[")) override = true; // Example -> float[] x; x = [5] | override is true in this case.
             }

@@ -1,55 +1,68 @@
-int func1(int a, float b) {
-    return a + cast(int) b;
-}
-float b;
-float[] p;
-p = [5];
-float func2(float c) {
-    print("q in func2: ", q, "\n");
-    p[1] = 2.;
-    return c + 1.5;
-}
-shared int q = 10;
-void main() {
-    int x = func1(5, 3.2);
-    float y = func2(2.5);
-    print("x after func1: ", x, "\n");
-    print("y after func2: ", y, "\n");
-    thread t1 => {
-        critical(q) {
-            q = q + 1;
+shared int counter = 0;
+const int LIMIT = 100000;
+int[4] results;
+int input;
+
+bool ready = false;
+
+int worker(int start, int end) {
+    int i = start;
+    int local = 0;
+
+    while (i < end) {
+        local = local + i;
+
+        critical(counter) {
+            counter = counter + 1;
         }
+
+        i = i + 1;
+    }
+
+    return local;
+}
+
+int parallelSum(int n) {
+    thread t1 => {
+        worker(0, n / 4);
     }
     thread t2 => {
-        critical(q) {
-            q = q - 1;
+        worker(n / 4, n / 2);
+    }
+    thread t3 => {
+        worker(n / 2, (3 * n) / 4);
+    }
+    thread t4 => {
+        worker((3 * n) / 4, n);
+    }
+
+    awaitAll(t1, t2, t3, t4);
+
+    return counter;
+}
+
+void main() {
+    print("Enter a number:");
+    input = read(int);
+    int[input] arr;
+
+    if (input > LIMIT) {
+        print "Input too large, clamping to LIMIT\n";
+        input = LIMIT;
+        ready = true;
+    } else {
+        ready = true;
+        print("The input was accepted as is.\n")
+    }
+    
+    if (ready) {
+        for(int i = 0; i < input; i = i + 1) {
+            arr[i] = i;
+        }
+        for(int i = 0; i < input; i = i + 1) {
+            print(arr[i], "\n");
         }
     }
-    awaitAll(t1, t2);
-    print("q after threads: ", q, "\n");
-    int wow = 3;
-    int[wow][wow] arr1;
-    arr1 = {{1,2,3},{1,2,3},{1,2,3}};
-    for (int i = 0; i < wow; i = i + 1) {
-        for (int j = 0; j < wow; j = j + 1) {
-            if (j == 1 && i == 1) {
-                continue;
-            }
-            print("arr1[i][j]: ", arr1[i][j], "\n");
-        }
-    }
-    string[] hello = {"Hello World\n"};
-    print(hello[0]);
-    float k = 1.1;
-    int condition = 0;
-    int counter = 0;
-    while (condition < 681472) {
-        k = k * 2.0;
-        counter = counter + 1;
-        condition = cast(int) k;
-        print("k after iteration ", counter, ": ", k, "\n");
-    }
-    print("\nPlease enter an integer value: \n");
-    int userInput = read(int);
-    print("bigger than 10: ", (userInput > 10), "\n");
+    
+    print(counter);
 }
