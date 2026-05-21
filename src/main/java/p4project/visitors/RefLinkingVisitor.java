@@ -93,10 +93,15 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
                     int sqBracket1 = beforeEquals.indexOf('[');
                     int sqBracket2 = beforeEquals.indexOf(']');
                     String currentDimIndex = beforeEquals.substring(sqBracket1 + 1, sqBracket2);
+                    System.out.println("dimensions:" + symbol.arrType.dimSize[i]);
+                    System.out.println("currentdimindex:" + currentDimIndex);
+                    System.out.println("context:" + context.getText());
                     if (currentDimIndex.matches("\\d+") && dimensions[i] != null && dimensions[i].matches("\\d+")) {
                         if (!(Integer.parseInt(currentDimIndex) <= Integer.parseInt(dimensions[i]))) {
                             throw new RuntimeException("Array index out of bounds for dimension " + i + ": " + currentDimIndex + " >= " + dimensions[i]);
                         }
+                    } if (symbol.arrType.dimSize[i].isEmpty()) {
+                        throw new RuntimeException("Value '"+ currentDimIndex + "' cannot be assigned to an empty dimension size. Dimension: '" + i + "'");
                     }
                     beforeEquals = beforeEquals.substring(sqBracket2 + 1);
                 }

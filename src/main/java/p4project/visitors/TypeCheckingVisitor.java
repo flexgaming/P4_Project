@@ -70,7 +70,14 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         if (context.assVar() != null) {
             String exprType = visit(context.assVar().expr());
             if (!declaredType.equals(exprType)) {
-                throw new RuntimeException("Type Error: Cannot assign '" + exprType + " to '" + declaredType + "'");
+                boolean override = false;
+            
+                if (symbol.arrType != null) { // If an array is being reassigned to a specific array. Then override exception.
+                    if (context.assVar().expr().getText().contains("{")) override = true; // Example -> float[2] x = {5,1} | override is true in this case.
+                }
+                if (!override) {
+                    throw new RuntimeException("Type Error: Cannot assign '" + exprType + " to '" + declaredType + "'");
+                }
             } else if (symbol.arrType != null) {
                 int[] arr = arrayValidator.validate(context.assVar().expr().getText(), symbol.arrType);
             }
@@ -125,7 +132,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
             boolean override = false;
             
             if (symbol.arrType != null) { // If an array is being reassigned with a specific size. Then override exception.
-                if (context.expr().toString().contains("[")) override = true; // Example -> float[] x; x = [5] | override is true in this case.
+                if (context.expr().getText().contains("[")) override = true; // Example -> float[] x; x = [5] | override is true in this case.
             }
             if (!override) {
                 throw new RuntimeException("Type Error: Cannot assign " + exprType + " to " + declaredType);
