@@ -182,10 +182,10 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             }
 
             if (bracketType.equals("[")) { // Handle array resizing with the new size of the array.
-                return "";
+                //return "";
                 // We do not reassign this value, because it is already defined, because the value is of the same scope
                 // and we reassign the size of each dimension in RefLinkingVisitor.
-                // return indent() + id + " = new " + symbol.type.name + afterEquals + ";\n";
+                return indent() + id + " = new " + symbol.type.name + afterEquals + ";\n";
 
             } else if (bracketType.equals("{")) { // Handle array resizing with actual input.
                 String brackets = "";

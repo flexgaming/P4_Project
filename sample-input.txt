@@ -1,28 +1,27 @@
-shared int counter = 0;
+shared int counter = 1;
 const int LIMIT = 100000;
 int[4] results;
 int input;
+int[] arr;
 
 bool ready = false;
 
-int worker(int start, int end) {
+void worker(int start, int end) {
     int i = start;
-    int local = 0;
 
     while (i < end) {
-        local = local + i;
 
         critical(counter) {
-            counter = counter + 1;
+            counter = counter * arr[i];
         }
 
         i = i + 1;
     }
 
-    return local;
+    return;
 }
 
-int parallelSum(int n) {
+void parallelFactorial(int n) {
     thread t1 => {
         worker(0, n / 4);
     }
@@ -38,13 +37,13 @@ int parallelSum(int n) {
 
     awaitAll(t1, t2, t3, t4);
 
-    return counter;
+    return;
 }
 
 void main() {
     print("Enter a number:");
     input = read(int);
-    int[input] arr;
+    arr = [input];
 
     if (input > LIMIT) {
         print "Input too large, clamping to LIMIT\n";
@@ -57,11 +56,9 @@ void main() {
     
     if (ready) {
         for(int i = 0; i < input; i = i + 1) {
-            arr[i] = i;
+            arr[i] = i + 1;
         }
-        for(int i = 0; i < input; i = i + 1) {
-            print(arr[i], "\n");
-        }
+        parallelFactorial(input);
     }
     
     print(counter);
