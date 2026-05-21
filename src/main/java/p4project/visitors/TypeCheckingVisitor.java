@@ -251,7 +251,6 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
         }
 
         String declaredType = symbol.type.name.toLowerCase();
-        // TODO - Ensure forvar is not void or thread, as those types cannot be used as loop variables.
         if (context.assVar() != null) {
             if (context.ID() != null) {
                 if (this.ctx.symbolTable.resolve(id).type == TypeSymbol.THREAD || 

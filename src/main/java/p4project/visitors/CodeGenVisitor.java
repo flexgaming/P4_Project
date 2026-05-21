@@ -12,13 +12,8 @@ import p4project.context.CompilationContext;
 import p4project.context.FunctionSymbol;
 import p4project.context.Symbol;
 
-import java.util.List;
-
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import java.util.ArrayList;
-import java.util.Collections;
 
 /*
     Phase 1: Symbol assignments and declerations
@@ -182,7 +177,7 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
             }
 
             if (bracketType.equals("[")) { // Handle array resizing with the new size of the array.
-                //return "";
+                // return "";
                 // We do not reassign this value, because it is already defined, because the value is of the same scope
                 // and we reassign the size of each dimension in RefLinkingVisitor.
                 return indent() + id + " = new " + symbol.type.name + afterEquals + ";\n";

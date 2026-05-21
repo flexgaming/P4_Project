@@ -1,65 +1,72 @@
 shared int counter = 1;
-const int LIMIT = 100000;
+const int LIMIT = 16;
 int[4] results;
 int input;
 int[] arr;
 
 bool ready = false;
 
-void worker(int start, int end) {
+int worker(int start, int end) {
     int i = start;
+    int result = counter;
 
     while (i < end) {
-
-        critical(counter) {
-            counter = counter * arr[i];
-        }
-
+        result = result * arr[i];
         i = i + 1;
     }
 
-    return;
-}
-
-void parallelFactorial(int n) {
-    thread t1 => {
-        worker(0, n / 4);
-    }
-    thread t2 => {
-        worker(n / 4, n / 2);
-    }
-    thread t3 => {
-        worker(n / 2, (3 * n) / 4);
-    }
-    thread t4 => {
-        worker((3 * n) / 4, n);
-    }
-
-    awaitAll(t1, t2, t3, t4);
-
-    return;
+    return result;
 }
 
 void main() {
     print("Enter a number:");
     input = read(int);
     arr = [input];
+    int index = 0;
 
     if (input > LIMIT) {
-        print "Input too large, clamping to LIMIT\n";
+        print("Input too large, clamping to the LIMIT:", LIMIT, "\n");
         input = LIMIT;
         ready = true;
     } else {
         ready = true;
         print("The input was accepted as is.\n")
     }
-    
     if (ready) {
         for(int i = 0; i < input; i = i + 1) {
             arr[i] = i + 1;
         }
-        parallelFactorial(input);
+        while(true) {
+            index = index + 1;
+            if (index == 67) {
+                print("SIX SEVEN!!! SIX SEVEN!!! SIX SEVEN!!! SIX SEVEN!!!\n");
+                continue;
+            }
+            thread t1 => {
+                critical(counter) {
+                    counter = worker(0, input / 4);
+                }
+            }
+            thread t2 => {
+                critical(counter) {
+                    counter = worker(input / 4, input / 2);
+                }
+            }
+            thread t3 => {
+                critical(counter) {
+                    counter = worker(input / 2, (3 * input) / 4);
+                }
+            }
+            thread t4 => {
+                critical(counter) {
+                    counter = worker((3 * input) / 4, input);
+                }
+            }
+
+            awaitAll(t1, t2, t3, t4);
+            print("The result of ", index, " is: ", counter, "\n");
+            counter = 1;
+            if (index >= 100) break;
+        }
     }
-    
-    print(counter);
 }
