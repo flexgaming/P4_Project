@@ -8,52 +8,19 @@ import java.lang.Math;
 
 public class Main {
     static int counter = 1;
-    static int LIMIT = 100000;
+    static int LIMIT = 16;
     static int[] results = new int[4];
     static int input = 0;
     static int[] arr = new int[input];
     static Boolean ready = false;
-    public static void worker(int start, int end) {
+    public static int worker(int start, int end) {
         int i = start;
+        int result = counter;
         while (i < end) {
-            {
-                counter = counter * arr[i];
-            }
+            result = result * arr[i];
             i = i + 1;
         }
-        return;
-    }
-    public static void parallelFactorial(int n) {
-        CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {
-            try {
-                worker(0, n / 4);
-            } finally {
-            };
-        });
-        CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {
-            try {
-                worker(n / 4, n / 2);
-            } finally {
-            };
-        });
-        CompletableFuture<Void> t3 = CompletableFuture.runAsync(() -> {
-            try {
-                worker(n / 2, (3 * n) / 4);
-            } finally {
-            };
-        });
-        CompletableFuture<Void> t4 = CompletableFuture.runAsync(() -> {
-            try {
-                worker((3 * n) / 4, n);
-            } finally {
-            };
-        });
-        try {
-            CompletableFuture.allOf(t1, t2, t3, t4).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        return;
+        return result;
     }
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -62,8 +29,9 @@ public class Main {
         System.out.print("Enter a number:");
         input = scanner.nextInt();
         arr = new int[input];
+        int index = 0;
         if (input > LIMIT) {
-            System.out.print("Input too large, clamping to LIMIT\n");
+            System.out.print("Input too large, clamping to the LIMIT:" + LIMIT + "\n");
             input = LIMIT;
             ready = true;
         }
@@ -75,9 +43,87 @@ public class Main {
             for (int i = 0; i < input; i = i + 1) {
                 arr[i] = i + 1;
             }
-            parallelFactorial(input);
+            while (true) {
+                index = index + 1;
+                if (index == 67) {
+                    System.out.print("SIX SEVEN!!! SIX SEVEN!!! SIX SEVEN!!! SIX SEVEN!!!\n");
+                    continue;
+                }
+                CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {
+                    {
+                        for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                            try {
+                                Thread.sleep((long) indexer);
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
+                        }
+                        try {
+                            counter = worker(0, input / 4);
+                        } finally {
+                            m0.unlock();
+                        }
+                    }
+                });
+                CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {
+                    {
+                        for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                            try {
+                                Thread.sleep((long) indexer);
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
+                        }
+                        try {
+                            counter = worker(input / 4, input / 2);
+                        } finally {
+                            m0.unlock();
+                        }
+                    }
+                });
+                CompletableFuture<Void> t3 = CompletableFuture.runAsync(() -> {
+                    {
+                        for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                            try {
+                                Thread.sleep((long) indexer);
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
+                        }
+                        try {
+                            counter = worker(input / 2, (3 * input) / 4);
+                        } finally {
+                            m0.unlock();
+                        }
+                    }
+                });
+                CompletableFuture<Void> t4 = CompletableFuture.runAsync(() -> {
+                    {
+                        for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                            try {
+                                Thread.sleep((long) indexer);
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
+                        }
+                        try {
+                            counter = worker((3 * input) / 4, input);
+                        } finally {
+                            m0.unlock();
+                        }
+                    }
+                });
+                try {
+                    CompletableFuture.allOf(t1, t2, t3, t4).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+                System.out.print("The result of " + index + " is: " + counter + "\n");
+                counter = 1;
+                if (index >= 100) break;
+
+            }
         }
-        System.out.print(counter);
         executor.shutdown();
         scanner.close();
     }

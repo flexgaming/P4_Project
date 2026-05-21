@@ -56,6 +56,7 @@ public class MutexVisitor extends OurGrammarBaseVisitor<Void> {
     public Void visitFunctionCall(OurGrammarParser.FunctionCallContext context) {
         if (inCriticalSection) {
             // Check if the function being called contains shared variables. If it does, throw an error.
+            System.out.println("NEGER");
             String functionName = context.ID().getText();
             FunctionSymbol functionSymbol = this.ctx.ftable.get(functionName);
             if (functionSymbol != null && functionSymbol.containsCriticalSection) {
