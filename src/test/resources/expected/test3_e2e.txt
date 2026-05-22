@@ -9,7 +9,6 @@ import java.lang.Math;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ExecutorService executor = Executors.newCachedThreadPool();
         int x = 1;
         while (true) {
             if (x > 10) {
@@ -20,7 +19,6 @@ public class Main {
                 x = x + 1;
             }
         }
-        executor.shutdown();
         scanner.close();
     }
 }

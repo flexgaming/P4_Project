@@ -415,7 +415,6 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
         ctx.symbolTable.restoreScope(context);
         if (inMain) { // Main block
             sb.append(indent() + "Scanner scanner = new Scanner(System.in);\n");
-            sb.append(indent() + "ExecutorService executor = Executors.newCachedThreadPool();\n");
 
             for (String shared : ctx.sharedVariables) {
                 sb.append(indent() +"Lock " + "m" + ctx.sharedVariables.indexOf(shared) + " = new ReentrantLock(); // Shared variable: " + shared + "\n");
@@ -427,7 +426,6 @@ public class CodeGenVisitor extends OurGrammarBaseVisitor<String> {
                 if (stmtCode == null || stmtCode.isEmpty()) continue;
                 sb.append(stmtCode);
             }
-            sb.append(indent() + "executor.shutdown();\n");
             sb.append(indent() + "scanner.close();\n");
         } else if (inCriticalSection) {
             inCriticalSection = false;

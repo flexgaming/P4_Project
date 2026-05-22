@@ -9,7 +9,6 @@ import java.lang.Math;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ExecutorService executor = Executors.newCachedThreadPool();
         int wow = 2;
         int[][] arr1 = new int[wow][wow];
         arr1 = new int[][]{{1, 2}, {1, 2}};
@@ -18,7 +17,6 @@ public class Main {
                 System.out.print(arr1[i][j]);
             }
         }
-        executor.shutdown();
         scanner.close();
     }
 }

@@ -24,7 +24,6 @@ public class Main {
     }
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ExecutorService executor = Executors.newCachedThreadPool();
         Lock m0 = new ReentrantLock(); // Shared variable: counter
         System.out.print("Enter a number:");
         input = scanner.nextInt();
@@ -124,7 +123,6 @@ public class Main {
 
             }
         }
-        executor.shutdown();
         scanner.close();
     }
 }

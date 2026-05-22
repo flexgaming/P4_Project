@@ -9,11 +9,9 @@ import java.lang.Math;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ExecutorService executor = Executors.newCachedThreadPool();
         int x = 10;
         float y = (float) x;
         System.out.print(y + " " + x);
-        executor.shutdown();
         scanner.close();
     }
 }

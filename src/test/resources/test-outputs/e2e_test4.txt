@@ -12,11 +12,9 @@ public class Main {
     }
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ExecutorService executor = Executors.newCachedThreadPool();
         float x = 5.0f;
         x = square(x);
         System.out.print(x);
-        executor.shutdown();
         scanner.close();
     }
 }

@@ -9,7 +9,6 @@ import java.lang.Math;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ExecutorService executor = Executors.newCachedThreadPool();
         Lock m0 = new ReentrantLock();
         int x = 0;
         CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {
@@ -34,7 +33,6 @@ public class Main {
             e.printStackTrace();
         }
         System.out.print(x);
-        executor.shutdown();
         scanner.close();
     }
 }

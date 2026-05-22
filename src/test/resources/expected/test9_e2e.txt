@@ -10,10 +10,8 @@ public class Main {
     static int global = 11;
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ExecutorService executor = Executors.newCachedThreadPool();
         global = global % 2;
         System.out.print(global);
-        executor.shutdown();
         scanner.close();
     }
 }
