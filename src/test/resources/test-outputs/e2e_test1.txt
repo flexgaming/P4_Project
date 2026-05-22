@@ -9,7 +9,6 @@ import java.lang.Math;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ExecutorService executor = Executors.newCachedThreadPool();
         int x = 0;
         x = scanner.nextInt();
         if (x > 0) {
@@ -22,7 +21,6 @@ public class Main {
         else {
             System.out.print("No IF statement reached. x = " + x);
         }
-        executor.shutdown();
         scanner.close();
     }
 }
