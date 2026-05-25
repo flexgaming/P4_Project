@@ -1,5 +1,5 @@
 shared int counter = 1;
-const int LIMIT = 16;
+const int LIMIT = 12;
 int[4] results;
 int input;
 int[] arr;
