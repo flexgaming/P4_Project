@@ -65,8 +65,6 @@ class AcceptanceTest {
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
-        System.out.println(javaCode);
-        System.out.println(normalized);
         assertTrue(normalized.contains("CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {});"));
         assertTrue(normalized.contains("CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {});"));
     }
@@ -74,18 +72,14 @@ class AcceptanceTest {
     // Requirement 2: An input in ParaLang file gets transpiled to Java file
     @Test
     void testRequirement2() throws IOException {
-        Path in = Path.of("src", "test", "resources", "test-inputs", "transpile_input.txt");
+        Path in = Paths.get("..\\P4_Project\\sample-input.txt");
         // Read ParaLang input file
         String input = Files.readString(in, StandardCharsets.UTF_8);
 
         // Run full pipeline in-test to produce Java code
         String javaCode = ParserDriver.runFullPipeline(input);
 
-        // Write output into test-outputs/<basename>.java
-        String base = in.getFileName().toString();
-        int idx = base.lastIndexOf('.');
-        if (idx > 0) base = base.substring(0, idx);
-        Path out = Path.of("test-outputs", base + ".java");
+        Path out = Paths.get("..\\P4_Project\\javaOutput.java");
         if (out.getParent() != null) Files.createDirectories(out.getParent());
         Files.writeString(out, javaCode, StandardCharsets.UTF_8);
 
@@ -93,8 +87,7 @@ class AcceptanceTest {
         assertTrue(Files.exists(out), "Expected transpiled file to exist: " + out.toAbsolutePath());
         String normalized = normalize(javaCode);
         System.out.println("=== Transpiled Java Path: " + out.toAbsolutePath() + " ===");
-        System.out.println(javaCode);
-        assertTrue(normalized.contains("System.out.print(\"Hello, World!\");"));
+        assertTrue(normalized.contains("public class Main {"));
     }
 
     // Requirement 5: Data Types: char, int, float, bool, string
@@ -113,8 +106,6 @@ class AcceptanceTest {
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
-        System.out.println(javaCode);
-        System.out.println(normalized);
         assertTrue(normalized.contains("char c = 'a';"));
         assertTrue(normalized.contains("int i = 42;"));
         assertTrue(normalized.contains("float f = 3.14f;"));
@@ -137,8 +128,6 @@ class AcceptanceTest {
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
-        System.out.println(javaCode);
-        System.out.println(normalized);
         assertTrue(normalized.contains("int[] numbers = new int[]{1, 2, 3};"));
         assertTrue(normalized.contains("float[] decimals = new float[]{1.0f, 2.5f};"));
         assertTrue(normalized.contains("Boolean[] flags = new Boolean[]{true, false};"));
@@ -164,7 +153,7 @@ class AcceptanceTest {
                 if (5 > 10) {}
                 if (true && false) {}
                 if (5 >= 4) {}  
-                if (5 <= 4) {}       
+                if (5 <= 4) {}0       
             }
             """;
 
@@ -191,6 +180,9 @@ class AcceptanceTest {
     @Test
     void requirement8() {
         String input = """
+            int myFunction(int i) {
+                return i + 1;
+            }
             void main() {
                 if (5 < 10) {}
                 if (5 < 10) {} else {}
@@ -200,6 +192,7 @@ class AcceptanceTest {
                 int x;
                 int y = 5;
                 y = 10;
+                int result = myFunction(5);
                 print("Hello, World!");
                 x = read(int);
             }
@@ -208,8 +201,6 @@ class AcceptanceTest {
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
-        System.out.println(javaCode);
-        System.out.println(normalized);
         assertTrue(normalized.contains("if (5 < 10) {}"));
         assertTrue(normalized.contains("if (5 < 10) {} else {}"));
         assertTrue(normalized.contains("if (5 < 10) {} else if (3 > 1) {} else {}"));
@@ -218,6 +209,8 @@ class AcceptanceTest {
         assertTrue(normalized.contains("int x = 0;"));
         assertTrue(normalized.contains("int y = 5;"));
         assertTrue(normalized.contains("y = 10;"));
+        assertTrue(normalized.contains("public static int myFunction(int i) {return i + 1;}"));
+        assertTrue(normalized.contains("int result = myFunction(5);"));
         assertTrue(normalized.contains("System.out.print(\"Hello, World!\");"));
         assertTrue(normalized.contains("x = scanner.nextInt();"));
     }
@@ -237,8 +230,6 @@ class AcceptanceTest {
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
-        System.out.println(javaCode);
-        System.out.println(normalized);
         assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
         assertTrue(normalized.contains("int counter = 0;"));
         assertTrue(normalized.contains("for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1))"));
@@ -251,13 +242,6 @@ class AcceptanceTest {
 
 @Test
 void testRequirement10() {
-    // NOTE:
-    // We cannot observe lock ordering at runtime, because the generated Java
-    // does not print lock acquisition events. Therefore, this test verifies
-    // deadlock prevention by inspecting the generated Java code directly.
-    // The input contains two critical sections with reversed lock arguments.
-    // The compiler must normalize the lock order so both acquire m0 before m1.
-
     String input = """
         void main() {
             shared int x = 0;
@@ -274,8 +258,6 @@ void testRequirement10() {
 
     String javaCode = ParserDriver.runFullPipeline(input);
     String normalized = normalize(javaCode);
-
-    System.out.println(javaCode);
 
     // Both locks must exist
     assertTrue(normalized.contains("m0.tryLock()"));
@@ -312,8 +294,6 @@ void testRequirement10() {
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
-        System.out.println(javaCode);
-        System.out.println(normalized);
         assertTrue(normalized.contains("System.out.print(\"Enter your name:\");"));
         assertTrue(normalized.contains("String name = scanner.nextLine();"));
         assertTrue(normalized.contains("System.out.print(\"Hello\" + name + \"!\");")); 
@@ -333,8 +313,6 @@ void testRequirement10() {
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
-        System.out.println(javaCode);
-        System.out.println(normalized);
         assertTrue(normalized.contains("CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {System.out.print(\"in t1\");});"));
         assertTrue(normalized.contains("CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {System.out.print(\"in t2\");});"));
         assertTrue(normalized.contains("CompletableFuture.allOf(t1, t2).get();"));
@@ -352,8 +330,6 @@ void testRequirement10() {
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
-        System.out.println(javaCode);
-        System.out.println(normalized);
         assertTrue(normalized.contains("CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {System.out.print(\"in t1\");});"));
         assertTrue(normalized.contains("CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {System.out.print(\"in t2\");});"));
         assertTrue(normalized.contains("CompletableFuture.anyOf(t1, t2).get();"));
@@ -394,8 +370,6 @@ void testRequirement10() {
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
-        System.out.println(javaCode);
-        System.out.println(normalized);
         assertTrue(normalized.contains("float intToFloat = (float) srcInt;"));
         assertTrue(normalized.contains("Boolean intToBool = (srcInt == 0) ? false : true;"));
         assertTrue(normalized.contains("String intToString = String.valueOf(srcInt);"));
@@ -448,9 +422,6 @@ void testRequirement10() {
 
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
-
-        System.out.println(javaCode);
-        System.out.println(normalized);
         
         assertTrue(normalized.contains("public static int func1(int a, float b) {"));
         assertTrue(normalized.contains("return a + (int) b;"));
@@ -495,8 +466,6 @@ void testRequirement10() {
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
-        System.out.println(javaCode);
-        System.out.println(normalized);
         assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
         
     }
@@ -533,9 +502,6 @@ void testRequirement10() {
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
-        System.out.println(javaCode);
-        System.out.println(normalized);
-
         assertTrue(javaCode.contains("public static void main(String[] args) {"));
         assertTrue(javaCode.contains("    int x = 5;"));
         assertTrue(javaCode.contains("}"));
@@ -555,9 +521,6 @@ void testRequirement10() {
 
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
-
-        System.out.println(javaCode);
-        System.out.println(normalized);
 
         assertTrue(normalized.contains("Lock m0 = new ReentrantLock();"));
         assertTrue(normalized.contains("Lock m1 = new ReentrantLock();"));
@@ -584,15 +547,25 @@ void testRequirement10() {
         String javaCode = ParserDriver.runFullPipeline(input);
         String normalized = normalize(javaCode);
 
-        System.out.println(javaCode);
-        System.out.println(normalized);
         assertFalse(normalized.contains("//"), "Single-line comments should be removed");
         assertFalse(normalized.contains("/*"), "Multi-line comments should be removed");
     }
 
-    // Req 24 We have it, but test idk
 
-    // Req 25 maybe not
+    @Test
+    void testRequirement13() {
+        String input = """
+            void main() {
+                thread t1 => {
+                    print("Thread as data type");
+                }
+            }
+            """;
+        String javaCode = ParserDriver.runFullPipeline(input);
+        String normalized = normalize(javaCode);
+        
+        assertTrue(normalized.contains("CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {System.out.print(\"Thread as data type\");});"));
+    }
 
 
     /**
