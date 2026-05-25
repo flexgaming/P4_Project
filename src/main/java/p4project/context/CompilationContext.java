@@ -12,7 +12,6 @@ public class CompilationContext {
     public final SymbolTable symbolTable = new SymbolTable();
 
     // Phase 2: every identifier-use node → the Symbol it refers to
-    // Phase 2: every identifier-use node → the Symbol it refers to
     // Use LinkedHashMap to preserve insertion order (deterministic across runs)
     public final Map<ParseTree, Symbol> resolvedSymbols = new LinkedHashMap<>();
 
