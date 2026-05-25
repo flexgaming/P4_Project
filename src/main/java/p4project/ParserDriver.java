@@ -94,7 +94,6 @@ public class ParserDriver {
             if (!ctx.ftable.containsKey("main")) {
                 javaCode.append("    public static void main(String[] args) {\n");
                 javaCode.append("        Scanner scanner = new Scanner(System.in);\n");
-                // javaCode.append("        ExecutorService executor = Executors.newCachedThreadPool();\n");
                 
                 for (String shared : ctx.sharedVariables) {
                     javaCode.append("        Lock " + "m" + ctx.sharedVariables.indexOf(shared) + " = new ReentrantLock();\n");
@@ -105,7 +104,6 @@ public class ParserDriver {
                 ctx.symbolTable.pushScope(tree);
                 javaCode.append(codeGenVisitor.visit(tree));
                 ctx.symbolTable.popScope();
-                // javaCode.append("        executor.shutdown();\n");
                 javaCode.append("        scanner.close();\n");
                 javaCode.append("    }\n");
             } else {
@@ -248,7 +246,6 @@ public class ParserDriver {
             if (!ctx.ftable.containsKey("main")) {
                 javaCode.append("    public static void main(String[] args) {\n");
                 javaCode.append("        Scanner scanner = new Scanner(System.in);\n");
-                javaCode.append("        ExecutorService executor = Executors.newCachedThreadPool();\n");
                 
                 for (String shared : ctx.sharedVariables) {
                     javaCode.append("        Lock " + "m" + ctx.sharedVariables.indexOf(shared) + " = new ReentrantLock();\n");
@@ -259,7 +256,6 @@ public class ParserDriver {
                 ctx.symbolTable.pushScope(tree);
                 javaCode.append(codeGenVisitor.visit(tree));
                 ctx.symbolTable.popScope();
-                javaCode.append("        executor.shutdown();\n");
                 javaCode.append("        scanner.close();\n");
                 javaCode.append("    }\n");
             } else {
