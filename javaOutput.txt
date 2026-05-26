@@ -38,90 +38,103 @@ public class Main {
             ready = true;
             System.out.print("The input was accepted as is.\n");
         }
-        if (ready) {
-            for (int i = 0; i < input; i = i + 1) {
-                arr[i] = i + 1;
-            }
-            while (true) {
-                index = index + 1;
-                if (index == 67) {
-                    System.out.print("SIX SEVEN!!! SIX SEVEN!!! SIX SEVEN!!! SIX SEVEN!!!\n");
-                    continue;
-                }
-                CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {
-                    {
-                        for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
-                            try {
-                                Thread.sleep((long) indexer);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                        }
-                        try {
-                            counter = worker(0, input / 4);
-                        } finally {
-                            m0.unlock();
-                        }
-                    }
-                });
-                CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {
-                    {
-                        for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
-                            try {
-                                Thread.sleep((long) indexer);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                        }
-                        try {
-                            counter = worker(input / 4, input / 2);
-                        } finally {
-                            m0.unlock();
-                        }
-                    }
-                });
-                CompletableFuture<Void> t3 = CompletableFuture.runAsync(() -> {
-                    {
-                        for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
-                            try {
-                                Thread.sleep((long) indexer);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                        }
-                        try {
-                            counter = worker(input / 2, (3 * input) / 4);
-                        } finally {
-                            m0.unlock();
-                        }
-                    }
-                });
-                CompletableFuture<Void> t4 = CompletableFuture.runAsync(() -> {
-                    {
-                        for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
-                            try {
-                                Thread.sleep((long) indexer);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                        }
-                        try {
-                            counter = worker((3 * input) / 4, input);
-                        } finally {
-                            m0.unlock();
-                        }
-                    }
-                });
-                try {
-                    CompletableFuture.allOf(t1, t2, t3, t4).get();
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-                System.out.print("The result of " + index + " is: " + counter + "\n");
-                counter = 1;
-                if (index >= 100) break;
+        if (ready == false) return;
 
+        for (int i = 0; i < input; i = i + 1) {
+            arr[i] = i + 1;
+        }
+        while (true) {
+            index = index + 1;
+            if (index == 67) {
+                System.out.print("Lets skip number 67\n");
+                continue;
             }
+            CompletableFuture<Void> t1 = CompletableFuture.runAsync(() -> {
+                {
+                    for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                        try {
+                            Thread.sleep((long) indexer);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    try {
+                        counter = worker(0, input / 4);
+                    } finally {
+                        m0.unlock();
+                    }
+                }
+            });
+            CompletableFuture<Void> t2 = CompletableFuture.runAsync(() -> {
+                {
+                    for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                        try {
+                            Thread.sleep((long) indexer);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    try {
+                        counter = worker(input / 4, input / 2);
+                    } finally {
+                        m0.unlock();
+                    }
+                }
+            });
+            CompletableFuture<Void> t3 = CompletableFuture.runAsync(() -> {
+                {
+                    for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                        try {
+                            Thread.sleep((long) indexer);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    try {
+                        counter = worker(input / 2, (3 * input) / 4);
+                    } finally {
+                        m0.unlock();
+                    }
+                }
+            });
+            CompletableFuture<Void> t4 = CompletableFuture.runAsync(() -> {
+                {
+                    for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                        try {
+                            Thread.sleep((long) indexer);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    try {
+                        counter = worker((3 * input) / 4, input);
+                    } finally {
+                        m0.unlock();
+                    }
+                }
+            });
+            try {
+                CompletableFuture.allOf(t1, t2, t3, t4).get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+            System.out.print("The result of " + index + " is: " + counter + "\n");
+            {
+                for (double indexer = 100; !m0.tryLock(); indexer = indexer*1.2-((indexer*1.2)%1)) {
+                    try {
+                        Thread.sleep((long) indexer);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                try {
+                    counter = 1;
+                } finally {
+                    m0.unlock();
+                }
+            }
+            if (index >= 100) break;
+
         }
         scanner.close();
     }
