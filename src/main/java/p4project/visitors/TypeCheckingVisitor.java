@@ -76,7 +76,7 @@ public class TypeCheckingVisitor extends OurGrammarBaseVisitor<String> {
                     if (context.assVar().expr().getText().contains("{")) override = true; // Example -> float[2] x = {5,1} | override is true in this case.
                 }
                 if (!override) {
-                    throw new RuntimeException("Type Error: Cannot assign '" + exprType + " to '" + declaredType + "'");
+                    throw new RuntimeException("Type Error: Cannot assign '" + exprType + "' to '" + declaredType + "'");
                 }
             } else if (symbol.arrType != null) {
                 int[] arr = arrayValidator.validate(context.assVar().expr().getText(), symbol.arrType);

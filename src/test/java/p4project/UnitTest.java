@@ -242,7 +242,7 @@ class UnitTest {
                         assertTrue(
                             org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> visitor.visitAssignment(assignmentCtx))
                                 .getMessage()
-                                .contains("Type Error: Cannot assign int to float"),
+                                .contains("Type Error: Cannot assign 'int' to 'float'"),
                             "Expected a type error when assigning an int to a float."
                         );
                     } else {
@@ -291,8 +291,8 @@ class UnitTest {
     @ParameterizedTest(name = "Testing code gen assignment: {0}")
     @CsvSource({
         "'int m = 25;', 'm', 'int', 'int m = 25;'",
-        "'float radius = 3.14;', 'radius', 'float', 'float radius = 3.14;'",
-        "'shared float radius = 3.14;', 'radius', 'float', 'float radius = 3.14;'"
+        "'float radius = 3.14;', 'radius', 'float', 'float radius = 3.14f;'",
+        "'shared float radius = 3.14;', 'radius', 'float', 'float radius = 3.14f;'"
     })
     void testCodeGenVisitorAssignment(String input, String expectedVarName, String expectedTypeName, String expectedCodeContent) {
         System.out.println("========== Running testCodeGenVisitorAssignment for: " + input + " ==========");
