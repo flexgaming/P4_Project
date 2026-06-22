@@ -39,7 +39,7 @@ public class ParserDriver {
             assDecVisitor.visit(tree);
             // print the symbol table after phase 1:
             System.out.println("--- Symbol Table After Phase 1 ---");
-            // ctx.symbolTable.printSymbolTable(); //No longer exists lol
+            // ctx.symbolTable.printSymbolTable();
             System.out.println("----------------------------------\n");
 
         // 2. Reference linking
