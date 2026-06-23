@@ -80,7 +80,7 @@ public class RefLinkingVisitor extends OurGrammarBaseVisitor<Void> {
             
             // If the string does not contain any brackets before the equals sign, 
             // we can treat it as a normal array reassignment and link it to the symbol without further checks.
-            if (!contextStr.contains("[")) {
+            if (!contextStr.contains("[") || !contextStr.contains("{")) {
                 break statement; // Jumps out of the if statement.
             }
             String beforeEquals = contextStr.substring(0, equalsIndex);
