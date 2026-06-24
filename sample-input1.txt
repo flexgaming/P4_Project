@@ -1,0 +1,8 @@
+shared int x = 1;
+shared float y = 2.5;
+
+critical(x,y) {
+    x = y;
+}
+
+print(x,y);

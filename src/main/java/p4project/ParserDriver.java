@@ -20,7 +20,7 @@ import p4project.visitors.MutexVisitor;
 
 public class ParserDriver {
     public static void main(String[] args) throws Exception {
-        String input = Files.readString(Paths.get("..\\P4_Project\\sample-input.txt"));
+        String input = Files.readString(Paths.get("..\\P4_Project\\sample-input3.txt"));
 
         CharStream charStream = CharStreams.fromString(input);
         OurGrammarLexer lexer = new OurGrammarLexer(charStream);

@@ -153,7 +153,7 @@ class AcceptanceTest {
                 if (5 > 10) {}
                 if (true && false) {}
                 if (5 >= 4) {}  
-                if (5 <= 4) {}0       
+                if (5 <= 4) {}       
             }
             """;
 
